@@ -422,4 +422,8 @@ class TeamController extends AbstractController {
         $users_seeking_team = $this->core->getQueries()->getUsersSeekingTeamByGradeableId($gradeable_id);
         $this->core->getOutput()->renderOutput(array('submission', 'Team'), 'showTeamPage', $gradeable, $team, $teams, $lock, $users_seeking_team);
     }
+    public function getTeamIds($id, $gradeable_id) {
+        $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
+        return $id;
+    }
 }
