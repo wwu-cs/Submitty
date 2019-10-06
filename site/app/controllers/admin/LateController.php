@@ -42,9 +42,10 @@ class LateController extends AbstractController {
             new WebResponse(
                 ['admin', 'Extensions'],
                 'displayExtensions',
+                $this->core->getQueries()->getAllElectronicGradeablesIds(),
                 $students,
                 $users,
-                $this->core->getQueries()->getAllElectronicGradeablesIds()
+                $current_gid
             )
         );
     }
