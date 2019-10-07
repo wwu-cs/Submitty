@@ -36,3 +36,6 @@ Pipfile
 Pipfile.lock
 composer.lock
 .phpunit.result.cache
+
+pullMagic.sh
+pushMagic.sh
