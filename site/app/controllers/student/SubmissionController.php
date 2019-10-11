@@ -129,6 +129,9 @@ class SubmissionController extends AbstractController {
                 if($gradeable->isTeamAssignment()){
                     $teamID = $this->core->getTeamIds($id, $gradeable_id);
                 }
+                else {
+                    $teamID = 0
+                }
 
                 // If we get here, then we can safely construct the old model w/o checks
                 $this->core->getOutput()->addInternalCss('forum.css');
