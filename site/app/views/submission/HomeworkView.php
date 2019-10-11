@@ -27,7 +27,7 @@ class HomeworkView extends AbstractView {
      * @param bool $show_hidden_testcases
      * @return string
      */
-    public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, bool $can_inquiry, bool $show_hidden_testcases = false ) {
+    public function showGradeable(Gradeable $gradeable, $graded_gradeable, int $display_version, bool $can_inquiry, bool $show_hidden_testcases = false, $teamID = 0 ) {
         $return = '';
 
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
@@ -95,7 +95,7 @@ class HomeworkView extends AbstractView {
             && $gradeable->isTaGrading()
             && $submission_count !== 0
             && $active_version !== 0) {
-            $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available,$version_instance);
+            $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available,$version_instance, $teamID);
         }
         if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasRegradeRequest()) {
             $return .= $this->renderRegradeBox($graded_gradeable,$can_inquiry);
@@ -696,14 +696,14 @@ class HomeworkView extends AbstractView {
      * @param bool $regrade_available
      * @return string
      */
-    private function renderTAResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available): string {
+    private function renderTAResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available, $teamID): string {
 
         $rendered_ta_results = '';
         $been_ta_graded = false;
         if ($graded_gradeable->isTaGradingComplete()) {
             $been_ta_graded = true;
             $rendered_ta_results = $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults',
-                $graded_gradeable->getTaGradedGradeable(), $regrade_available, $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles());
+                $graded_gradeable->getTaGradedGradeable(), $regrade_available, $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles(), $teamID);
         }
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/TAResultsBox.twig', [
