@@ -55,6 +55,11 @@ class SubmissionController extends AbstractController {
         }
     }
 
+    public function getTeamIds($id, $gradeable_id) {
+        $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
+        return $id;
+    }
+
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}")
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements={"gradeable_version": "\d+"})
