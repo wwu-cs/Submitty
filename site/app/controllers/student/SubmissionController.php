@@ -130,6 +130,7 @@ class SubmissionController extends AbstractController {
                 }
 
                 $id = $this->core->getUser()->getId();
+                $gradeable_id = $gradeable->getId();
 
                 if($gradeable->isTeamAssignment()){
                     $id = $this->core->getTeamIds($id, $gradeable_id);
@@ -141,7 +142,7 @@ class SubmissionController extends AbstractController {
                 $this->core->getOutput()->addInternalCss('grade-inquiry.css');
                 $this->core->getOutput()->addInternalJs('grade-inquiry.js');
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $show_hidden, $teamID);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $show_hidden, $id);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);

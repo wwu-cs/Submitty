@@ -278,7 +278,7 @@ class AutoGradingView extends AbstractView {
      * @param array $uploaded_files
      * @return string
      */
-    public function showTAResults(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available, array $uploaded_files, $teamID) {
+    public function showTAResults(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available, array $uploaded_files, $id) {
         $gradeable = $ta_graded_gradeable->getGradedGradeable()->getGradeable();
         $active_version = $ta_graded_gradeable->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
         $version_instance = $ta_graded_gradeable->getGradedVersionInstance();
@@ -383,12 +383,6 @@ class AutoGradingView extends AbstractView {
         }
         $can_download = !$gradeable->isVcs();
 
-        //trying something
-        $gradeable_id = $gradeable->getId();
-        $id = $this->core->getUser()->getId();
-        if($gradeable->isTeamAssignment()){
-            $id = $teamID;
-        }
         $annotation_path = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'annotations', $gradeable_id, $id, $active_version);
         $annotated_file_names = [];
         if(is_dir($annotation_path) && count(scandir($annotation_path)) > 2){
