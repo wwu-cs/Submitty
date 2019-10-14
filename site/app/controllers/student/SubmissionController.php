@@ -133,7 +133,7 @@ class SubmissionController extends AbstractController {
                 $gradeable_id = $gradeable->getId();
 
                 if($gradeable->isTeamAssignment()){
-                    $id = $this->core->getTeamIds($id, $gradeable_id);
+                    $id = $this->getTeamIds($id, $gradeable_id);
                 }
 
                 // If we get here, then we can safely construct the old model w/o checks
