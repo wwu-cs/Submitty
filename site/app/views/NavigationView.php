@@ -74,7 +74,7 @@ class NavigationView extends AbstractView {
     const DATE_FORMAT = "m/d/Y @ h:i A";
 
     public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone,
-                                   $gradeable_ids_and_titles) {
+                                   $gradeable_ids_and_titles, $gradables_teams) {
         // ======================================================================================
         // DISPLAY CUSTOM BANNER (previously used to display room seating assignments)
         // note: placement of this information this may eventually be re-designed
@@ -106,7 +106,7 @@ class NavigationView extends AbstractView {
         // ======================================================================================
         // DISPLAY ROOM SEATING (used to display room seating assignments)
         // ======================================================================================
-	$seating_only_for_instructor = $this->core->getConfig()->isSeatingOnlyForInstructor();
+	    $seating_only_for_instructor = $this->core->getConfig()->isSeatingOnlyForInstructor();
         if ($seating_only_for_instructor && !$this->core->getUser()->accessAdmin()) {
             $display_room_seating = false;
         }
@@ -170,7 +170,9 @@ class NavigationView extends AbstractView {
                 /** @var Gradeable $gradeable */
 
                 $graded_gradeable = $graded_gradeables[$gradeable->getId()] ?? null;
-                $buttons = $this->getButtons($gradeable, $graded_gradeable, $list_section, $submit_everyone[$gradeable->getId()]);
+                $gradeable_teams = $gradables_teams[$gradeable->getId()];
+                $buttons = $this->getButtons($gradeable, $graded_gradeable, $list_section,
+                    $submit_everyone[$gradeable->getId()], $gradeable_teams);
                 $render_gradeables[] = [
                     "id" => $gradeable->getId(),
                     "name" => $gradeable->getTitle(),
@@ -218,9 +220,11 @@ class NavigationView extends AbstractView {
      * @param bool $submit_everyone If the user can submit for another user
      * @return array
      */
-    private function getButtons(Gradeable $gradeable, $graded_gradeable, int $list_section, bool $submit_everyone): array {
+    private function getButtons(Gradeable $gradeable, $graded_gradeable, int $list_section, bool $submit_everyone,
+                                $gradeable_teams): array {
         $buttons = [];
-        $buttons[] = $this->hasTeamButton($gradeable) ? $this->getTeamButton($gradeable, $graded_gradeable) : null;
+        $buttons[] = $this->hasTeamButton($gradeable) ? $this->getTeamButton($gradeable, $graded_gradeable,
+            $gradeable_teams) : null;
         $buttons[] = $this->hasSubmitButton($gradeable) ? $this->getSubmitButton($gradeable, $graded_gradeable, $list_section, $submit_everyone) : null;
 
         if ($this->hasGradeButton($gradeable)) {
@@ -323,7 +327,7 @@ class NavigationView extends AbstractView {
      * @param GradedGradeable|null $graded_gradeable
      * @return Button|null
      */
-    private function getTeamButton(Gradeable $gradeable, $graded_gradeable) {
+    private function getTeamButton(Gradeable $gradeable, $graded_gradeable, $gradeable_teams) {
         // Team management button, only visible on team assignments
         $date = $this->core->getDateTimeNow();
         $past_lock_date = $date < $gradeable->getTeamLockDate();
@@ -342,8 +346,8 @@ class NavigationView extends AbstractView {
             }
             $team_button_text = 'CREATE TEAM';
             // TODO (stephenermshar)
-            $teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable->getId());
-            foreach ($teams as $t) {
+            //$teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable->getId());
+            foreach ($gradeable_teams as $t) {
                 if ($t->sentInvite($this->core->getUser()->getId())) {
                     $team_button_text = 'CREATE/JOIN TEAM';
                     break;

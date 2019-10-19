@@ -65,11 +65,14 @@ class NavigationController extends AbstractController {
         // Get a single array of the visible gradeables
         $visible_gradeables = [];
         $submit_everyone = [];
+        $gradables_teams = [];
         foreach($sections_to_lists as $gradeables) {
             foreach($gradeables as $gradeable) {
                 $visible_gradeables[] = $gradeable;
                 $submit_everyone[$gradeable->getId()] =
                     $this->core->getAccess()->canI('gradeable.submit.everyone', ['gradeable' => $gradeable]);
+                $gradables_teams[$gradeable->getId()] =
+                    $this->core->getQueries()->getTeamsByGradeableId($gradeable->getId());
             }
         }
 
@@ -83,7 +86,7 @@ class NavigationController extends AbstractController {
         $gradeable_ids_and_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
         $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables,
-            $submit_everyone, $gradeable_ids_and_titles);
+            $submit_everyone, $gradeable_ids_and_titles, $gradables_teams);
         $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm');
         $this->core->getOutput()->renderOutput('Navigation', 'closeSubmissionsWarning');
     }
