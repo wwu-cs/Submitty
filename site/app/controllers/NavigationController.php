@@ -78,15 +78,18 @@ class NavigationController extends AbstractController {
 
         // Get the user data for each gradeable
         $graded_gradeables = [];
+        $teams_viewed_times = [];
         if (count($visible_gradeables) !== 0) {
             foreach ($this->core->getQueries()->getGradedGradeables($visible_gradeables, $user->getId()) as $gg) {
                 $graded_gradeables[$gg->getGradeableId()] = $gg;
+                $teams_viewed_times[$gg->getGradeableId()] = $this->core->getQueries()->getTeamViewedTime(
+                    $gg->getSubmitter()->getId(), $this->core->getUser()->getId());
             }
         }
         $gradeable_ids_and_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
         $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables,
-            $submit_everyone, $gradeable_ids_and_titles, $gradables_teams);
+            $submit_everyone, $gradeable_ids_and_titles, $gradables_teams, $teams_viewed_times);
         $this->core->getOutput()->renderOutput('Navigation', 'deleteGradeableForm');
         $this->core->getOutput()->renderOutput('Navigation', 'closeSubmissionsWarning');
     }
