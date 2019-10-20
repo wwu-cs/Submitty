@@ -171,7 +171,7 @@ class NavigationView extends AbstractView {
 
                 $graded_gradeable = $graded_gradeables[$gradeable->getId()] ?? null;
                 $gradeable_teams = $gradables_teams[$gradeable->getId()];
-                $team_viewed_time = $teams_viewed_times[$gradeable->getId()];
+                $team_viewed_time = $teams_viewed_times[$gradeable->getId()] ?? null;
                 $buttons = $this->getButtons($gradeable, $graded_gradeable, $list_section,
                     $submit_everyone[$gradeable->getId()], $gradeable_teams, $team_viewed_time);
                 $render_gradeables[] = [

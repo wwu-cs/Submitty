@@ -78,14 +78,26 @@ class NavigationController extends AbstractController {
 
         // Get the user data for each gradeable
         $graded_gradeables = [];
-        $teams_viewed_times = [];
         if (count($visible_gradeables) !== 0) {
             foreach ($this->core->getQueries()->getGradedGradeables($visible_gradeables, $user->getId()) as $gg) {
                 $graded_gradeables[$gg->getGradeableId()] = $gg;
-                $teams_viewed_times[$gg->getGradeableId()] = $this->core->getQueries()->getTeamViewedTime(
-                    $gg->getSubmitter()->getId(), $this->core->getUser()->getId());
             }
         }
+
+        $teams_viewed_times = [];
+        foreach($sections_to_lists as $gradeables) {
+            foreach ($gradeables as $gradeable) {
+                $graded_gradeable = $graded_gradeables[$gradeable->getId()] ?? null;
+                // TA grading enabled, the gradeable is fully graded, and the user hasn't viewed it
+                // $grade_ready_for_view = $gradeable->isTaGrading() && $graded_gradeable->isTaGradingComplete() &&
+                //     $gradeables === GradeableList::GRADED;
+                if ($gradeable->isTeamAssignment()) {
+                    $teams_viewed_times[$gradeable->getId()] = $this->core->getQueries()->getTeamViewedTime(
+                        $gradeable->getSubmitter()->getId(), $this->core->getUser()->getId());
+                }
+            }
+        }
+
         $gradeable_ids_and_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
 
         $this->core->getOutput()->renderOutput('Navigation', 'showGradeables', $sections_to_lists, $graded_gradeables,
