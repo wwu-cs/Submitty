@@ -121,8 +121,6 @@ class NavigationView extends AbstractView {
             $this->core->getOutput()->addRoomTemplatesTwigPath();
             // use the room seating gradeable id to find the title to display.
             $gradeable_id = $this->core->getConfig()->getRoomSeatingGradeableId();
-            // TODO (stephenermshar)
-            // $gradeable_ids_and_titles = $this->core->getQueries()->getAllGradeablesIdsAndTitles();
             foreach($gradeable_ids_and_titles as $gradeable_id_and_title) {
                 if($gradeable_id_and_title['g_id'] === $gradeable_id) {
                     $gradeable_title = $gradeable_id_and_title['g_title'];
@@ -347,8 +345,6 @@ class NavigationView extends AbstractView {
                 $team_button_type = 'btn-danger';
             }
             $team_button_text = 'CREATE TEAM';
-            // TODO (stephenermshar)
-            //$teams = $this->core->getQueries()->getTeamsByGradeableId($gradeable->getId());
             foreach ($gradeable_teams as $t) {
                 if ($t->sentInvite($this->core->getUser()->getId())) {
                     $team_button_text = 'CREATE/JOIN TEAM';
@@ -437,8 +433,6 @@ class NavigationView extends AbstractView {
                 $list_section === GradeableList::GRADED;
             if ($gradeable->isTeamAssignment()) {
                 if ($grade_ready_for_view && $team_viewed_time === null) {
-                    // TODO (stephenermshar)
-                    // $this->core->getQueries()->getTeamViewedTime($graded_gradeable->getSubmitter()->getId(),$this->core->getUser()->getId()) === null) {
                     $class = "btn-success";
                 }
             }
