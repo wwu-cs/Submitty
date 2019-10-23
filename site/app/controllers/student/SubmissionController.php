@@ -132,8 +132,8 @@ class SubmissionController extends AbstractController {
                 $this->core->getOutput()->addInternalJs('grade-inquiry.js');
 
                 // Query for values here before moving to the view
-                $students = array();
                 $students = $this->core->getQueries()->getAllUsers();
+                $students = new \ArrayIterator($students);
                 $student_ids = array();
                 foreach ($students as $student) {
                     $student_ids[] = $student->getId();
