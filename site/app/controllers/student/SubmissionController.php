@@ -132,11 +132,12 @@ class SubmissionController extends AbstractController {
                 $this->core->getOutput()->addInternalJs('grade-inquiry.js');
 
                 // Query for values here before moving to the view
+                $students = array();
                 $students = $this->core->getQueries()->getAllUsers();
                 $student_ids = array();
-//                foreach ($students as $student) {
-//                    $student_ids[] = $student->getId();
-//                }
+                foreach ($students as $student) {
+                    $student_ids[] = $student->getId();
+                }
 
                 $students_full = [];
                 if ($this->core->getUser()->accessGrading()) {
@@ -217,6 +218,7 @@ class SubmissionController extends AbstractController {
                         $count++;
                     }
                 }
+                $is_valid = true;
 
                 for ($i = 0; $i < count($files); $i++) {
                     if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)){
@@ -226,7 +228,6 @@ class SubmissionController extends AbstractController {
                     }
 
                     $page_count = 0;
-                    $is_valid = true;
                     $id = '';
 
                     //decoded.json may be read before the assoicated data is written, check if key exists first
@@ -256,7 +257,7 @@ class SubmissionController extends AbstractController {
                 }
 
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $students_full, true, $count_array, $files, $show_hidden);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $students_full, $is_valid, $count_array, $files, $show_hidden);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
