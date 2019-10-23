@@ -36,10 +36,11 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      * @param array $user_config
      * @param array $queries
      * @param array $access
+     * @param array $core_methods
      *
      * @return Core
      */
-    protected function createMockCore($config_values=array(), $user_config=array(), $queries=array(), $access=array()) {
+    protected function createMockCore($config_values=array(), $user_config=array(), $queries=array(), $access=array(), $core_methods=array()) {
         $core = $this->createMock(Core::class);
 
         $config = $this->createMockModel(Config::class);
@@ -73,7 +74,19 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             });
         }
 
-        $core->method('getConfig')->willReturn($config);
+        foreach ($config_values as $method => $value) {
+            $this->mocked_methods[$method] = false;
+            $config->method($method)->will($this->returnCallback(function () use ($method, $value) {
+                $this->mocked_methods[$method] = true;
+                return $value;
+            }));
+        }
+
+        $this->mocked_methods['getConfig'] = false;
+        $core->method('getConfig')->will($this->returnCallback(function () use ($config) {
+            $this->mocked_methods['getConfig'] = true;
+            return $config;
+        }));
 
         if (isset($config_values['logged_in'])) {
             $core->method('isWebLoggedIn')->willReturn($config_values['logged_in']);
@@ -141,7 +154,11 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
                 $user->method('accessFaculty')->willReturn(false);
             }
 
-            $core->method('getUser')->willReturn($user);
+            $this->mocked_methods['getUser'] = false;
+            $core->method('getUser')->will($this->returnCallback(function () use ($user) {
+                $this->mocked_methods['getUser'] = true;
+                return $user;
+            }));
         }
 
         /** @noinspection PhpParamsInspection */
@@ -153,6 +170,14 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
         $output->disableRender();
 
         $core->method('getOutput')->willReturn($output);
+
+        foreach ($core_methods as $method => $value) {
+            $this->mocked_methods[$method] = false;
+            $core->method($method)->will($this->returnCallback(function () use ($method, $value) {
+                $this->mocked_methods[$method] = true;
+                return $value;
+            }));
+        }
 
         /** @noinspection PhpIncompatibleReturnTypeInspection */
         return $core;

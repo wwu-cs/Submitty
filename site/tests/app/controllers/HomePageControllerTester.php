@@ -18,17 +18,36 @@ class HomePageControllerTester extends BaseUnitTest {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->core = $this->createMockCore([], [
-			'accessGrading' => True,
+		$this->core = $this->createMockCore([
+			'getUsernameChangeText' => True
+		], [
+			'accessGrading' => True
 		], [
 			'updateUser' => []
+		], [], [
+			'addSuccessMessage' => true,
+			'addErrorMessage' => true,
+			'buildUrl' => 'http://192.168.56.111/home'
 		]);
 
-		$this->core->method("addSuccessMessage")->willReturn(true);
-		$this->core->method("addErrorMessage")->willReturn(true);
-		$this->core->method("buildUrl")->willReturn("http://192.168.56.111/home");
-
-		$this->controller = new HomePageController($this->core);
+		$this->true_controller = new HomePageController($this->core);
+		$this->controller = $this->getMockBuilder(HomePageController::class)
+			->setConstructorArgs([$this->core])
+			->setMethods(['changePassword', 'getCourses'])
+			->getMock();
+		$this->controller->method('changePassword')
+			->will($this->returnCallback(function ($post) {
+				$this->mocked_methods['changePassword'] = true;
+				$_POST = $post;
+				return $this->true_controller->changePassword();
+			}));
+		$courses = (object) [
+			"json_response" => (object) [
+				"json" => $this->getCoursesResponse()
+			]
+		];
+		$this->controller->method('getCourses')
+			->willReturn($courses);
 	}
 
 	public function testHomePageViewChangePasswordSuccess() {
@@ -36,7 +55,7 @@ class HomePageControllerTester extends BaseUnitTest {
 			"new_password" => "123",
 			"confirm_new_password" => "123"
 		];
-		$response = $this->controller->changePassword();
+		$response = $this->controller->changePassword($_POST);
 
 		$this->assertMethodCalled("getUser");
 		$this->assertMethodCalled("updateUser");
@@ -50,29 +69,15 @@ class HomePageControllerTester extends BaseUnitTest {
 			"new_password" => "123",
 			"confirm_new_password" => "321"
 		];
-		$response = $this->controller->changePassword();
+		$response = $this->controller->changePassword($_POST);
 
 		$this->assertMethodCalled("addErrorMessage");
 		$this->assertMethodCalled("buildUrl");
 		$this->assertInstanceOf(RedirectResponse::class, $response->redirect_response);
 	}
 
-	public function testHomePageViewShowHomepage() {
-		$courses = (object) [
-			"json_response" => (object) [
-				"json" => $this->getCoursesResponse()
-			]
-		];
-		$controller = $this->getMockBuilder(HomePageController::class)
-			->setConstructorArgs([$this->core])
-			->setMethods(['getCourses'])
-			->getMock();
-		$controller->method('getCourses')
-			->willReturn($courses);
-
-		$this->core->getConfig()->method("getUsernameChangeText")->willReturn(True);
-		
-		$response = $controller->showHomepage();
+	public function testHomePageViewShowHomepage() {		
+		$response = $this->controller->showHomepage();
 
 		$this->assertMethodCalled("getUser");
 		$this->assertMethodCalled("getConfig");
