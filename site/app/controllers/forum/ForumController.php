@@ -380,6 +380,8 @@ class ForumController extends AbstractController{
             if($hasGoodAttachment[0] == -1){
                 $result['next_page'] = $hasGoodAttachment[1];
             } else {
+                ## $user_info = $this->core->getQueries()->getDisplayUserInfoFromUserId($post["author_user_id"]);
+                ##$thread_resolve_state = $this->core->getQueries()->getResolveState($thread_id)[0]['status'];
                 $post_id = $this->core->getQueries()->createPost($current_user_id, $post_content, $thread_id, $anon, 0, false, $hasGoodAttachment[0], $markdown, $parent_id);
                 $thread_dir = FileUtils::joinPaths(FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), "forum_attachments"), $thread_id);
 
@@ -812,12 +814,15 @@ class ForumController extends AbstractController{
         }
         $pageNumber = 0;
         $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
+        $threadExists = $this->core->getQueries()->threadExists();
+        $categories = $this->core->getQueries()->getCategories();
+
 
         if(!empty($_REQUEST["ajax"])){
-            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, true);
+            $this->core->getOutput()->renderTemplate('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, $threadExists, $categories, ForumUtils::FORUM_CHAR_POST_LIMIT, true);
         }
         else {
-            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, ForumUtils::FORUM_CHAR_POST_LIMIT, false);
+            $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $thread_resolve_state, $threadExists, $categories, ForumUtils::FORUM_CHAR_POST_LIMIT, false);
         }
     }
 
@@ -838,14 +843,17 @@ class ForumController extends AbstractController{
      * @Route("/{_semester}/{_course}/forum/threads/new", methods={"GET"})
      */
     public function showCreateThread(){
-         $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
+        $categories = $this->core->getQueries()->getCategories();
+        $thread_exists = $this->core->getQueries()->threadExists();
+         $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor(), $categories, $thread_exists);
     }
 
     /**
      * @Route("/{_semester}/{_course}/forum/categories", methods={"GET"})
      */
     public function showCategories(){
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showCategories', $this->getAllowedCategoryColor());
+        $thread_exists = $this->core->getQueries()->threadExists();
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showCategories', $this->getAllowedCategoryColor(), $thread_existssta);
     }
 
     /**
@@ -957,6 +965,7 @@ class ForumController extends AbstractController{
 
         }
         ksort($users);
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
+        $thread_exists = $this->core->getQueries()->threadExists();
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users, $thread_exists);
     }
 }

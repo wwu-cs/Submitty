@@ -576,8 +576,10 @@ class ForumController2 extends AbstractController {
         }
         $pageNumber = 0;
         $threads = $this->getSortedThreads($category_id, $max_thread, $show_deleted, $show_merged_thread, $thread_status, $unread_threads, $pageNumber, $thread_id);
+        $threadExists = $this->core->getQueries()->threadExists();
+        $categories = $this->core->getQueries()->getCategories();
 
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber);
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'showForumThreads', $user, $posts, $new_posts, $threads, $show_deleted, $show_merged_thread, $option, $max_thread, $pageNumber, $threadExists);
     }
 
     private function getAllowedCategoryColor() {
@@ -594,7 +596,9 @@ class ForumController2 extends AbstractController {
     }
 
     public function showCreateThread(){
-         $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor());
+         $categories = $this->core->getQueries()->getCategories();
+        $thread_exists = $this->core->getQueries()->threadExists();
+         $this->core->getOutput()->renderOutput('forum\ForumThread', 'createThread', $this->getAllowedCategoryColor(), $categories, $thread_exists);
     }
 
     public function getHistory(){
@@ -666,7 +670,8 @@ class ForumController2 extends AbstractController {
 
         }
         ksort($users);
-        $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users);
+        $thread_exists = $this->core->getQueries()->threadExists();
+        $this->core->getOutput()->renderOutput('forum\ForumThread', 'statPage', $users, $thread_exists);
     }
 
     public function mergeThread(){
