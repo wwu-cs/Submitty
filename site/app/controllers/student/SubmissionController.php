@@ -134,19 +134,19 @@ class SubmissionController extends AbstractController {
                 // Query for values here before moving to the view
                 $students = $this->core->getQueries()->getAllUsers();
                 $student_ids = array();
-                foreach ($students as $student) {
-                    $student_ids[] = $student->getId();
-                }
+//                foreach ($students as $student) {
+//                    $student_ids[] = $student->getId();
+//                }
 
                 $students_full = [];
-//                if ($this->core->getUser()->accessGrading()) {
-//                    $students_version = array();
-//                    foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids) as $gg) {
-//                        /** @var GradedGradeable $gg */
-//                        $students_version[$gg->getSubmitter()->getId()] = $gg->getAutoGradedGradeable()->getHighestVersion();
-//                    }
-//                    $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
-//                }
+                if ($this->core->getUser()->accessGrading()) {
+                    $students_version = array();
+                    foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids) as $gg) {
+                        /** @var GradedGradeable $gg */
+                        $students_version[$gg->getSubmitter()->getId()] = $gg->getAutoGradedGradeable()->getHighestVersion();
+                    }
+                    $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
+                }
 
                 $all_directories = $gradeable->getSplitPdfFiles();
                 $files = [];
