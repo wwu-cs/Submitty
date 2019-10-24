@@ -55,11 +55,6 @@ class SubmissionController extends AbstractController {
         }
     }
 
-    public function getTeamIds($id, $gradeable_id) {
-        $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
-        return $id;
-    }
-
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}")
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/{gradeable_version}", requirements={"gradeable_version": "\d+"})
@@ -133,7 +128,7 @@ class SubmissionController extends AbstractController {
                 $gradeable_id = $gradeable->getId();
 
                 if($gradeable->isTeamAssignment()){
-                    $id = $this->core->getTeamIds($id, $gradeable_id);
+                    $id = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable_id, $id)->getId();
                 }
 
                 // If we get here, then we can safely construct the old model w/o checks
