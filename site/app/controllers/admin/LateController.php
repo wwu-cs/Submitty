@@ -35,15 +35,10 @@ class LateController extends AbstractController {
      * @return Response
      */
     public function viewExtensions() {
-        $students = $this->core->getQueries()->getAllUsers();
-        $current_gid = isset($_COOKIE['exception_gid']) ? $_COOKIE['exception_gid'] : null;
-        $users = $this->core->getQueries()->getUsersWithExtensions($current_gid);
         return Response::WebOnlyResponse(
             new WebResponse(
                 ['admin', 'Extensions'],
                 'displayExtensions',
-                $students,
-                $users,
                 $this->core->getQueries()->getAllElectronicGradeablesIds()
             )
         );
