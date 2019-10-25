@@ -33,6 +33,13 @@ class AdminGradeableController extends AbstractController {
         }
     }
 
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/homework_library", methods={"GET"})
+     */
+    public function editGradeableHomeworkLibraryRequest($gradeable_id, $nav_tab = 0) {
+        $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableHomeworkLibrary.twig', []);
+    }
+
     const syllabus_buckets = [
         'homework', 'assignment', 'problem-set',
         'quiz', 'test', 'exam',
@@ -237,6 +244,7 @@ class AdminGradeableController extends AbstractController {
             'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
 
             'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']),
+            'homework_library_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'homework_library']),
             'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
             'csrf_token' => $this->core->getCsrfToken()
         ]);
