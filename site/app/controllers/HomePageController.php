@@ -34,6 +34,7 @@ class HomePageController extends AbstractController {
      * @return Response
      */
     public function showLibrary() {
+        $this->core->getOutput()->addBreadcrumb("Homework Library");
 		return Response::WebOnlyResponse(
 			new WebResponse('Homework', 'library')
 		);
