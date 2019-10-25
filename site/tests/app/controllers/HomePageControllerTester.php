@@ -51,11 +51,11 @@ class HomePageControllerTester extends BaseUnitTest {
 	}
 
 	public function testHomePageViewChangePasswordSuccess() {
-		$_POST = [
+		$post = [
 			"new_password" => "123",
 			"confirm_new_password" => "123"
 		];
-		$response = $this->controller->changePassword($_POST);
+		$response = $this->controller->changePassword($post);
 
 		$this->assertMethodCalled("getUser");
 		$this->assertMethodCalled("updateUser");
@@ -65,11 +65,11 @@ class HomePageControllerTester extends BaseUnitTest {
 	}
 
 	public function testHomePageViewChangePasswordFail() {
-		$_POST = [
+		$post = [
 			"new_password" => "123",
 			"confirm_new_password" => "321"
 		];
-		$response = $this->controller->changePassword($_POST);
+		$response = $this->controller->changePassword($post);
 
 		$this->assertMethodCalled("addErrorMessage");
 		$this->assertMethodCalled("buildUrl");
