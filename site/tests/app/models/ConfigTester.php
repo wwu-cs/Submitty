@@ -283,7 +283,10 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'email_enabled' => true,
             'auto_rainbow_grades' => false,
             'latest_commit' => 'd150131c',
-            'latest_tag' => 'v19.07.00'
+            'latest_tag' => 'v19.07.00',
+            'homework_library_params' => [
+                'enabled' => false
+            ]
         );
         $actual = $config->toArray();
 
