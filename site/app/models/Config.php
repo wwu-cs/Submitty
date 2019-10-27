@@ -255,11 +255,14 @@ class Config extends AbstractModel {
 
         // Load homework library config
         $homework_library_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'homework_library.json'));
-        if (!$homework_library_json) {
-            throw new ConfigException("Could not find homework library config: {$this->config_path}/homework_library.json");
+
+        $homework_library_enabled = false;
+        if ($homework_library_json) {
+            $homework_library_enabled = $homework_library_json['homework_library_enabled'];
         }
+
         $this->homework_library_params = [
-            'enabled' => $homework_library_json['homework_library_enabled']
+            'enabled' => $homework_library_enabled
         ];
 
         $this->submitty_log_path = $submitty_json['site_log_path'];
