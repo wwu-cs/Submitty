@@ -95,7 +95,7 @@ class HomeworkView extends AbstractView {
             && $gradeable->isTaGrading()
             && $submission_count !== 0
             && $active_version !== 0) {
-            $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available,$version_instance, $id);
+            $return .= $this->renderTAResultsBox($graded_gradeable, $regrade_available, $gradeable->getId(), $id);
         }
         if ($regrade_available || $graded_gradeable !== null && $graded_gradeable->hasRegradeRequest()) {
             $return .= $this->renderRegradeBox($graded_gradeable,$can_inquiry);
@@ -696,14 +696,14 @@ class HomeworkView extends AbstractView {
      * @param bool $regrade_available
      * @return string
      */
-    private function renderTAResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available, $id): string {
+    private function renderTAResultsBox(GradedGradeable $graded_gradeable, bool $regrade_available, string $gradeable_id, $id): string {
 
         $rendered_ta_results = '';
         $been_ta_graded = false;
         if ($graded_gradeable->isTaGradingComplete()) {
             $been_ta_graded = true;
             $rendered_ta_results = $this->core->getOutput()->renderTemplate('AutoGrading', 'showTAResults',
-                $graded_gradeable->getTaGradedGradeable(), $regrade_available, $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles(), $id);
+                $graded_gradeable->getTaGradedGradeable(), $regrade_available, $graded_gradeable->getAutoGradedGradeable()->getActiveVersionInstance()->getFiles(), $gradeable_id, $id);
         }
 
         return $this->core->getOutput()->renderTwigTemplate('submission/homework/TAResultsBox.twig', [
