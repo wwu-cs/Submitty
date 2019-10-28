@@ -106,7 +106,7 @@ class NavigationView extends AbstractView {
         // ======================================================================================
         // DISPLAY ROOM SEATING (used to display room seating assignments)
         // ======================================================================================
-	    $seating_only_for_instructor = $this->core->getConfig()->isSeatingOnlyForInstructor();
+        $seating_only_for_instructor = $this->core->getConfig()->isSeatingOnlyForInstructor();
         if ($seating_only_for_instructor && !$this->core->getUser()->accessAdmin()) {
             $display_room_seating = false;
         }
@@ -219,8 +219,14 @@ class NavigationView extends AbstractView {
      * @param bool $submit_everyone If the user can submit for another user
      * @return array
      */
-    private function getButtons(Gradeable $gradeable, $graded_gradeable, int $list_section, bool $submit_everyone,
-                                $gradeable_teams, $team_viewed_time): array {
+    private function getButtons(
+        Gradeable $gradeable,
+        $graded_gradeable,
+        int $list_section,
+        bool $submit_everyone,
+        $gradeable_teams,
+        $team_viewed_time
+    ): array {
         $buttons = [];
         $buttons[] = $this->hasTeamButton($gradeable) ? $this->getTeamButton($gradeable, $graded_gradeable,
             $gradeable_teams) : null;
@@ -379,8 +385,13 @@ class NavigationView extends AbstractView {
      * @param bool $submit_everyone If the user can submit for another user
      * @return Button|null
      */
-    private function getSubmitButton(Gradeable $gradeable, $graded_gradeable, int $list_section, bool $submit_everyone,
-                                     $team_viewed_time) {
+    private function getSubmitButton(
+        Gradeable $gradeable,
+        $graded_gradeable,
+        int $list_section,
+        bool $submit_everyone,
+        $team_viewed_time
+    ) {
         $class = self::gradeableSections[$list_section]["button_type_submission"];
         $title = self::gradeableSections[$list_section]["prefix"];
         $display_date = ($list_section == GradeableList::FUTURE || $list_section == GradeableList::BETA) ?
