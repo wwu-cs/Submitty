@@ -66,7 +66,6 @@ class NavigationController extends AbstractController {
         $visible_gradeables = [];
         $submit_everyone = [];
         $gradables_teams = [];
-        $teams_viewed_times = [];
         foreach($sections_to_lists as $gradeables) {
             foreach($gradeables as $gradeable) {
                 $visible_gradeables[] = $gradeable;
@@ -74,10 +73,6 @@ class NavigationController extends AbstractController {
                     $this->core->getAccess()->canI('gradeable.submit.everyone', ['gradeable' => $gradeable]);
                 $gradables_teams[$gradeable->getId()] =
                     $this->core->getQueries()->getTeamsByGradeableId($gradeable->getId());
-                if ($gradeable->isTeamAssignment()) {
-                    $teams_viewed_times[$gradeable->getId()] = $this->core->getQueries()->getTeamViewedTime(
-                        $gradeable->getSubmitter()->getId(), $this->core->getUser()->getId());
-                }
             }
         }
 
@@ -86,6 +81,22 @@ class NavigationController extends AbstractController {
         if (count($visible_gradeables) !== 0) {
             foreach ($this->core->getQueries()->getGradedGradeables($visible_gradeables, $user->getId()) as $gg) {
                 $graded_gradeables[$gg->getGradeableId()] = $gg;
+            }
+        }
+
+        $teams_viewed_times = [];
+        foreach ($sections_to_lists as $gradeables) {
+            foreach($gradeables as $gradeable) {
+                $graded_gradeable = $graded_gradeables[$gradeable->getId()] ?? null;
+                if($graded_gradeable !== null) {
+                    $grade_ready_for_view = $gradeable->isTaGrading() && $graded_gradeable->isTaGradingComplete() &&
+                        $gradeables === GradeableList::GRADED;
+                    if ($gradeable->isTeamAssignment() && $grade_ready_for_view) {
+                        $teams_viewed_times[$gradeable->getId()] = $this->core->getQueries()->getTeamViewedTime(
+                            $gradeable->getSubmitter()->getId(), $this->core->getUser()->getId());
+                    }
+                }
+
             }
         }
 
