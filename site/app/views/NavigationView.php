@@ -73,8 +73,14 @@ class NavigationView extends AbstractView {
 
     const DATE_FORMAT = "m/d/Y @ h:i A";
 
-    public function showGradeables($sections_to_list, $graded_gradeables, array $submit_everyone,
-                                   $gradeable_ids_and_titles, $gradables_teams, $teams_viewed_times) {
+    public function showGradeables(
+        $sections_to_list,
+        $graded_gradeables,
+        array $submit_everyone,
+        $gradeable_ids_and_titles,
+        $gradables_teams,
+        $teams_viewed_times
+    ) {
         // ======================================================================================
         // DISPLAY CUSTOM BANNER (previously used to display room seating assignments)
         // note: placement of this information this may eventually be re-designed
