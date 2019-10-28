@@ -700,7 +700,7 @@ HTML;
         $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderRubricPanel', $graded_gradeable, $display_version, $can_verify, $show_verify_all, $show_silent_edit);
 
         if($graded_gradeable->getGradeable()->isDiscussionBased()) {
-            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter()->getId());
+            $return .= $this->core->getOutput()->renderTemplate(array('grading', 'ElectronicGrader'), 'renderDiscussionForum', json_decode($graded_gradeable->getGradeable()->getDiscussionThreadId(), true), $graded_gradeable->getSubmitter()->getId(), $posts_array);
         }
 
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('codemirror', 'codemirror.css'));
@@ -792,7 +792,7 @@ HTML;
         ]);
     }
 
-    public function renderDiscussionForum($threadIds, $submitter_id) {
+    public function renderDiscussionForum($threadIds, $submitter_id, $posts_array) {
         $posts_view = <<<HTML
             <span class="col grading_label">Discussion Posts</span>
 HTML;
