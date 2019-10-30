@@ -30,7 +30,7 @@ class HomePageController extends AbstractController {
     /**
      * Display the HomePageView to the student.
      *
-     * @Route("/homework/library")
+     * @Route("/{_semester}/{_course}/homework/library")
      * @return Response
      */
     public function showLibrary() {
