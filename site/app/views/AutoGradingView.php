@@ -13,7 +13,6 @@ use app\views\AbstractView;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\libraries\DateUtils;
-use function GuzzleHttp\Psr7\build_query;
 
 class AutoGradingView extends AbstractView {
 
@@ -278,7 +277,7 @@ class AutoGradingView extends AbstractView {
      * @param array $uploaded_files
      * @return string
      */
-    public function showTAResults(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available, array $uploaded_files, $id) {
+    public function showTAResults(TaGradedGradeable $ta_graded_gradeable, bool $regrade_available, array $uploaded_files, string $gradeable_id, $id) {
         $gradeable = $ta_graded_gradeable->getGradedGradeable()->getGradeable();
         $active_version = $ta_graded_gradeable->getGradedGradeable()->getAutoGradedGradeable()->getActiveVersion();
         $version_instance = $ta_graded_gradeable->getGradedVersionInstance();
@@ -403,8 +402,17 @@ class AutoGradingView extends AbstractView {
                 }
             }
         }
+
+        // for bulk uploads only show PDFs
+        if ($gradeable->isScannedExam() ){
+            $files = $uploaded_pdfs;
+        }else{
+            $files = array_merge($files['submissions'], $files['checkout']);
+        }
+
+
         return $this->core->getOutput()->renderTwigTemplate('autograding/TAResults.twig', [
-            'files'=> array_merge($files['submissions'], $files['checkout']),
+            'files'=> $files,
             'been_ta_graded' => $ta_graded_gradeable->isComplete(),
             'ta_graded_version' => $version_instance !== null ? $version_instance->getVersion() : 'INCONSISTENT',
             'any_late_days_used' => $version_instance !== null ? $version_instance->getDaysLate() > 0 : false,
