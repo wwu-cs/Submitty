@@ -32,9 +32,9 @@ class UsersController extends AbstractController {
      */
     public function showLibrary() {
         $this->core->getOutput()->addBreadcrumb("Homework Library");
-  return Response::WebOnlyResponse(
-   new WebResponse('Homework', 'library')
-  );
+        return Response::WebOnlyResponse(
+            new WebResponse('Homework', 'library')
+        );
     }
     
     /**
