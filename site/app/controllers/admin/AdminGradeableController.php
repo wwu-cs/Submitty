@@ -237,6 +237,7 @@ class AdminGradeableController extends AbstractController {
             'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
 
             'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']),
+            'homework_library_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'homework_library']),
             'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
             'csrf_token' => $this->core->getCsrfToken()
         ]);
