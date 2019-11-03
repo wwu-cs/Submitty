@@ -155,6 +155,9 @@ class Config extends AbstractModel {
     protected $course_database_params = array();
 
     /** @property @var array */
+    protected $homework_library_params = [];
+
+    /** @property @var array */
     protected $wrapper_files = array();
 
     /** @property @var bool */
@@ -249,6 +252,18 @@ class Config extends AbstractModel {
         if (!$submitty_json) {
             throw new ConfigException("Could not find submitty config: {$this->config_path}/submitty.json");
         }
+
+        // Load homework library config
+        $homework_library_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'homework_library.json'));
+
+        $homework_library_enabled = false;
+        if ($homework_library_json) {
+            $homework_library_enabled = $homework_library_json['homework_library_enabled'];
+        }
+
+        $this->homework_library_params = [
+            'enabled' => $homework_library_enabled
+        ];
 
         $this->submitty_log_path = $submitty_json['site_log_path'];
         $this->log_exceptions = true;
@@ -519,6 +534,13 @@ class Config extends AbstractModel {
 
     public function getLogPath() {
         return $this->submitty_log_path;
+    }
+
+    /**
+     * @return bool
+     */
+    public function useHomeworkLibrary(): bool {
+        return $this->homework_library_params['enabled'];
     }
 
     public function saveCourseJson($save) {
