@@ -47,7 +47,9 @@ class HomePageController extends AbstractController {
      */
     public function searchLibrary() {
         $gradeable_ids = FileUtils::getAllDirs("/usr/local/submitty/library");
-        return $this->core->getOutput()->renderJsonSuccess($gradeable_ids);
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($gradeable_ids)
+        );
 	}
 
     /**
