@@ -372,6 +372,17 @@ mkdir -p ${SUBMITTY_INSTALL_DIR}/library
 chown submitty_php:submitty_php ${SUBMITTY_INSTALL_DIR}/library
 chmod g+rwx ${SUBMITTY_INSTALL_DIR}/library
 
+# Create test folders
+mkdir -p ${SUBMITTY_INSTALL_DIR}/library/WE_WANT_TO_SEE_THIS
+mkdir -p ${SUBMITTY_INSTALL_DIR}/library/DAEMON_CONTAINED_WITHIN
+mkdir -p ${SUBMITTY_INSTALL_DIR}/library/THERE_SHALL_BE_LIGHT
+chown submitty_php:submitty_php ${SUBMITTY_INSTALL_DIR}/library/WE_WANT_TO_SEE_THIS
+chown submitty_php:submitty_php ${SUBMITTY_INSTALL_DIR}/library/DAEMON_CONTAINED_WITHIN
+chown submitty_php:submitty_php ${SUBMITTY_INSTALL_DIR}/library/THERE_SHALL_BE_LIGHT
+chmod g+rwx ${SUBMITTY_INSTALL_DIR}/library/WE_WANT_TO_SEE_THIS
+chmod g+rwx ${SUBMITTY_INSTALL_DIR}/library/DAEMON_CONTAINED_WITHIN
+chmod g+rwx ${SUBMITTY_INSTALL_DIR}/library/THERE_SHALL_BE_LIGHT
+
 ########################################################################################################################
 ########################################################################################################################
 # BUILD JUNIT TEST RUNNER (.java file)
