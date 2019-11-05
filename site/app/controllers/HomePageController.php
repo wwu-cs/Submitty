@@ -6,6 +6,7 @@ use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
 use app\libraries\Core;
+use app\libraries\FileUtils;
 use app\libraries\response\Response;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
@@ -39,6 +40,15 @@ class HomePageController extends AbstractController {
 			new WebResponse('Homework', 'library')
 		);
     }
+
+    /**
+     * @Route("/homework/library/search", methods={"GET"})
+     * @return Response
+     */
+    public function searchLibrary() {
+        $gradeable_ids = FileUtils::getAllDirs("/usr/local/submitty/library");
+        return $this->core->getOutput()->renderJsonSuccess($gradeable_ids);
+	}
 
     /**
      * Display the LibraryManagerView to the instructor/admin.
