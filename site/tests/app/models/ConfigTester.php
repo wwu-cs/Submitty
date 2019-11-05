@@ -285,7 +285,8 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'latest_commit' => 'd150131c',
             'latest_tag' => 'v19.07.00',
             'homework_library_params' => [
-                'enabled' => false
+                'enabled' => false,
+                'location' => '~/library'
             ]
         );
         $actual = $config->toArray();
