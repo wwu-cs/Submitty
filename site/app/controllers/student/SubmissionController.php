@@ -10,12 +10,11 @@ use app\libraries\Logger;
 use app\libraries\routers\AccessControl;
 use app\libraries\Utils;
 use app\models\gradeable\Gradeable;
+use app\models\gradeable\GradedGradeable;
 use app\models\gradeable\SubmissionTextBox;
 use app\models\gradeable\SubmissionCodeBox;
 use app\models\gradeable\SubmissionMultipleChoice;
 use Symfony\Component\Routing\Annotation\Route;
-
-
 
 class SubmissionController extends AbstractController {
 
@@ -129,8 +128,134 @@ class SubmissionController extends AbstractController {
                 $this->core->getOutput()->addInternalJs('forum.js');
                 $this->core->getOutput()->addInternalCss('grade-inquiry.css');
                 $this->core->getOutput()->addInternalJs('grade-inquiry.js');
+
+                // Query for values here before moving to the view
+                $students_full = [];
+                if ($this->core->getUser()->accessGrading()) {
+                    $students = $this->core->getQueries()->getAllUsers();
+                    $student_ids = array();
+                    foreach ($students as $student) {
+                        $student_ids[] = $student->getId();
+                    }
+
+                    $students_version = array();
+                    foreach ($this->core->getQueries()->getGradedGradeables([$gradeable], $student_ids) as $gg) {
+                        /** @var GradedGradeable $gg */
+                        $students_version[$gg->getSubmitter()->getId()] = $gg->getAutoGradedGradeable()->getHighestVersion();
+                    }
+                    $students_full = json_decode(Utils::getAutoFillData($students, $students_version));
+                }
+
+                $all_directories = $gradeable->getSplitPdfFiles();
+                $files = [];
+                $cover_images = [];
+                $count = 1;
+                $count_array = array();
+                $bulk_upload_data = [];
+                foreach ($all_directories as $timestamp => $content) {
+                    $dir_files = $content['files'];
+                    foreach ($dir_files as $filename => $details) {
+                        if($filename === 'decoded.json'){
+                            $bulk_upload_data +=  FileUtils::readJsonFile($details['path']);
+                        }
+                        $clean_timestamp = str_replace('_', ' ', $timestamp);
+                        $path = rawurlencode(htmlspecialchars($details['path']));
+                        //get the cover image if it exists
+                        if(strpos($filename, '_cover.jpg') && pathinfo($filename)['extension'] === 'jpg'){
+                            $corrected_filename = rawurlencode(htmlspecialchars($filename));
+                            $url = $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
+                                    'dir' => 'split_pdf',
+                                    'file' => $corrected_filename,
+                                    'path' => $path,
+                                    'ta_grading' => 'false'
+                                ]);
+                            $cover_images[] = [
+                                'filename' => $corrected_filename,
+                                'url' => $url,
+                            ];
+                        }
+                        if (strpos($filename, 'cover') === false || pathinfo($filename)['extension'] === 'json' ||
+                            pathinfo($filename)['extension'] === "jpg") {
+                            continue;
+                        }
+                        // get the full filename for PDF popout
+                        // add 'timestamp / full filename' to count_array so that path to each filename is to the full PDF, not the cover
+                        $filename = rawurlencode(htmlspecialchars($filename));
+                        $url = $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
+                                'dir' => 'split_pdf',
+                                'file' => $filename,
+                                'path' => $path,
+                                'ta_grading' => 'false'
+                            ]);
+                        $filename_full = str_replace('_cover.pdf', '.pdf', $filename);
+                        $path_full = str_replace('_cover.pdf', '.pdf', $path);
+                        $url_full = $this->core->buildCourseUrl(['display_file']) . '?' . http_build_query([
+                                'dir' => 'uploads',
+                                'file' => $filename_full,
+                                'path' => $path_full,
+                                'ta_grading' => 'false'
+                            ]);
+                        $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode($filename_full));
+                        //decode the filename after to display correctly for users
+                        $filename_full = rawurldecode($filename_full);
+                        $cover_image_name = substr($filename,0,-3) . "jpg";
+                        $cover_image = [];
+                        foreach ($cover_images as $img) {
+                            if($img['filename'] === $cover_image_name)
+                                $cover_image = $img;
+                        }
+                        $files[] = [
+                            'clean_timestamp' => $clean_timestamp,
+                            'filename_full' => $filename_full,
+                            'filename' => $filename,
+                            'url' => $url,
+                            'url_full' => $url_full,
+                            'cover_image' => $cover_image
+                        ];
+                        $count++;
+                    }
+                }
+
+                $is_valid = true;
+
+                for ($i = 0; $i < count($files); $i++) {
+                    if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)){
+                        continue;
+                    }else if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
+                        $data = $bulk_upload_data[ $files[$i]['filename_full'] ];
+                    }
+
+                    $page_count = 0;
+                    $id = '';
+
+                    //decoded.json may be read before the assoicated data is written, check if key exists first
+                    if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']){
+                        if(array_key_exists('id', $data)){
+                            $id = $data['id'];
+                            $is_valid = null !== $this->core->getQueries()->getUserByIdOrNumericId($id);
+                        }else{
+                            //set the blank id as invalid for now, after a page refresh it will recorrect
+                            $id = '';
+                            $is_valid = false;
+                        }
+                        if(array_key_exists('page_count', $data)){
+                            $page_count = $data['page_count'];
+                        }
+                    }else{
+                        $is_valid = true;
+                        $id = '';
+                        if(array_key_exists('page_count', $bulk_upload_data)){
+                            $page_count = $bulk_upload_data['page_count'];
+                        }
+                    }
+
+                    $files[$i] += ['page_count' => $page_count,
+                        'id' => $id,
+                        'valid' => $is_valid ];
+                }
+
                 $this->core->getOutput()->renderOutput(array('submission', 'Homework'),
-                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $show_hidden);
+                                                       'showGradeable', $gradeable, $graded_gradeable, $version, $can_inquiry ?? false, $students_full, $is_valid, $count_array, $files, $show_hidden);
             }
         }
         return array('id' => $gradeable_id, 'error' => $error);
@@ -199,7 +324,7 @@ class SubmissionController extends AbstractController {
             foreach ($user_ids as $user) {
                 $tmp = $this->core->getQueries()->getTeamByGradeableAndUser($gradeable->getId(), $user);
                 if($tmp === NULL){
-                    $null_team_count ++;
+                    $null_team_count++;
                 }else{
                     $teams[] = $tmp->getId();
                 }
@@ -285,9 +410,9 @@ class SubmissionController extends AbstractController {
         }
 
         $max_size = $gradeable->getAutogradingConfig()->getMaxSubmissionSize();
-    	if ($max_size < 10000000) {
-    	    $max_size = 10000000;
-    	}
+        if ($max_size < 10000000) {
+            $max_size = 10000000;
+        }
         // Error checking of file name
         $file_size = 0;
         if (isset($uploaded_file)) {
@@ -325,7 +450,7 @@ class SubmissionController extends AbstractController {
         // delete the temporary file
         if (isset($uploaded_file)) {
             for ($j = 0; $j < $count; $j++) {
-                if ($this->core->isTesting() || is_uploaded_file($uploaded_file["tmp_name"][$j])) {
+                if (is_uploaded_file($uploaded_file["tmp_name"][$j])) {
                     $dst = FileUtils::joinPaths($version_path, $uploaded_file["name"][$j]);
                     if (!@copy($uploaded_file["tmp_name"][$j], $dst)) {
                         return $this->uploadResult("Failed to copy uploaded file {$uploaded_file["name"][$j]} to current submission.", false);
@@ -909,7 +1034,7 @@ class SubmissionController extends AbstractController {
                     $num_codeboxes += 1;
                 }
                 else if ($this_input instanceof SubmissionMultipleChoice) {
-                    $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();;
+                    $answers = $multiple_choice_objects["multiple_choice_" .  $num_multiple_choice] ?? array();
                     $num_multiple_choice += 1;
                 }
                 else {
@@ -1013,7 +1138,7 @@ class SubmissionController extends AbstractController {
 
             // Determine the size of the uploaded files as well as whether or not they're a zip or not.
             // We save that information for later so we know which files need unpacking or not and can save
-            // a check to getMimeType()
+            // a check for its mime type
             $file_size = 0;
             for ($i = 1; $i <= $num_parts; $i++) {
                 if (isset($uploaded_files[$i])) {
@@ -1077,7 +1202,7 @@ class SubmissionController extends AbstractController {
                             }
                         }
                         else {
-                            if ($this->core->isTesting() || is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
+                            if (is_uploaded_file($uploaded_files[$i]["tmp_name"][$j])) {
                                 $dst = FileUtils::joinPaths($part_path[$i], $uploaded_files[$i]["name"][$j]);
                                 if (!@copy($uploaded_files[$i]["tmp_name"][$j], $dst)) {
                                     return $this->uploadResult("Failed to copy uploaded file {$uploaded_files[$i]["name"][$j]} to current submission.", false);
@@ -1232,14 +1357,15 @@ class SubmissionController extends AbstractController {
         // Create the vcs file first!  (avoid race condition, we must
         // check out the files before trying to grade them)
         if ($vcs_queue_file !== "") {
-          if (@file_put_contents($vcs_queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
-            return $this->uploadResult("Failed to create vcs file for grading queue.", false);
-          }
-        } else {
-          // Then create the file that will trigger autograding
-          if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
-            return $this->uploadResult("Failed to create file for grading queue.", false);
-          }
+            if (@file_put_contents($vcs_queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create vcs file for grading queue.", false);
+            }
+        }
+        else {
+            // Then create the file that will trigger autograding
+            if (@file_put_contents($queue_file, FileUtils::encodeJson($queue_data), LOCK_EX) === false) {
+                return $this->uploadResult("Failed to create file for grading queue.", false);
+            }
         }
 
         Logger::logAccess(
