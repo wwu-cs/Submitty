@@ -7,6 +7,7 @@ use ZipArchive;
 use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\controllers\AbstractController;
+use app\exceptions\NotEnabledException;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -19,8 +20,17 @@ class LibraryManage extends AbstractController
 {
     protected $libraryPath;
 
+    /**
+     * LibraryManage constructor.
+     * @param Core $core
+     * @throws NotEnabledException
+     */
     public function __construct(Core $core) {
         parent::__construct($core);
+
+        if (!$this->core->getConfig()->useHomeworkLibrary()) {
+            throw new NotEnabledException();
+        }
 
         $this->libraryPath = $this->core->getConfig()->getHomeworkLibraryLocation();
     }
