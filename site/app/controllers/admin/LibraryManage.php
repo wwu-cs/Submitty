@@ -199,7 +199,15 @@ class LibraryManage extends AbstractController
          * a user would already need full admin access to get to this point.
          * It also should be relatively protected with the escaping of shell arguments.
          */
-        exec('git clone ' . escapeshellarg($url) . ' ' . escapeshellarg($libraryLocation));
+        exec('git clone ' . escapeshellarg($url) . ' ' . escapeshellarg($libraryLocation), $out);
+
+        if (strpos($out, 'fatal') !== FALSE) {
+            FileUtils::recursiveRmdir($libraryLocation);
+            return $this->core->getOutput()->renderResultMessage(
+                'Could not clone git repository.',
+                false
+            );
+        }
 
 
         return $this->core->getOutput()->renderResultMessage(
