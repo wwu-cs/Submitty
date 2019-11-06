@@ -8,6 +8,7 @@ use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
+use ZipArchive;
 
 /**
  * Class LibraryManage
@@ -24,7 +25,6 @@ class LibraryManage extends AbstractController {
         parent::__construct($core);
 
         $this->libraryPath = $this->core->getConfig()->getHomeworkLibraryLocation();
-
     }
 
     /**
@@ -74,16 +74,61 @@ class LibraryManage extends AbstractController {
         $type = $zipFile['type'];
 
         $parts = explode('.', $name);
-        if (count($parts) < 2 || strtolower($parts[-1]) != '.zip') {
+        if (count($parts) != 2 || strtolower($parts[-1]) != '.zip') {
             return $this->core->getOutput()->renderResultMessage(
-                'Please upload a .zip file.',
+                'Please upload a .zip file with no periods other than the one for the file extension.',
                 false
             );
         }
 
+        $libName = $parts[0];
 
-        // Check to see if the library exists
-        return [];
+        if ($this->libraryExists($libName)) {
+            return $this->core->getOutput()->renderResultMessage(
+                'Library already exists.',
+                false
+            );
+        }
+
+        // Create the libraries folder
+        $libraryLocation = $this->createLibraryLocation($libName);
+        if (!$libraryLocation) {
+            return $this->core->getOutput()->renderResultMessage(
+                'Error uploading file',
+                false
+            );
+        }
+
+        $dst = FileUtils::joinPaths($libraryLocation, $name);
+        if (!move_uploaded_file($tmpName, $dst)) {
+            FileUtils::recursiveRmdir($libraryLocation);
+
+            return $this->core->getOutput()->renderResultMessage(
+                'Error uploading file',
+                false
+            );
+        }
+
+        $zip = new ZipArchive();
+        $res = $zip->open($dst);
+        if ($res === TRUE) {
+            $zip->extractTo($libraryLocation);
+            $zip->close();
+        } else {
+            FileUtils::recursiveRmdir($libraryLocation);
+
+            return $this->core->getOutput()->renderResultMessage(
+                'Could not unzip the file.',
+                false
+            );
+
+        }
+
+        FileUtils::rmFile($dst);
+
+        return $this->core->getOutput()->renderResultMessage(
+            'Successfully installed the new library'
+        );
     }
 
     /**
@@ -101,6 +146,8 @@ class LibraryManage extends AbstractController {
                 false
             );
         }
+
+        
 
 
         return [];
