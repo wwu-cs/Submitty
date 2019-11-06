@@ -3,25 +3,23 @@
 namespace app\controllers\admin;
 
 
-use app\controllers\AbstractController;
+use ZipArchive;
 use app\libraries\Core;
 use app\libraries\FileUtils;
+use app\controllers\AbstractController;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
-use ZipArchive;
 
 /**
  * Class LibraryManage
  * @package app\controllers\admin
  * @AccessControl(role="INSTRUCTOR")
  */
-class LibraryManage extends AbstractController {
-
+class LibraryManage extends AbstractController
+{
     protected $libraryPath;
 
-
-    public function __construct(Core $core)
-    {
+    public function __construct(Core $core) {
         parent::__construct($core);
 
         $this->libraryPath = $this->core->getConfig()->getHomeworkLibraryLocation();
@@ -70,8 +68,7 @@ class LibraryManage extends AbstractController {
         }
         $zipFile = $_FILES['zip'];
         $name = $zipFile['name'];
-        $tmpName  = $zipFile['tmp_name'];
-        $type = $zipFile['type'];
+        $tmpName = $zipFile['tmp_name'];
 
         $parts = explode('.', $name);
         if (count($parts) != 2 || strtolower($parts[-1]) != '.zip') {
@@ -94,7 +91,7 @@ class LibraryManage extends AbstractController {
         $libraryLocation = $this->createLibraryLocation($libName);
         if (!$libraryLocation) {
             return $this->core->getOutput()->renderResultMessage(
-                'Error uploading file',
+                'Error creating library folder.',
                 false
             );
         }
@@ -147,10 +144,57 @@ class LibraryManage extends AbstractController {
             );
         }
 
-        
+        $url = $_POST['git_url'];
+
+        // Regex can be viewed in detail here:
+        // https://www.debuggex.com/r/H4kRw1G0YPyBFjfm
+        if (!preg_match(
+            '/((git|ssh|http(s)?)|(git@[\w.]+))(:(\/\/)?)([\w.@:/\-~]+)(\.git)(\/)?/',
+            $url,
+            $matches
+        )) {
+            return $this->core->getOutput()->renderResultMessage(
+                'The git url is not of the right format.',
+                false
+            );
+        }
+
+        /*
+         * From the link above, one can easily see that group 7 is the wanted group.
+         * We use index 8 because index 0 from preg match is the whole string.
+         * We then split and take the name which is usually at the end of the url.
+         * This will not work for same repo names with different authors, so
+         * that will probably want to be fixed later.
+         */
+        $libName = explode('/', $matches[8])[-1];
+
+        if ($this->libraryExists($libName)) {
+            return $this->core->getOutput()->renderResultMessage(
+                'Library already exists.',
+                false
+            );
+        }
+
+        // Create the libraries folder
+        $libraryLocation = $this->createLibraryLocation($libName);
+        if (!$libraryLocation) {
+            return $this->core->getOutput()->renderResultMessage(
+                'Error creating library folder.',
+                false
+            );
+        }
+
+        /*
+         * I am not going to worry too much about bash injection here because
+         * a user would already need full admin access to get to this point.
+         * It also should be relatively protected with the escaping of shell arguments.
+         */
+        exec('git clone ' . escapeshellarg($url) . ' ' . escapeshellarg($libraryLocation));
 
 
-        return [];
+        return $this->core->getOutput()->renderResultMessage(
+            'Cloned the library repository.'
+        );
     }
 
 }
