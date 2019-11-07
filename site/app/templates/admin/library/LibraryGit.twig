@@ -1,0 +1,13 @@
+<!-- Instruction URL (read/write in all modes) -->
+<div class="option row">
+    <div class="option-desc col-md-6">
+        <label for="instructions_url">
+            <div class="option-title">Git URL</div>
+            <div class="option-alt">What is the url to the Git repo?</div>
+        </label>
+    </div>
+    <div class="option-input col-md-6">
+        <input type='text' name='git_url' id='git_url' class="auto_save"
+        value="{{ action != 'new' ? gradeable.getInstructionsUrl() : '' }}" placeholder="(Optional)" />
+    </div>
+</div>
