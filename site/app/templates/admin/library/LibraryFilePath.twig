@@ -1,13 +1,16 @@
-<!-- Instruction URL (read/write in all modes) -->
-<div class="option row">
-    <div class="option-desc col-md-6">
-        <label for="instructions_url">
-            <div class="option-title">File Path</div>
-            <div class="option-alt">What is the file path to the gradeable?</div>
-        </label>
+<form class="form-signin" action="{{ filepath_submit_url }}" method="post">
+    <div class="option row">
+        <div class="option-desc col-md-6">
+            <label for="instructions_url">
+                <div class="option-title">File Path</div>
+                <div class="option-alt">What is the file path to the gradeable?</div>
+            </label>
+        </div>
+        <div class="option-input col-md-6">
+            <input type='text' name='filepath' id='filepath' class="auto_save" placeholder="" />
+        </div>
     </div>
-    <div class="option-input col-md-6">
-        <input type='text' name='filepath' id='filepath' class="auto_save"
-        value="{{ action != 'new' ? gradeable.getInstructionsUrl() : '' }}" placeholder="(Optional)" />
+    <div class="row">
+        <input class="btn btn-primary" type="submit" value="Submit" />
     </div>
-</div>
+</form>
