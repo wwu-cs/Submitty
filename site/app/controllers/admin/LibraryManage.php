@@ -4,11 +4,14 @@ namespace app\controllers\admin;
 
 
 use ZipArchive;
+use app\models\User;
 use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\controllers\AbstractController;
 use app\exceptions\NotEnabledException;
 use app\libraries\routers\AccessControl;
+use app\exceptions\AuthorizationException;
+use app\exceptions\AuthenticationException;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -27,6 +30,14 @@ class LibraryManage extends AbstractController
      */
     public function __construct(Core $core) {
         parent::__construct($core);
+
+        if ($this->core->userLoaded()) {
+            throw new AuthenticationException('You must sign in to access this route', 403);
+        }
+
+        if ($this->core->getUser()->getAccessLevel() !== User::LEVEL_SUPERUSER) {
+            throw new AuthorizationException('You must be superuser to access this route', 401);
+        }
 
         if (!$this->core->getConfig()->useHomeworkLibrary()) {
             throw new NotEnabledException();
