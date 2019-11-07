@@ -38,10 +38,10 @@ class LibraryManageController extends AbstractController
      * Function for uploading a zipped up library to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, return a true or false on whether or not it succeeded.
      *
-     * @Route("/library/zip/upload")
+     * @Route("/homework/library/upload/zip", methods={"POST"})
      * @return array
      */
-    public function ajaxUploadLibrary(): array {
+    public function ajaxUploadLibraryFromZip(): array {
         $useCase = new LibraryAddUseCase($this->core);
         $response = $useCase->addZipLibrary($_FILES['zip']);
 
@@ -63,7 +63,7 @@ class LibraryManageController extends AbstractController
      * saving the result to the json_buffer of the Output object, returns a true or false on whether or not it
      * succeeded.
      *
-     * @Route("/library/git/upload")
+     * @Route("/homework/library/upload/git", methods={"POST", "GET"})
      * @return array
      */
     public function ajaxUploadLibraryFromGit(): array {
