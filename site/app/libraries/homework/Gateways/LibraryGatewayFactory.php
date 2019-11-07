@@ -1,13 +1,11 @@
 <?php namespace app\libraries\homework\Gateways;
 
 
-class LibraryGatewayFactory
-{
+class LibraryGatewayFactory {
     /** @var LibraryGateway */
     protected static $instance;
 
     /**
-     *
      * Lazy load the library singleton
      *
      * @return LibraryGateway

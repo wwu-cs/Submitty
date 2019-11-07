@@ -28,8 +28,7 @@ class LibraryGetUseCase extends BaseUseCase {
     /** @var LibraryGateway */
     protected $gateway;
 
-    public function __construct(Core $core)
-    {
+    public function __construct(Core $core) {
         parent::__construct($core);
 
         $this->gateway = LibraryGatewayFactory::getInstance();

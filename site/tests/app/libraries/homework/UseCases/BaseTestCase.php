@@ -5,8 +5,7 @@ use tests\BaseUnitTest;
 use app\libraries\homework\Gateways\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\InMemoryLibraryGateway;
 
-class BaseTestCase extends BaseUnitTest
-{
+class BaseTestCase extends BaseUnitTest {
     /** @var InMemoryLibraryGateway */
     protected $libraryGateway;
 
@@ -16,8 +15,7 @@ class BaseTestCase extends BaseUnitTest
     /** @var string */
     protected $location;
 
-    public function setUp(): void
-    {
+    public function setUp(): void {
         parent::setUp();
 
         $this->location = 'library location';

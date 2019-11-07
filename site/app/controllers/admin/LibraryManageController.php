@@ -19,8 +19,7 @@ use app\libraries\homework\UseCases\LibraryAddUseCase;
  * @package app\controllers\admin
  * @AccessControl(role="INSTRUCTOR")
  */
-class LibraryManageController extends AbstractController
-{
+class LibraryManageController extends AbstractController {
     /**
      * LibraryManage constructor.
      * @param Core $core

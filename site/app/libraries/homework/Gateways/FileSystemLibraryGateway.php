@@ -4,8 +4,7 @@
 use ZipArchive;
 use app\libraries\FileUtils;
 
-class FileSystemLibraryGateway implements LibraryGateway
-{
+class FileSystemLibraryGateway implements LibraryGateway {
     const SUCCESS = 0;
 
     protected function createFolderIfNotExists(string $path): bool {

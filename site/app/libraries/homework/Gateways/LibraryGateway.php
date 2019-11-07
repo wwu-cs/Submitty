@@ -1,8 +1,7 @@
 <?php namespace app\libraries\homework\Gateways;
 
 
-interface LibraryGateway
-{
+interface LibraryGateway {
     /**
      * This will clone the provided repo url into the specified location.
      * On success will return 'success', and on failure will return an error message

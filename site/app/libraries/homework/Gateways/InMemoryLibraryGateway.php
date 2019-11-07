@@ -1,10 +1,6 @@
 <?php namespace app\libraries\homework\Gateways;
 
-
-use app\libraries\Core;
-
-class InMemoryLibraryGateway implements LibraryGateway
-{
+class InMemoryLibraryGateway implements LibraryGateway {
     /** @var array */
     protected $libraries = [];
 

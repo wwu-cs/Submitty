@@ -5,8 +5,7 @@ use tests\app\libraries\homework\UseCases\BaseTestCase;
 use app\libraries\homework\UseCases\LibraryAddResponse;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
 
-class GitLibraryAddTester extends BaseTestCase
-{
+class GitLibraryAddTester extends BaseTestCase {
     /** @var LibraryAddUseCase */
     protected $useCase;
 

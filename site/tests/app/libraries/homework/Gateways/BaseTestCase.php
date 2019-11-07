@@ -7,8 +7,7 @@ use tests\BaseUnitTest;
 use app\libraries\homework\Gateways\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\InMemoryLibraryGateway;
 
-class BaseTestCase extends BaseUnitTest
-{
+class BaseTestCase extends BaseUnitTest {
     /** @var Core */
     protected $core;
 
