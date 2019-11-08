@@ -15,7 +15,7 @@ class LibraryEntity {
      */
     public function __construct(string $name, string $location) {
         $this->name = $name;
-        $this->location = $location;
+        $this->location = rtrim($location, "/ \n\r");
     }
 
     /**
@@ -40,7 +40,7 @@ class LibraryEntity {
      * @return bool
      */
     public function hasLocationOf(string $location): bool {
-        return $this->location == $location;
+        return $this->location == rtrim($location, "/ \n\r");
     }
 
     /**

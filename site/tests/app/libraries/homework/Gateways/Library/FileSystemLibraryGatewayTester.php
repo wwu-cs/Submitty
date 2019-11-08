@@ -1,9 +1,9 @@
 <?php namespace tests\app\libraries\homework\Gateways\Library;
 
-use app\libraries\homework\Entities\LibraryEntity;
-use tests\app\libraries\homework\Gateways\BaseTestCase;
 use ZipArchive;
 use app\libraries\FileUtils;
+use app\libraries\homework\Entities\LibraryEntity;
+use tests\app\libraries\homework\Gateways\BaseTestCase;
 use app\libraries\homework\Gateways\Library\FileSystemLibraryGateway;
 
 class FileSystemLibraryGatewayTester extends BaseTestCase {
@@ -72,5 +72,46 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
         $this->assertEquals('success', $return);
         $this->assertDirectoryExists($library->getLibraryPath());
         $this->assertFileExists($library->getLibraryPath() . '/test.txt');
+    }
+
+    /** @test */
+    public function testItRetrievesAllLibrariesWhenEmpty() {
+        $results = $this->gateway->getAllLibraries($this->location);
+
+        $this->assertEquals([], $results);
+    }
+
+    /** @test */
+    public function testItRetrievesAllLibraries() {
+        FileUtils::createDir(FileUtils::joinPaths($this->location, 'lib1'));
+        FileUtils::createDir(FileUtils::joinPaths($this->location, 'lib2'));
+        FileUtils::createDir(FileUtils::joinPaths($this->location, 'lib3'));
+
+        /** @var LibraryEntity[] $results */
+        $results = $this->gateway->getAllLibraries($this->location);
+
+        $this->assertCount(3, $results);
+        $this->assertEquals('lib1', $results[0]->getName());
+        $this->assertEquals('lib2', $results[1]->getName());
+        $this->assertEquals('lib3', $results[2]->getName());
+    }
+
+    /** @test */
+    public function testItDoesNotOverwriteLibrariesZip() {
+        FileUtils::createDir(FileUtils::joinPaths($this->location, 'name'));
+        $library = new LibraryEntity('name', $this->location);
+        $result = $this->gateway->addZipLibrary($library, 'invalid zip');
+
+        $this->assertEquals('Library already exists.', $result);
+    }
+
+    /** @test */
+    public function testItDoesNotOverwriteLibrariesGit() {
+        FileUtils::createDir(FileUtils::joinPaths($this->location, 'name'));
+        $library = new LibraryEntity('name', $this->location);
+
+        $result = $this->gateway->addGitLibrary($library, 'url');
+
+        $this->assertEquals('Library already exists.', $result);
     }
 }

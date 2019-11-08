@@ -16,6 +16,10 @@ class FileSystemLibraryGateway implements LibraryGateway {
 
     /** @inheritDoc */
     public function addGitLibrary(LibraryEntity $library, string $repoUrl): string {
+        if ($this->libraryExists($library)) {
+            return 'Library already exists.';
+        }
+
         if (!$this->createFolderIfNotExists($library->getLibraryPath())) {
             return 'Error when creating folder.';
         }
