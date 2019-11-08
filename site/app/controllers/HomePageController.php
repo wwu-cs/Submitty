@@ -53,6 +53,17 @@ class HomePageController extends AbstractController {
 	}
 
     /**
+     * @Route("/homework/library/search/{query}", methods={"GET"})
+     * @return Response
+     */
+    public function searchLibraryWithQuery($query) {
+        $gradeable_ids = FileUtils::getDirWithText("/usr/local/submitty/library", $query);
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($gradeable_ids)
+        );
+	}
+    
+    /**
      * Display the LibraryManagerView to the instructor/admin.
      *
      * @Route("/homework/library/manage", methods={"GET"})

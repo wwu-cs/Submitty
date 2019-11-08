@@ -252,6 +252,31 @@ class FileUtils {
     }
 
     /**
+     * Given a path and a text string, return all directories in the path that have names containing the text argument.
+     *
+     * @param string $path
+     * @param string $text
+     *
+     * @return array
+     */
+    public static function getDirWithText($path, $text) {
+        $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
+        $return = array();
+        if (is_dir($path)) {
+            if ($handle = opendir($path)) {
+                while (false !== ($entry = readdir($handle))) {
+                    $file = "{$path}/{$entry}";
+                    if(is_dir($file) && !in_array(strtolower($entry), $disallowed_folders) && (strpos($entry, $text) !== false)) {
+                        $return[] = $entry;
+                    }
+                }
+            }
+        }
+        sort($return);
+        return $return;
+    }
+
+    /**
      * Given a filename, load the file and then parse it as a json file, creating an associative array if
      * possible. For any loaded file, we perform a bit of regex that attempts to remove the comma on the last
      * element of any list if it exists
