@@ -6,6 +6,7 @@ namespace app\controllers\admin;
 use app\libraries\Core;
 use app\controllers\AbstractController;
 use app\exceptions\NotEnabledException;
+use app\libraries\homework\UseCases\LibraryGetUseCase;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
@@ -74,6 +75,25 @@ class LibraryManageController extends AbstractController {
 
         return $this->core->getOutput()->renderResultMessage(
             $response->error ?? $response->getMessage(),
+            empty($response->error)
+        );
+    }
+
+    /**
+     * Function for returning all libraries stored on the system. This should be called via AJAX
+     * saving the result to the json_buffer of the Output object, returns a true or false on
+     * whether or not it succeeded.
+     *
+     * @Route("/homework/library/list", methods={"GET"})
+     * @return array
+     */
+    public function ajaxGetLibraryList(): array {
+        $useCase = new LibraryGetUseCase($this->core);
+
+        $response = $useCase->getLibraries();
+
+        return $this->core->getOutput()->renderResultMessage(
+            $response->error ?? $response->getResults(),
             empty($response->error)
         );
     }

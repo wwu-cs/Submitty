@@ -1,6 +1,7 @@
 <?php namespace tests\app\controllers\admin;
 
 
+use app\libraries\homework\Entities\LibraryEntity;
 use tests\BaseUnitTest;
 use app\libraries\Core;
 use app\exceptions\NotEnabledException;
@@ -106,6 +107,27 @@ class LibraryManageControllerTester extends BaseUnitTest {
         $this->controller = new LibraryManageController($this->core);
     }
 
+    /** @test */
+    public function testItGetsLibrariesWhenThereAreNone() {
+        $response = $this->controller->ajaxGetLibraryList();
+
+        $this->assertEquals([
+            'status' => 'success',
+            'data' => []
+        ], $response);
+    }
+
+    /** @test */
+    public function testItGetsAllLibraries() {
+        $this->gateway->addLibrary(new LibraryEntity('name', $this->location));
+
+        $response = $this->controller->ajaxGetLibraryList();
+
+        $this->assertEquals([
+            'status' => 'success',
+            'data' => ['name']
+        ], $response);
+    }
 
     public function tearDown(): void
     {
