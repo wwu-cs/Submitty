@@ -21,7 +21,7 @@ class LibraryAddResponse {
         return $this->message;
     }
 
-    public static function error(string $message) {
+    public static function error(string $message): LibraryAddResponse {
         $response = new static;
         $response->error = $message;
         return $response;

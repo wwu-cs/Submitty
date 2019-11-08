@@ -20,7 +20,7 @@ class LibraryGetTester extends BaseTestCase {
         $this->useCase = new LibraryGetUseCase($this->core);
     }
 
-    public function handleTest() {
+    protected function handleTest() {
         $this->response = $this->useCase->getLibraries();
     }
 

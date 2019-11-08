@@ -20,7 +20,7 @@ class LibraryGetResponse {
         return $this->libraries;
     }
 
-    public static function error(string $message) {
+    public static function error(string $message): LibraryGetResponse {
         $response = new static;
         $response->error = $message;
         return $response;

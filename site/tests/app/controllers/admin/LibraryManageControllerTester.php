@@ -129,6 +129,42 @@ class LibraryManageControllerTester extends BaseUnitTest {
         ], $response);
     }
 
+    /** @test */
+    public function testItRemovesALibrary() {
+        $this->gateway->addLibrary(new LibraryEntity('name', $this->location));
+
+        $response = $this->controller->ajaxRemoveLibrary('name');
+
+        $this->assertEquals([
+            'status' => 'success',
+            'data' => 'Successfully removed library \'name\''
+        ], $response);
+        $this->assertEquals([], $this->gateway->getAllLibraries($this->location));
+    }
+
+    /** @test */
+    public function testItDoesntRemoveLibrariesItsNotSupposedTo() {
+        $this->gateway->addLibrary(new LibraryEntity('name', $this->location));
+
+        $response = $this->controller->ajaxRemoveLibrary('different name');
+
+        $this->assertEquals([
+            'status' => 'success',
+            'data' => 'Successfully removed library \'different name\''
+        ], $response);
+        $this->assertCount(1, $this->gateway->getAllLibraries($this->location));
+    }
+
+    /** @test */
+    public function testItDoesntRemoveInvalidName() {
+        $response = $this->controller->ajaxRemoveLibrary('');
+
+        $this->assertEquals([
+            'status' => 'fail',
+            'message' => 'You must specify the library to remove.'
+        ], $response);
+    }
+
     public function tearDown(): void
     {
         parent::tearDown();

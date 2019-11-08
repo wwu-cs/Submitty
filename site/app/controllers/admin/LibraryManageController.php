@@ -7,6 +7,7 @@ use app\libraries\Core;
 use app\controllers\AbstractController;
 use app\exceptions\NotEnabledException;
 use app\libraries\homework\UseCases\LibraryGetUseCase;
+use app\libraries\homework\UseCases\LibraryRemoveUseCase;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
@@ -98,4 +99,24 @@ class LibraryManageController extends AbstractController {
         );
     }
 
+    /**
+     * Function for deleting a specific library stored on the system. This should be called via
+     * a DELETE AJAX request. It then returns json data to the caller about the request specifying
+     * if it was successful or not and any error messages.
+     *
+     * @Route("/homework/library/remove/{name}", methods={"DELETE"})
+     * @param string $name
+     * @return array
+     */
+    public function ajaxRemoveLibrary(string $name): array {
+        $useCase = new LibraryRemoveUseCase($this->core);
+
+        $response = $useCase->removeLibrary($name);
+
+        return $this->core->getOutput()->renderResultMessage(
+            $response->error ?? $response->getMessage(),
+            empty($response->error)
+        );
+
+    }
 }

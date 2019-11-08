@@ -34,13 +34,22 @@ class LibraryEntity {
         return $this->location;
     }
 
+    /**
+     * Checks to see if the library has the specified name
+     *
+     * @param string $name
+     * @return bool
+     */
+    public function hasNameOf(string $name): bool {
+        return $this->getName() === $name;
+    }
 
     /**
      * @param string $location
      * @return bool
      */
     public function hasLocationOf(string $location): bool {
-        return $this->location == rtrim($location, "/ \n\r");
+        return $this->location === rtrim($location, "/ \n\r");
     }
 
     /**
@@ -48,8 +57,16 @@ class LibraryEntity {
      * @return bool
      */
     public function is(LibraryEntity $library): bool {
-        return $library->getName() == $this->getName() &&
-            $library->getLocation() == $this->getLocation();
+        return $this->hasNameOf($library->getName()) &&
+            $this->hasLocationOf($library->getLocation());
+    }
+
+    /**
+     * @param LibraryEntity $library
+     * @return bool
+     */
+    public function isNot(LibraryEntity $library): bool {
+        return !$this->is($library);
     }
 
     /**
