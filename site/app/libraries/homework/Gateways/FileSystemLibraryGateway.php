@@ -6,6 +6,7 @@ use app\libraries\FileUtils;
 
 class FileSystemLibraryGateway implements LibraryGateway {
     const SUCCESS = 0;
+    const STDERR = 2;
 
     protected function createFolderIfNotExists(string $path): bool {
         return FileUtils::createDir($path);
@@ -29,6 +30,8 @@ class FileSystemLibraryGateway implements LibraryGateway {
         ];
         $git = proc_open($cmd, $descriptors, $pipes);
 
+        $stderr = trim(stream_get_contents($pipes[self::STDERR]));
+
         // All pipes need to be closed before closing the process otherwise a deadlock occurs
         foreach ($pipes as $pipe) {
             fclose($pipe);
@@ -38,7 +41,7 @@ class FileSystemLibraryGateway implements LibraryGateway {
 
         if ($status != self::SUCCESS) {
             FileUtils::recursiveRmdir($location);
-            return 'Error when cloning the repository.';
+            return "Error when cloning the repository: $stderr";
         }
 
         return 'success';

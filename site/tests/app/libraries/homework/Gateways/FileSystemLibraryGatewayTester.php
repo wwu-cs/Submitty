@@ -43,7 +43,10 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
         $loc = FileUtils::joinPaths($this->location, 'Submitty');
         $return = $this->gateway->addGitLibrary('invalid url', $loc);
 
-        $this->assertEquals('Error when cloning the repository.', $return);
+        $this->assertEquals(
+            'Error when cloning the repository: fatal: repository \'invalid url\' does not exist',
+            $return
+        );
         $this->assertDirectoryNotExists($loc);
     }
 
