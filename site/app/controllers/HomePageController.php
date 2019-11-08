@@ -45,8 +45,8 @@ class HomePageController extends AbstractController {
      * @Route("/homework/library/search", methods={"GET"})
      * @return Response
      */
-    public function searchLibrary() {
-        $gradeable_ids = FileUtils::getAllDirs("/usr/local/submitty/library");
+    public function searchLibrary($path = "/usr/local/submitty/library") {
+        $gradeable_ids = FileUtils::getAllDirs($path);
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($gradeable_ids)
         );
@@ -56,8 +56,8 @@ class HomePageController extends AbstractController {
      * @Route("/homework/library/search/{query}", methods={"GET"})
      * @return Response
      */
-    public function searchLibraryWithQuery($query) {
-        $gradeable_ids = FileUtils::getDirWithText("/usr/local/submitty/library", $query);
+    public function searchLibraryWithQuery($query, $path = "/usr/local/submitty/library") {
+        $gradeable_ids = FileUtils::getDirWithText($path, $query);
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($gradeable_ids)
         );
