@@ -2,6 +2,7 @@
 
 use app\libraries\Core;
 use app\libraries\FileUtils;
+use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 
@@ -70,13 +71,9 @@ class LibraryAddUseCase extends BaseUseCase {
         $parts = explode('/', $matches[7]);
         $libName = array_pop($parts);
 
-        if ($this->gateway->libraryExists($libName, $this->location)) {
-            return LibraryAddResponse::error('Library already exists!');
-        }
+        $library = new LibraryEntity($libName, $this->location);
 
-        $location = FileUtils::joinPaths($this->location, $libName);
-
-        if (($msg = $this->gateway->addGitLibrary($repoUrl, $location)) != 'success') {
+        if (($msg = $this->gateway->addGitLibrary($library, $repoUrl)) != 'success') {
             return LibraryAddResponse::error('Error adding the library. ' . $msg);
         }
 
@@ -112,16 +109,11 @@ class LibraryAddUseCase extends BaseUseCase {
 
         $libName = implode('.', $parts);
 
-        if ($this->gateway->libraryExists($libName, $this->location)) {
-            $this->deleteUploadedFile($tmpName);
-            return LibraryAddResponse::error('Library already exists!');
-        }
+        $library = new LibraryEntity($libName, $this->location);
 
-        $location = FileUtils::joinPaths($this->location, $libName);
-
-        if (($msg = $this->gateway->addZipLibrary($tmpName, $location)) != 'success') {
+        if (($msg = $this->gateway->addZipLibrary($library, $tmpName)) != 'success') {
             $this->deleteUploadedFile($tmpName);
-            return LibraryAddResponse::error('Error when adding the library. ' . $msg);
+            return LibraryAddResponse::error('Error adding the library. ' . $msg);
         }
 
         $this->deleteUploadedFile($tmpName);

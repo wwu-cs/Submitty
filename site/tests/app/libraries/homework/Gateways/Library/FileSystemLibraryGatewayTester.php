@@ -1,5 +1,6 @@
 <?php namespace tests\app\libraries\homework\Gateways\Library;
 
+use app\libraries\homework\Entities\LibraryEntity;
 use tests\app\libraries\homework\Gateways\BaseTestCase;
 use ZipArchive;
 use app\libraries\FileUtils;
@@ -31,43 +32,45 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
 
     /** @test */
     public function testItClonesAGitRepository() {
-        $loc = FileUtils::joinPaths($this->location, 'Submitty');
-        $return = $this->gateway->addGitLibrary(self::VALID_GIT_URL, $loc);
+        $library = new LibraryEntity('Submitty', $this->location);
+        $return = $this->gateway->addGitLibrary($library, self::VALID_GIT_URL);
 
         $this->assertEquals('success', $return);
-        $this->assertDirectoryExists($loc);
-        $this->assertDirectoryExists(FileUtils::joinPaths($loc, '.git'));
+        $this->assertDirectoryExists($library->getLibraryPath());
+        $this->assertDirectoryExists(FileUtils::joinPaths($library->getLibraryPath(), '.git'));
     }
 
     /** @test */
     public function testItFailsCloningABadGitRepository() {
-        $loc = FileUtils::joinPaths($this->location, 'Submitty');
-        $return = $this->gateway->addGitLibrary('invalid url', $loc);
+        $library = new LibraryEntity('name', $this->location);
+
+        $return = $this->gateway->addGitLibrary($library, 'invalid url');
 
         $this->assertEquals(
-            'Error when cloning the repository: fatal: repository \'invalid url\' does not exist',
+            'Error cloning repository. fatal: repository \'invalid url\' does not exist',
             $return
         );
-        $this->assertDirectoryNotExists($loc);
+        $this->assertDirectoryNotExists($library->getLibraryPath());
     }
 
     /** @test */
     public function testItDoesNotAddAnInvalidZipFile() {
-        $loc = FileUtils::joinPaths($this->location, 'Submitty');
-        $return = $this->gateway->addZipLibrary('invalid zip', $loc);
+        $library = new LibraryEntity('name', $this->location);
+        $return = $this->gateway->addZipLibrary($library, 'invalid zip');
 
         $this->assertEquals('Error opening zip file.', $return);
-        $this->assertDirectoryNotExists($loc);
+        $this->assertDirectoryNotExists($library->getLibraryPath());
     }
 
     /** @test */
     public function testItAddsAZipFile() {
-        $loc = FileUtils::joinPaths($this->location, 'test');
         $zip = $this->createTestZip('test.zip');
 
-        $return = $this->gateway->addZipLibrary($zip, $loc);
+        $library = new LibraryEntity('test', $this->location);
+
+        $return = $this->gateway->addZipLibrary($library, $zip);
         $this->assertEquals('success', $return);
-        $this->assertDirectoryExists($loc);
-        $this->assertFileExists(FileUtils::joinPaths($loc, 'test.txt'));
+        $this->assertDirectoryExists($library->getLibraryPath());
+        $this->assertFileExists($library->getLibraryPath() . '/test.txt');
     }
 }

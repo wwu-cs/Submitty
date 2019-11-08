@@ -1,6 +1,7 @@
 <?php namespace tests\app\libraries\homework\UseCases\LibraryAdd;
 
 
+use app\libraries\homework\Entities\LibraryEntity;
 use tests\app\libraries\homework\UseCases\BaseTestCase;
 use app\libraries\homework\UseCases\LibraryAddResponse;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
@@ -46,11 +47,11 @@ class GitLibraryAddTester extends BaseTestCase {
 
     /** @test */
     public function testItDoesNotOverwriteLibraries() {
-        $this->libraryGateway->addLibraryWithName('lib', $this->location);
+        $this->libraryGateway->addLibrary(new LibraryEntity('lib', $this->location));
 
         $this->handleTest('git@github.com:user/lib.git');
 
-        $this->assertEquals('Library already exists!', $this->response->error);
+        $this->assertEquals('Error adding the library. Library already exists', $this->response->error);
     }
 
     /** @test */
@@ -58,13 +59,6 @@ class GitLibraryAddTester extends BaseTestCase {
         $this->handleTest('git@github.com:user/lib.git');
 
         $this->assertEquals('Successfully cloned git@github.com:user/lib.git.', $this->response->getMessage());
-        $this->assertTrue($this->libraryGateway->libraryExists('lib', $this->location));
-    }
-
-    /** @test  */
-    public function testItDoesNotAddInvalidLibrary() {
-        $this->handleTest('git@github.com:user/invalid.git');
-
-        $this->assertEquals('Error adding the library. Invalid location', $this->response->error);
+        $this->assertTrue($this->libraryGateway->libraryExists(new LibraryEntity('lib', $this->location)));
     }
 }

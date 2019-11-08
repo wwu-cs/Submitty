@@ -2,6 +2,7 @@
 
 
 use app\libraries\Core;
+use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\LibraryGateway;
 
@@ -15,7 +16,7 @@ class LibraryGetResponse {
         $this->libraries[] = $lib;
     }
 
-    public function getLibraries(): array {
+    public function getResults(): array {
         return $this->libraries;
     }
 
@@ -43,8 +44,9 @@ class LibraryGetUseCase extends BaseUseCase {
 
         $libraries = $this->gateway->getAllLibraries($this->location);
 
+        /** @var LibraryEntity $library */
         foreach ($libraries as $library) {
-            $response->addLibrary($library);
+            $response->addLibrary($library->getName());
         }
 
         return $response;
