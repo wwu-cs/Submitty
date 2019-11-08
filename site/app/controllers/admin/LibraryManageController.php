@@ -45,11 +45,7 @@ class LibraryManageController extends AbstractController {
     public function ajaxUploadLibraryFromZip(): array {
         $useCase = new LibraryAddUseCase($this->core);
 
-        // Equivalent to $_FILES['zip'] except for it doesn't generate a notice error.
-        // Idk why E_NOTICE is enabled. It's dumb because it makes me have to do workarounds like this all over
-        $file = (isset($_FILES['zip'])) ? $_FILES['zip'] : null;
-
-        $response = $useCase->addZipLibrary($file);
+        $response = $useCase->addZipLibrary($_FILES['zip'] ?? null);
 
         return $this->core->getOutput()->renderResultMessage(
             $response->error ?? $response->getMessage(),
@@ -68,11 +64,7 @@ class LibraryManageController extends AbstractController {
     public function ajaxUploadLibraryFromGit(): array {
         $useCase = new LibraryAddUseCase($this->core);
 
-        // Equivalent to $_POST['git_url'] except for it doesn't generate a notice error.
-        // Idk why E_NOTICE is enabled. It's dumb because it makes me have to do workarounds like this all over
-        $url = (isset($_POST['git_url'])) ? $_POST['git_url'] : null;
-
-        $response = $useCase->addGitLibrary($url);
+        $response = $useCase->addGitLibrary($_POST['git_url'] ?? null);
 
         return $this->core->getOutput()->renderResultMessage(
             $response->error ?? $response->getMessage(),
