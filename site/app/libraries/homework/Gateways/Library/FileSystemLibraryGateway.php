@@ -1,8 +1,9 @@
-<?php namespace app\libraries\homework\Gateways;
+<?php namespace app\libraries\homework\Gateways\Library;
 
 
 use ZipArchive;
 use app\libraries\FileUtils;
+use app\libraries\homework\Gateways\LibraryGateway;
 
 class FileSystemLibraryGateway implements LibraryGateway {
     const SUCCESS = 0;

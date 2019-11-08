@@ -1,8 +1,9 @@
-<?php namespace tests\app\libraries\homework\Gateways;
+<?php namespace tests\app\libraries\homework\Gateways\Library;
 
+use tests\app\libraries\homework\Gateways\BaseTestCase;
 use ZipArchive;
 use app\libraries\FileUtils;
-use app\libraries\homework\Gateways\FileSystemLibraryGateway;
+use app\libraries\homework\Gateways\Library\FileSystemLibraryGateway;
 
 class FileSystemLibraryGatewayTester extends BaseTestCase {
     /** @var FileSystemLibraryGateway */

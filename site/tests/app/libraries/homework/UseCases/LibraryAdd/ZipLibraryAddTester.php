@@ -94,4 +94,14 @@ class ZipLibraryAddTester extends BaseTestCase {
         $this->assertEquals('Successfully installed new library: lib', $this->response->getMessage());
         $this->assertTrue($this->libraryGateway->libraryExists('lib', $this->location));
     }
+
+    /** @test  */
+    public function testItDoesNotAddInvalidLibrary() {
+        $this->handleTest([
+            'name' => 'invalid.zip',
+            'tmp_name' => '169633'
+        ]);
+
+        $this->assertEquals('Error when adding the library. Invalid location', $this->response->error);
+    }
 }

@@ -3,7 +3,7 @@
 use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\homework\Gateways\LibraryGateway;
-use app\libraries\homework\Gateways\LibraryGatewayFactory;
+use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 
 class LibraryAddResponse {
     /** @var string */
@@ -49,8 +49,9 @@ class LibraryAddUseCase extends BaseUseCase {
             return LibraryAddResponse::error('A repo url is required.');
         }
 
-        // Regex can be viewed in detail here:
+        // Regex can be viewed in detail here.
         // https://www.debuggex.com/r/H4kRw1G0YPyBFjfm
+        // It validates .git repository urls.
         if (!preg_match(
             '/((git|ssh|http(s)?)|(git@[\w\.]+))(:(\/\/)?)([\w\.@\:\/\-~]+)(\.git)(\/)?/',
             $repoUrl,
@@ -61,7 +62,7 @@ class LibraryAddUseCase extends BaseUseCase {
 
         /*
          * From the link above, one can easily see that group 7 is the wanted group.
-         * We use index 8 because index 0 from preg match is the whole string.
+         * We use index 7 because index 0 from preg match is the whole string.
          * We then split and take the name which is usually at the end of the url.
          * This will not work for same repo names with different authors, so
          * that will probably want to be fixed later.

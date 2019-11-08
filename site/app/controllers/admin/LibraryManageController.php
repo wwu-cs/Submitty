@@ -44,16 +44,9 @@ class LibraryManageController extends AbstractController {
         $useCase = new LibraryAddUseCase($this->core);
         $response = $useCase->addZipLibrary($_FILES['zip']);
 
-        if ($response->error) {
-            return $this->core->getOutput()->renderResultMessage(
-                $response->error,
-                false
-            );
-        }
-
         return $this->core->getOutput()->renderResultMessage(
-            $response->getMessage(),
-            true
+            $response->error ?? $response->getMessage(),
+            empty($response->error)
         );
     }
 
@@ -69,16 +62,9 @@ class LibraryManageController extends AbstractController {
         $useCase = new LibraryAddUseCase($this->core);
         $response = $useCase->addGitLibrary($_POST['git_url']);
 
-        if ($response->error) {
-            return $this->core->getOutput()->renderResultMessage(
-                $response->error,
-                false
-            );
-        }
-
         return $this->core->getOutput()->renderResultMessage(
-            $response->getMessage(),
-            true
+            $response->error ?? $response->getMessage(),
+            empty($response->error)
         );
     }
 

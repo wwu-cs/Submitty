@@ -60,4 +60,11 @@ class GitLibraryAddTester extends BaseTestCase {
         $this->assertEquals('Successfully cloned git@github.com:user/lib.git.', $this->response->getMessage());
         $this->assertTrue($this->libraryGateway->libraryExists('lib', $this->location));
     }
+
+    /** @test  */
+    public function testItDoesNotAddInvalidLibrary() {
+        $this->handleTest('git@github.com:user/invalid.git');
+
+        $this->assertEquals('Error adding the library. Invalid location', $this->response->error);
+    }
 }

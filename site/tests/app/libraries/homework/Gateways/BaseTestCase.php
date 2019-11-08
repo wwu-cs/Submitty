@@ -4,8 +4,6 @@ use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use tests\BaseUnitTest;
-use app\libraries\homework\Gateways\LibraryGatewayFactory;
-use app\libraries\homework\Gateways\InMemoryLibraryGateway;
 
 class BaseTestCase extends BaseUnitTest {
     /** @var Core */

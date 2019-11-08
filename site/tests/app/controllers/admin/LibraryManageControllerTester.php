@@ -1,11 +1,12 @@
 <?php namespace tests\app\controllers\admin;
 
 
-use app\controllers\admin\LibraryManageController;
-use app\libraries\Core;
-use app\libraries\homework\Gateways\InMemoryLibraryGateway;
-use app\libraries\homework\Gateways\LibraryGatewayFactory;
 use tests\BaseUnitTest;
+use app\libraries\Core;
+use app\exceptions\NotEnabledException;
+use app\controllers\admin\LibraryManageController;
+use app\libraries\homework\Gateways\Library\InMemoryLibraryGateway;
+use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 
 class LibraryManageControllerTester extends BaseUnitTest {
 
@@ -96,6 +97,13 @@ class LibraryManageControllerTester extends BaseUnitTest {
             'message' => 'The git url is not of the right format.'
         ], $response);
         $this->assertCount(0, $this->gateway->getAllLibraries($this->location));
+    }
+
+    /** @test */
+    public function testItThrowsNotEnabledException() {
+        $this->expectException(NotEnabledException::class);
+        $this->createConfigWithLibrary(false);
+        $this->controller = new LibraryManageController($this->core);
     }
 
 

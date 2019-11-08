@@ -2,8 +2,8 @@
 
 use app\libraries\Core;
 use tests\BaseUnitTest;
-use app\libraries\homework\Gateways\LibraryGatewayFactory;
-use app\libraries\homework\Gateways\InMemoryLibraryGateway;
+use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
+use app\libraries\homework\Gateways\Library\InMemoryLibraryGateway;
 
 class BaseTestCase extends BaseUnitTest {
     /** @var InMemoryLibraryGateway */

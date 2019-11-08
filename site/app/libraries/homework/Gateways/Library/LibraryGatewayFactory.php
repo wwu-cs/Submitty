@@ -1,5 +1,6 @@
-<?php namespace app\libraries\homework\Gateways;
+<?php namespace app\libraries\homework\Gateways\Library;
 
+use app\libraries\homework\Gateways\LibraryGateway;
 
 class LibraryGatewayFactory {
     /** @var LibraryGateway */
