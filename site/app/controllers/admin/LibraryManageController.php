@@ -4,11 +4,13 @@ namespace app\controllers\admin;
 
 
 use app\libraries\Core;
+use app\libraries\response\Response;
 use app\controllers\AbstractController;
 use app\exceptions\NotEnabledException;
-use app\libraries\homework\UseCases\LibraryGetUseCase;
+use app\libraries\response\WebResponse;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\homework\UseCases\LibraryGetUseCase;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
 
 /**
@@ -35,10 +37,31 @@ class LibraryManageController extends AbstractController {
     }
 
     /**
+     * Controller route to show the homework library page.
+     *
+     * @Route("/homework/library/manage", methods={"GET"})
+     * @return Response
+     */
+    public function showLibraryManagePage() {
+        $useCase = new LibraryGetUseCase($this->core);
+
+        $response = $useCase->getLibraries();
+
+        return Response::WebOnlyResponse(
+            new WebResponse([
+                'admin', 'LibraryManager'
+            ], 'showLibraryManager',
+                'Do all your fancy homework library things here!',
+                $response->getResults()
+            )
+        );
+    }
+
+    /**
      * Function for uploading a zipped up library to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, return a true or false on whether or not it succeeded.
      *
-     * @Route("/homework/library/upload/zip", methods={"POST"})
+     * @Route("/homework/library/manage/upload/zip", methods={"POST"})
      * @return array
      */
     public function ajaxUploadLibraryFromZip(): array {
@@ -61,7 +84,7 @@ class LibraryManageController extends AbstractController {
      * saving the result to the json_buffer of the Output object, returns a true or false on whether or not it
      * succeeded.
      *
-     * @Route("/homework/library/upload/git", methods={"POST"})
+     * @Route("/homework/library/manage/upload/git", methods={"POST"})
      * @return array
      */
     public function ajaxUploadLibraryFromGit(): array {
@@ -84,7 +107,7 @@ class LibraryManageController extends AbstractController {
      * saving the result to the json_buffer of the Output object, returns a true or false on
      * whether or not it succeeded.
      *
-     * @Route("/homework/library/list", methods={"GET"})
+     * @Route("/homework/library/manage/list", methods={"GET"})
      * @return array
      */
     public function ajaxGetLibraryList(): array {

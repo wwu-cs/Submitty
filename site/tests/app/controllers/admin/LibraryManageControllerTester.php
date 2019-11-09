@@ -2,6 +2,8 @@
 
 
 use app\libraries\homework\Entities\LibraryEntity;
+use app\libraries\response\Response;
+use app\libraries\response\WebResponse;
 use tests\BaseUnitTest;
 use app\libraries\Core;
 use app\exceptions\NotEnabledException;
@@ -44,9 +46,20 @@ class LibraryManageControllerTester extends BaseUnitTest {
     }
 
     /** @test */
-    public function testAjaxUploadLibraryFromZipFail() {
-        $controller = new LibraryManageController($this->core);
+    public function testItShowsTheLibraryManagePage() {
+        $response = $this->controller->showLibraryManagePage();
 
+        $this->assertInstanceOf(Response::class, $response);
+        $webResponse = $response->web_response;
+        $this->assertInstanceOf(WebResponse::class, $response->web_response);
+        $this->assertEquals([
+            'admin', 'LibraryManager'
+        ], $webResponse->view_class);
+        $this->assertEquals('showLibraryManager', $webResponse->view_function);
+    }
+
+    /** @test */
+    public function testAjaxUploadLibraryFromZipFail() {
         $_FILES['zip'] = [
             'invalid' => 'zip file array'
         ];
