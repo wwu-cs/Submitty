@@ -14,6 +14,11 @@ class LibraryGetResponse {
         $this->libraries[] = $lib;
     }
 
+    /**
+     * Returns an array the library names
+     *
+     * @return string[]
+     */
     public function getResults(): array {
         return $this->libraries;
     }
