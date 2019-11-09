@@ -93,8 +93,8 @@ class LibraryManageController extends AbstractController {
         $response = $useCase->getLibraries();
 
         return $this->core->getOutput()->renderResultMessage(
-            $response->error ?? $response->getResults(),
-            empty($response->error)
+            $response->getResults(),
+            true
         );
     }
 
