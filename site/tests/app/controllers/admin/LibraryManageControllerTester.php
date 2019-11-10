@@ -1,11 +1,8 @@
 <?php namespace tests\app\controllers\admin;
 
-
-use app\libraries\homework\Entities\LibraryEntity;
-use app\libraries\response\Response;
-use app\libraries\response\WebResponse;
 use tests\BaseUnitTest;
 use app\libraries\Core;
+use app\libraries\response\WebResponse;
 use app\exceptions\NotEnabledException;
 use app\libraries\response\JsonResponse;
 use app\controllers\admin\LibraryManageController;
@@ -49,15 +46,13 @@ class LibraryManageControllerTester extends BaseUnitTest {
 
     /** @test */
     public function testItShowsTheLibraryManagePage() {
-        $response = $this->controller->showLibraryManagePage();
+        $response = $this->controller->showLibraryManagePage()->web_response;
 
-        $this->assertInstanceOf(Response::class, $response);
-        $webResponse = $response->web_response;
-        $this->assertInstanceOf(WebResponse::class, $response->web_response);
+        $this->assertInstanceOf(WebResponse::class, $response);
         $this->assertEquals([
             'admin', 'LibraryManager'
-        ], $webResponse->view_class);
-        $this->assertEquals('showLibraryManager', $webResponse->view_function);
+        ], $response->view_class);
+        $this->assertEquals('showLibraryManager', $response->view_function);
     }
 
     /** @test */
