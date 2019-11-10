@@ -3,12 +3,10 @@
 
 use app\libraries\Core;
 use app\libraries\homework\Entities\LibraryEntity;
-use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\LibraryGateway;
+use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 
 class LibraryGetResponse {
-    public $error;
-
     /** @var string[] */
     protected $libraries = [];
 
@@ -18,12 +16,6 @@ class LibraryGetResponse {
 
     public function getResults(): array {
         return $this->libraries;
-    }
-
-    public static function error(string $message): LibraryGetResponse {
-        $response = new static;
-        $response->error = $message;
-        return $response;
     }
 }
 

@@ -1,16 +1,16 @@
-<?php
-
-namespace app\controllers\admin;
+<?php namespace app\controllers\admin;
 
 
 use app\libraries\Core;
+use app\libraries\response\Response;
 use app\controllers\AbstractController;
 use app\exceptions\NotEnabledException;
-use app\libraries\homework\UseCases\LibraryGetUseCase;
-use app\libraries\homework\UseCases\LibraryRemoveUseCase;
+use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
+use app\libraries\homework\UseCases\LibraryGetUseCase;
+use app\libraries\homework\UseCases\LibraryRemoveUseCase;
 
 /**
  * Class LibraryManage
@@ -40,17 +40,20 @@ class LibraryManageController extends AbstractController {
      * to the json_buffer of the Output object, return a true or false on whether or not it succeeded.
      *
      * @Route("/homework/library/upload/zip", methods={"POST"})
-     * @return array
+     * @return Response
      */
-    public function ajaxUploadLibraryFromZip(): array {
+    public function ajaxUploadLibraryFromZip(): Response {
         $useCase = new LibraryAddUseCase($this->core);
 
-        $response = $useCase->addZipLibrary($_FILES['zip'] ?? null);
+        $results = $useCase->addZipLibrary($_FILES['zip'] ?? null);
 
-        return $this->core->getOutput()->renderResultMessage(
-            $response->error ?? $response->getMessage(),
-            empty($response->error)
-        );
+        if ($results->error) {
+            $response = JsonResponse::getFailResponse($results->error);
+        } else {
+            $response = JsonResponse::getSuccessResponse($results->getMessage());
+        }
+
+        return Response::JsonOnlyResponse($response);
     }
 
     /**
@@ -59,17 +62,20 @@ class LibraryManageController extends AbstractController {
      * succeeded.
      *
      * @Route("/homework/library/upload/git", methods={"POST"})
-     * @return array
+     * @return Response
      */
-    public function ajaxUploadLibraryFromGit(): array {
+    public function ajaxUploadLibraryFromGit(): Response {
         $useCase = new LibraryAddUseCase($this->core);
 
-        $response = $useCase->addGitLibrary($_POST['git_url'] ?? null);
+        $results = $useCase->addGitLibrary($_POST['git_url'] ?? null);
 
-        return $this->core->getOutput()->renderResultMessage(
-            $response->error ?? $response->getMessage(),
-            empty($response->error)
-        );
+        if ($results->error) {
+            $response = JsonResponse::getFailResponse($results->error);
+        } else {
+            $response = JsonResponse::getSuccessResponse($results->getMessage());
+        }
+
+        return Response::JsonOnlyResponse($response);
     }
 
     /**
@@ -78,16 +84,15 @@ class LibraryManageController extends AbstractController {
      * whether or not it succeeded.
      *
      * @Route("/homework/library/list", methods={"GET"})
-     * @return array
+     * @return Response
      */
-    public function ajaxGetLibraryList(): array {
+    public function ajaxGetLibraryList(): Response {
         $useCase = new LibraryGetUseCase($this->core);
 
-        $response = $useCase->getLibraries();
+        $results = $useCase->getLibraries();
 
-        return $this->core->getOutput()->renderResultMessage(
-            $response->error ?? $response->getResults(),
-            empty($response->error)
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($results->getResults())
         );
     }
 

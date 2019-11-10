@@ -1,13 +1,14 @@
 <?php namespace tests\app\controllers\admin;
 
 
-use app\libraries\homework\Entities\LibraryEntity;
 use tests\BaseUnitTest;
 use app\libraries\Core;
 use app\exceptions\NotEnabledException;
+use app\libraries\response\JsonResponse;
 use app\controllers\admin\LibraryManageController;
-use app\libraries\homework\Gateways\Library\InMemoryLibraryGateway;
+use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
+use app\libraries\homework\Gateways\Library\InMemoryLibraryGateway;
 
 class LibraryManageControllerTester extends BaseUnitTest {
 
@@ -45,17 +46,17 @@ class LibraryManageControllerTester extends BaseUnitTest {
 
     /** @test */
     public function testAjaxUploadLibraryFromZipFail() {
-        $controller = new LibraryManageController($this->core);
-
         $_FILES['zip'] = [
             'invalid' => 'zip file array'
         ];
 
-        $response = $this->controller->ajaxUploadLibraryFromZip();
+        $response = $this->controller->ajaxUploadLibraryFromZip()->json_response;
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals([
             'status' => 'fail',
             'message' => 'A file must be provided.'
-        ], $response);
+        ], $response->json);
         $this->assertCount(0, $this->gateway->getAllLibraries($this->location));
     }
 
@@ -66,37 +67,40 @@ class LibraryManageControllerTester extends BaseUnitTest {
             'tmp_name' => 'We all make mistakes in the heat of passion, jimbo.'
         ];
 
-        $response = $this->controller->ajaxUploadLibraryFromZip();
+        $response = $this->controller->ajaxUploadLibraryFromZip()->json_response;
 
+        $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals([
             'status' => 'success',
             'data' => 'Successfully installed new library: lib'
-        ], $response);
+        ], $response->json);
         $this->assertCount(1, $this->gateway->getAllLibraries($this->location));
     }
 
     /** @test */
     public function testAjaxUploadLibraryFromGitSuccess() {
         $_POST['git_url'] = 'https://github.com/Submitty/Submitty.git';
-        $response = $this->controller->ajaxUploadLibraryFromGit();
+        $response = $this->controller->ajaxUploadLibraryFromGit()->json_response;
 
+        $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals([
             'status' => 'success',
             'data' => 'Successfully cloned https://github.com/Submitty/Submitty.git.'
-        ], $response);
-
+        ], $response->json);
         $this->assertCount(1, $this->gateway->getAllLibraries($this->location));
     }
 
     /** @test */
     public function testAjaxUploadLibraryFromGitFail() {
         $_POST['git_url'] = 'my first git url. BABY SHARK DO DO DO DO DO';
-        $response = $this->controller->ajaxUploadLibraryFromGit();
 
+        $response = $this->controller->ajaxUploadLibraryFromGit()->json_response;
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals([
             'status' => 'fail',
             'message' => 'The git url is not of the right format.'
-        ], $response);
+        ], $response->json);
         $this->assertCount(0, $this->gateway->getAllLibraries($this->location));
     }
 
@@ -109,24 +113,25 @@ class LibraryManageControllerTester extends BaseUnitTest {
 
     /** @test */
     public function testItGetsLibrariesWhenThereAreNone() {
-        $response = $this->controller->ajaxGetLibraryList();
+        $response = $this->controller->ajaxGetLibraryList()->json_response;
 
         $this->assertEquals([
             'status' => 'success',
             'data' => []
-        ], $response);
+        ], $response->json);
     }
 
     /** @test */
     public function testItGetsAllLibraries() {
         $this->gateway->addLibrary(new LibraryEntity('name', $this->location));
 
-        $response = $this->controller->ajaxGetLibraryList();
+        $response = $this->controller->ajaxGetLibraryList()->json_response;
 
+        $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals([
             'status' => 'success',
             'data' => ['name']
-        ], $response);
+        ], $response->json);
     }
 
     /** @test */
@@ -172,5 +177,4 @@ class LibraryManageControllerTester extends BaseUnitTest {
         $_FILES = [];
         $_POST = [];
     }
-
 }
