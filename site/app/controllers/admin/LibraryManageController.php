@@ -42,8 +42,7 @@ class LibraryManageController extends AbstractController {
      * @Route("/homework/library/upload/zip", methods={"POST"})
      * @return Response
      */
-    public function ajaxUploadLibraryFromZip(): Response
-    {
+    public function ajaxUploadLibraryFromZip(): Response {
         $useCase = new LibraryAddUseCase($this->core);
 
         // Equivalent to $_FILES['zip'] except for it doesn't generate a notice error.
@@ -69,8 +68,7 @@ class LibraryManageController extends AbstractController {
      * @Route("/homework/library/upload/git", methods={"POST"})
      * @return Response
      */
-    public function ajaxUploadLibraryFromGit(): Response
-    {
+    public function ajaxUploadLibraryFromGit(): Response {
         $useCase = new LibraryAddUseCase($this->core);
 
         // Equivalent to $_POST['git_url'] except for it doesn't generate a notice error.
