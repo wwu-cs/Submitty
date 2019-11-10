@@ -1,13 +1,12 @@
 <?php namespace tests\app\controllers\admin;
 
 
-use app\libraries\homework\Entities\LibraryEntity;
 use tests\BaseUnitTest;
 use app\libraries\Core;
-use app\libraries\response\Response;
 use app\exceptions\NotEnabledException;
 use app\libraries\response\JsonResponse;
 use app\controllers\admin\LibraryManageController;
+use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\Library\InMemoryLibraryGateway;
 
@@ -114,24 +113,25 @@ class LibraryManageControllerTester extends BaseUnitTest {
 
     /** @test */
     public function testItGetsLibrariesWhenThereAreNone() {
-        $response = $this->controller->ajaxGetLibraryList();
+        $response = $this->controller->ajaxGetLibraryList()->json_response;
 
         $this->assertEquals([
             'status' => 'success',
             'data' => []
-        ], $response);
+        ], $response->json);
     }
 
     /** @test */
     public function testItGetsAllLibraries() {
         $this->gateway->addLibrary(new LibraryEntity('name', $this->location));
 
-        $response = $this->controller->ajaxGetLibraryList();
+        $response = $this->controller->ajaxGetLibraryList()->json_response;
 
+        $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals([
             'status' => 'success',
             'data' => ['name']
-        ], $response);
+        ], $response->json);
     }
 
     public function tearDown(): void

@@ -1,6 +1,4 @@
-<?php
-
-namespace app\controllers\admin;
+<?php namespace app\controllers\admin;
 
 
 use app\libraries\Core;
@@ -93,17 +91,15 @@ class LibraryManageController extends AbstractController {
      * whether or not it succeeded.
      *
      * @Route("/homework/library/list", methods={"GET"})
-     * @return array
+     * @return Response
      */
-    public function ajaxGetLibraryList(): array {
+    public function ajaxGetLibraryList(): Response {
         $useCase = new LibraryGetUseCase($this->core);
 
-        $response = $useCase->getLibraries();
+        $results = $useCase->getLibraries();
 
-        return $this->core->getOutput()->renderResultMessage(
-            $response->getResults(),
-            true
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($results->getResults())
         );
     }
-
 }
