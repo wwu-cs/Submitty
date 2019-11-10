@@ -3,8 +3,8 @@
 
 use app\libraries\Core;
 use app\libraries\homework\Entities\LibraryEntity;
-use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\LibraryGateway;
+use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 
 class LibraryGetResponse {
     /** @var string[] */

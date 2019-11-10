@@ -96,4 +96,9 @@ class FileSystemLibraryGateway implements LibraryGateway {
             return $item->is($library);
         })) > 0;
     }
+
+    /** @inheritDoc */
+    public function removeLibrary(LibraryEntity $library): bool {
+        return FileUtils::recursiveRmdir($library->getLibraryPath());
+    }
 }

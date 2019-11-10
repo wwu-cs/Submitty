@@ -11,6 +11,7 @@ use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
 use app\libraries\homework\UseCases\LibraryGetUseCase;
+use app\libraries\homework\UseCases\LibraryRemoveUseCase;
 
 /**
  * Class LibraryManage
@@ -115,5 +116,28 @@ class LibraryManageController extends AbstractController {
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($results->getResults())
         );
+    }
+
+    /**
+     * Function for deleting a specific library stored on the system. This should be called via
+     * a DELETE AJAX request. It then returns json data to the caller about the request specifying
+     * if it was successful or not and any error messages.
+     *
+     * @Route("/homework/library/remove/{name}", methods={"DELETE"})
+     * @param string $name
+     * @return Response
+     */
+    public function ajaxRemoveLibrary(string $name): Response {
+        $useCase = new LibraryRemoveUseCase($this->core);
+
+        $results = $useCase->removeLibrary($name);
+
+        if ($results->error) {
+            $response = JsonResponse::getFailResponse($results->error);
+        } else {
+            $response = JsonResponse::getSuccessResponse($results->getMessage());
+        }
+
+        return Response::JsonOnlyResponse($response);
     }
 }

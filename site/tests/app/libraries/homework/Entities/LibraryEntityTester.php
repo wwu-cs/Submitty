@@ -42,5 +42,8 @@ class LibraryEntityTester extends TestCase {
         $otherEntity = new LibraryEntity('name', 'path');
 
         $this->assertTrue($entity->is($otherEntity));
+        $this->assertFalse($entity->isNot($otherEntity));
+        $this->assertTrue($entity->hasNameOf($otherEntity->getName()));
+        $this->assertTrue($entity->hasLocationOf($otherEntity->getLocation()));
     }
 }
