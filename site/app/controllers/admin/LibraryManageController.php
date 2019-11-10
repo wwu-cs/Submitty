@@ -123,7 +123,7 @@ class LibraryManageController extends AbstractController {
      * a DELETE AJAX request. It then returns json data to the caller about the request specifying
      * if it was successful or not and any error messages.
      *
-     * @Route("/homework/library/remove/{name}", methods={"DELETE"})
+     * @Route("/homework/library/manage/remove/{name}", methods={"DELETE"})
      * @param string $name
      * @return Response
      */
