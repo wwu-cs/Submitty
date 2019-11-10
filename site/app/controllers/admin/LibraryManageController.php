@@ -103,17 +103,19 @@ class LibraryManageController extends AbstractController {
      *
      * @Route("/homework/library/remove/{name}", methods={"DELETE"})
      * @param string $name
-     * @return array
+     * @return Response
      */
-    public function ajaxRemoveLibrary(string $name): array {
+    public function ajaxRemoveLibrary(string $name): Response {
         $useCase = new LibraryRemoveUseCase($this->core);
 
-        $response = $useCase->removeLibrary($name);
+        $results = $useCase->removeLibrary($name);
 
-        return $this->core->getOutput()->renderResultMessage(
-            $response->error ?? $response->getMessage(),
-            empty($response->error)
-        );
+        if ($results->error) {
+            $response = JsonResponse::getFailResponse($results->error);
+        } else {
+            $response = JsonResponse::getSuccessResponse($results->getMessage());
+        }
 
+        return Response::JsonOnlyResponse($response);
     }
 }

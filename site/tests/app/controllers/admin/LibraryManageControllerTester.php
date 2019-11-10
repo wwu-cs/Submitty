@@ -138,12 +138,13 @@ class LibraryManageControllerTester extends BaseUnitTest {
     public function testItRemovesALibrary() {
         $this->gateway->addLibrary(new LibraryEntity('name', $this->location));
 
-        $response = $this->controller->ajaxRemoveLibrary('name');
+        $response = $this->controller->ajaxRemoveLibrary('name')->json_response;
 
+        $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals([
             'status' => 'success',
             'data' => 'Successfully removed library \'name\''
-        ], $response);
+        ], $response->json);
         $this->assertEquals([], $this->gateway->getAllLibraries($this->location));
     }
 
@@ -151,23 +152,25 @@ class LibraryManageControllerTester extends BaseUnitTest {
     public function testItDoesntRemoveLibrariesItsNotSupposedTo() {
         $this->gateway->addLibrary(new LibraryEntity('name', $this->location));
 
-        $response = $this->controller->ajaxRemoveLibrary('different name');
+        $response = $this->controller->ajaxRemoveLibrary('different name')->json_response;
 
+        $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals([
             'status' => 'success',
             'data' => 'Successfully removed library \'different name\''
-        ], $response);
+        ], $response->json);
         $this->assertCount(1, $this->gateway->getAllLibraries($this->location));
     }
 
     /** @test */
     public function testItDoesntRemoveInvalidName() {
-        $response = $this->controller->ajaxRemoveLibrary('');
+        $response = $this->controller->ajaxRemoveLibrary('')->json_response;
 
+        $this->assertInstanceOf(JsonResponse::class, $response);
         $this->assertEquals([
             'status' => 'fail',
             'message' => 'You must specify the library to remove.'
-        ], $response);
+        ], $response->json);
     }
 
     public function tearDown(): void
