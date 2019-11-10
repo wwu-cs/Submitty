@@ -4,8 +4,10 @@ namespace app\controllers\admin;
 
 
 use app\libraries\Core;
+use app\libraries\response\Response;
 use app\controllers\AbstractController;
 use app\exceptions\NotEnabledException;
+use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
@@ -38,21 +40,25 @@ class LibraryManageController extends AbstractController {
      * to the json_buffer of the Output object, return a true or false on whether or not it succeeded.
      *
      * @Route("/homework/library/upload/zip", methods={"POST"})
-     * @return array
+     * @return Response
      */
-    public function ajaxUploadLibraryFromZip(): array {
+    public function ajaxUploadLibraryFromZip(): Response
+    {
         $useCase = new LibraryAddUseCase($this->core);
 
         // Equivalent to $_FILES['zip'] except for it doesn't generate a notice error.
         // Idk why E_NOTICE is enabled. It's dumb because it makes me have to do workarounds like this all over
         $file = (isset($_FILES['zip'])) ? $_FILES['zip'] : null;
 
-        $response = $useCase->addZipLibrary($file);
+        $results = $useCase->addZipLibrary($file);
 
-        return $this->core->getOutput()->renderResultMessage(
-            $response->error ?? $response->getMessage(),
-            empty($response->error)
-        );
+        if ($results->error) {
+            $response = JsonResponse::getFailResponse($results->error);
+        } else {
+            $response = JsonResponse::getSuccessResponse($results->getMessage());
+        }
+
+        return Response::JsonOnlyResponse($response);
     }
 
     /**
@@ -61,21 +67,25 @@ class LibraryManageController extends AbstractController {
      * succeeded.
      *
      * @Route("/homework/library/upload/git", methods={"POST"})
-     * @return array
+     * @return Response
      */
-    public function ajaxUploadLibraryFromGit(): array {
+    public function ajaxUploadLibraryFromGit(): Response
+    {
         $useCase = new LibraryAddUseCase($this->core);
 
         // Equivalent to $_POST['git_url'] except for it doesn't generate a notice error.
         // Idk why E_NOTICE is enabled. It's dumb because it makes me have to do workarounds like this all over
         $url = (isset($_POST['git_url'])) ? $_POST['git_url'] : null;
 
-        $response = $useCase->addGitLibrary($url);
+        $results = $useCase->addGitLibrary($url);
 
-        return $this->core->getOutput()->renderResultMessage(
-            $response->error ?? $response->getMessage(),
-            empty($response->error)
-        );
+        if ($results->error) {
+            $response = JsonResponse::getFailResponse($results->error);
+        } else {
+            $response = JsonResponse::getSuccessResponse($results->getMessage());
+        }
+
+        return Response::JsonOnlyResponse($response);
     }
 
 }
