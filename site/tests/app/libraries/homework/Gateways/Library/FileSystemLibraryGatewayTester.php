@@ -136,6 +136,7 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
 
     /** @test */
     public function testTheDefaultGatewayIsFileSystemGateway() {
+        LibraryGatewayFactory::clearInstance();
         $instance = LibraryGatewayFactory::getInstance();
         $this->assertInstanceOf(FileSystemLibraryGateway::class, $instance);
     }
