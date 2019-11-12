@@ -2,9 +2,9 @@
 
 
 use app\libraries\homework\Entities\LibraryEntity;
-use app\libraries\homework\UseCases\LibraryRemoveResponse;
-use app\libraries\homework\UseCases\LibraryRemoveUseCase;
 use tests\app\libraries\homework\UseCases\BaseTestCase;
+use app\libraries\homework\UseCases\LibraryRemoveUseCase;
+use app\libraries\homework\UseCases\LibraryRemoveResponse;
 
 class LibraryRemoveTester extends BaseTestCase {
     /** @var LibraryRemoveUseCase */

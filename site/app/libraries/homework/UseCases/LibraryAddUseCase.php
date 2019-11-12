@@ -111,7 +111,7 @@ class LibraryAddUseCase extends BaseUseCase {
         $library = new LibraryEntity($libName, $this->location);
 
         if (($msg = $this->gateway->addZipLibrary($library, $tmpName)) != 'success') {
-            return LibraryAddResponse::error('Error when adding the library. ' . $msg);
+            return LibraryAddResponse::error('Error adding the library. ' . $msg);
         }
 
         return new LibraryAddResponse("Successfully installed new library: $libName");
