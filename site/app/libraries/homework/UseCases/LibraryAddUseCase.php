@@ -106,36 +106,21 @@ class LibraryAddUseCase extends BaseUseCase {
         $extension = array_pop($parts);
 
         if (strtolower($extension) != 'zip' || count($parts) < 1) {
-            $this->deleteUploadedFile($tmpName);
             return LibraryAddResponse::error('A .zip file must be provided.');
         }
 
         $libName = implode('.', $parts);
 
         if ($this->gateway->libraryExists($libName, $this->location)) {
-            $this->deleteUploadedFile($tmpName);
             return LibraryAddResponse::error('Library already exists!');
         }
 
         $location = FileUtils::joinPaths($this->location, $libName);
 
         if (($msg = $this->gateway->addZipLibrary($tmpName, $location)) != 'success') {
-            $this->deleteUploadedFile($tmpName);
             return LibraryAddResponse::error('Error when adding the library. ' . $msg);
         }
 
-        $this->deleteUploadedFile($tmpName);
-
         return new LibraryAddResponse("Successfully installed new library: $libName");
-    }
-
-
-    /**
-     * Delete an uploaded file;
-     *
-     * @param string $file
-     */
-    protected function deleteUploadedFile(string $file) {
-        FileUtils::rmFile($file);
     }
 }

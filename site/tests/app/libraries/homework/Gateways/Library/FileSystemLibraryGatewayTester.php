@@ -1,8 +1,9 @@
 <?php namespace tests\app\libraries\homework\Gateways\Library;
 
-use tests\app\libraries\homework\Gateways\BaseTestCase;
 use ZipArchive;
 use app\libraries\FileUtils;
+use tests\app\libraries\homework\Gateways\BaseTestCase;
+use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\Library\FileSystemLibraryGateway;
 
 class FileSystemLibraryGatewayTester extends BaseTestCase {
@@ -69,5 +70,11 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
         $this->assertEquals('success', $return);
         $this->assertDirectoryExists($loc);
         $this->assertFileExists(FileUtils::joinPaths($loc, 'test.txt'));
+    }
+
+    /** @test */
+    public function testTheDefaultGatewayIsFileSystemGateway() {
+        $instance = LibraryGatewayFactory::getInstance();
+        $this->assertInstanceOf(FileSystemLibraryGateway::class, $instance);
     }
 }

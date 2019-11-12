@@ -3,7 +3,8 @@
 
 use tests\BaseUnitTest;
 use app\libraries\Core;
-use app\libraries\response\Response;
+use app\libraries\Utils;
+use app\libraries\FileUtils;
 use app\exceptions\NotEnabledException;
 use app\libraries\response\JsonResponse;
 use app\controllers\admin\LibraryManageController;
@@ -24,12 +25,13 @@ class LibraryManageControllerTester extends BaseUnitTest {
     /** @var LibraryManageController */
     protected $controller;
 
-    protected function createConfigWithLibrary(bool $enabled = true) {
-        $this->location = 'library location';
+    protected function createConfigWithLibrary(bool $enabled = true, string $location = 'library location') {
+        $this->location = $location;
         $this->core = $this->createMockCore([
             'homework_library_enable' => $enabled,
             'homework_library_location' => $this->location
         ]);
+        $this->controller = new LibraryManageController($this->core);
     }
 
     public function setUp(): void {
@@ -40,8 +42,6 @@ class LibraryManageControllerTester extends BaseUnitTest {
         LibraryGatewayFactory::setInstance($this->gateway);
 
         $this->createConfigWithLibrary();
-
-        $this->controller = new LibraryManageController($this->core);
     }
 
     /** @test */
@@ -108,7 +108,31 @@ class LibraryManageControllerTester extends BaseUnitTest {
     public function testItThrowsNotEnabledException() {
         $this->expectException(NotEnabledException::class);
         $this->createConfigWithLibrary(false);
-        $this->controller = new LibraryManageController($this->core);
+    }
+
+    /** @test */
+    public function testItDeletesAFileAfterHandling() {
+        $location = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
+        $this->createConfigWithLibrary(true, $location);
+        $this->assertTrue(FileUtils::createDir($this->location));
+        $file = $this->createFile('tmp.txt');
+
+        $_FILES['zip'] = [
+            'name' => 'lib.zip',
+            'tmp_name' => $file
+        ];
+
+        $this->controller->ajaxUploadLibraryFromZip()->json_response;
+
+        $this->assertFileNotExists($file);
+        $this->assertTrue(FileUtils::recursiveRmdir($this->location));
+    }
+
+    protected function createFile(string $name): string {
+        $name = FileUtils::joinPaths($this->location, $name);
+        touch($name);
+        $this->assertFileExists($name);
+        return $name;
     }
 
 
