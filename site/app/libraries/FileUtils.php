@@ -260,20 +260,13 @@ class FileUtils {
      * @return array
      */
     public static function getDirWithText($path, $text) {
-        $disallowed_folders = array(".", "..", ".svn", ".git", ".idea", "__macosx");
-        $return = array();
-        if (is_dir($path)) {
-            if ($handle = opendir($path)) {
-                while (false !== ($entry = readdir($handle))) {
-                    $file = "{$path}/{$entry}";
-                    if(is_dir($file) && !in_array(strtolower($entry), $disallowed_folders) && (strpos($entry, $text) !== false)) {
-                        $return[] = $entry;
-                    }
-                }
+        $dirs = FileUtils::getAllDirs($path, $text);
+        foreach ($dirs as $entry) {
+            if(!strpos($entry, $text)) {
+                unset($entry);
             }
         }
-        sort($return);
-        return $return;
+        return $dirs;
     }
 
     /**

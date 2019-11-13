@@ -42,7 +42,7 @@ class HomePageControllerTester extends BaseUnitTest {
 			'buildUrl' => 'http://192.168.56.111/home'
 		]);
 
-		$this->true_controller = new HomePageController($this->core);
+		$this->controller = new HomePageController($this->core);
 
 		// mock folder structure in system temp folder
 		FileUtils::createDir($this->library_path);
@@ -53,7 +53,7 @@ class HomePageControllerTester extends BaseUnitTest {
 	}
 
 	public function testHomePageSearchLibrary() {
-		$response = $this->true_controller->searchLibrary($this->library_path);
+		$response = $this->controller->searchLibrary($this->library_path);
 		
 		$this->assertTrue($response->json_response->json['status'] === "success");
 		$this->assertTrue($response->json_response->json['data'] === $this->tmp_dirs);
@@ -63,7 +63,7 @@ class HomePageControllerTester extends BaseUnitTest {
 
 	public function testHomePageSearchLibraryWithQueryThatSucceeds() {
 		$query = "LIVE";
-		$response = $this->true_controller->searchLibraryWithQuery($query, $this->library_path);
+		$response = $controller->searchLibraryWithQuery($query, $this->library_path);
 		
 		$this->assertTrue($response->json_response->json['status'] === "success");
 		$this->assertTrue($response->json_response->json['data'] === ["LIVE_UPDATES"]);
@@ -73,10 +73,10 @@ class HomePageControllerTester extends BaseUnitTest {
 
 	public function testHomePageSearchLibraryWithQueryThatFails() {
 		$query = "BLATANT NONEXISTENCE BLASPHEME AGAINST MAHAPARINIRVANA";
-		$response = $this->true_controller->searchLibraryWithQuery($query, $this->library_path);
+		$response = $this->controller->searchLibraryWithQuery($query, $this->library_path);
 		
-		$this->assertTrue($response->json_response->json['status'] === "success");
-		$this->assertTrue(count($response->json_response->json['data']) === 0);
+		$this->assertEquals($response->json_response->json['status'], "success");
+		$this->assertEmpty($response->json_response->json['data'], "Test array is not empty");
 		$this->assertInstanceOf(JsonResponse::class, $response->json_response);
 	}
 
