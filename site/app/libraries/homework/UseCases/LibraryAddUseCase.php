@@ -73,8 +73,10 @@ class LibraryAddUseCase extends BaseUseCase {
 
         $library = new LibraryEntity($libName, $this->location);
 
-        if (($msg = $this->gateway->addGitLibrary($library, $repoUrl)) != 'success') {
-            return LibraryAddResponse::error('Error adding the library. ' . $msg);
+        $status = $this->gateway->addGitLibrary($library, $repoUrl);
+
+        if (!$status->library) {
+            return LibraryAddResponse::error('Error adding the library. ' . $status->message);
         }
 
         return new LibraryAddResponse("Successfully cloned $repoUrl.");
@@ -110,8 +112,10 @@ class LibraryAddUseCase extends BaseUseCase {
 
         $library = new LibraryEntity($libName, $this->location);
 
-        if (($msg = $this->gateway->addZipLibrary($library, $tmpName)) != 'success') {
-            return LibraryAddResponse::error('Error adding the library. ' . $msg);
+        $status = $this->gateway->addZipLibrary($library, $tmpName);
+
+        if (!$status->library) {
+            return LibraryAddResponse::error('Error adding the library. ' . $status->message);
         }
 
         return new LibraryAddResponse("Successfully installed new library: $libName");
