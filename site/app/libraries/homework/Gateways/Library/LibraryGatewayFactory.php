@@ -28,4 +28,11 @@ class LibraryGatewayFactory {
         static::$instance = $gateway;
     }
 
+    /**
+     * Clear the LibraryGateway singleton
+     */
+    public static function clearInstance() {
+        static::$instance = null;
+    }
+
 }
