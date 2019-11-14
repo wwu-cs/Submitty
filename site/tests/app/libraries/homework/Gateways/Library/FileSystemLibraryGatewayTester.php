@@ -4,6 +4,7 @@ use ZipArchive;
 use app\libraries\FileUtils;
 use app\libraries\homework\Entities\LibraryEntity;
 use tests\app\libraries\homework\Gateways\BaseTestCase;
+use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\Library\FileSystemLibraryGateway;
 
 class FileSystemLibraryGatewayTester extends BaseTestCase {
@@ -113,5 +114,12 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
         $result = $this->gateway->addGitLibrary($library, 'url');
 
         $this->assertEquals('Library already exists.', $result);
+    }
+
+    /** @test */
+    public function testTheDefaultGatewayIsFileSystemGateway() {
+        LibraryGatewayFactory::clearInstance();
+        $instance = LibraryGatewayFactory::getInstance();
+        $this->assertInstanceOf(FileSystemLibraryGateway::class, $instance);
     }
 }
