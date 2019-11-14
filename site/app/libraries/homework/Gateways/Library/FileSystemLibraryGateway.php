@@ -5,6 +5,7 @@ use ZipArchive;
 use app\libraries\FileUtils;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
+use app\libraries\homework\Entities\LibraryAddStatus;
 
 class FileSystemLibraryGateway implements LibraryGateway {
     const SUCCESS = 0;
@@ -15,13 +16,13 @@ class FileSystemLibraryGateway implements LibraryGateway {
     }
 
     /** @inheritDoc */
-    public function addGitLibrary(LibraryEntity $library, string $repoUrl): string {
+    public function addGitLibrary(LibraryEntity $library, string $repoUrl): LibraryAddStatus {
         if ($this->libraryExists($library)) {
-            return 'Library already exists.';
+            return LibraryAddStatus::error('Library already exists.');
         }
 
         if (!$this->createFolderIfNotExists($library->getLibraryPath())) {
-            return 'Error when creating folder.';
+            return LibraryAddStatus::error('Error when creating folder for the library.');
         }
 
         $sanitizedRepoUrl = escapeshellarg($repoUrl);
@@ -47,20 +48,20 @@ class FileSystemLibraryGateway implements LibraryGateway {
 
         if ($status != self::SUCCESS) {
             FileUtils::recursiveRmdir($library->getLibraryPath());
-            return "Error cloning repository. $stderr";
+            return LibraryAddStatus::error("Error cloning repository. $stderr");
         }
 
-        return 'success';
+        return LibraryAddStatus::success($library);
     }
 
     /** @inheritDoc */
-    public function addZipLibrary(LibraryEntity $library, string $tmpFilePath): string {
+    public function addZipLibrary(LibraryEntity $library, string $tmpFilePath): LibraryAddStatus {
         if ($this->libraryExists($library)) {
-            return 'Library already exists.';
+            return LibraryAddStatus::error('Library already exists.');
         }
 
         if (!$this->createFolderIfNotExists($library->getLibraryPath())) {
-            return 'Error when creating folder.';
+            return LibraryAddStatus::error('Error when creating folder.');
         }
 
         $zip = new ZipArchive();
@@ -68,15 +69,15 @@ class FileSystemLibraryGateway implements LibraryGateway {
         if ($res === TRUE) {
             if (!$zip->extractTo($library->getLibraryPath())) {
                 FileUtils::recursiveRmdir($library->getLibraryPath());
-                return 'Error extracting zip file.';
+                return LibraryAddStatus::error('Error extracting zip file.');
             }
             $zip->close();
         } else {
             FileUtils::recursiveRmdir($library->getLibraryPath());
-            return 'Error opening zip file.';
+            return LibraryAddStatus::error('Error opening zip file.');
         }
 
-        return 'success';
+        return LibraryAddStatus::success($library);
     }
 
     /** @inheritDoc */
