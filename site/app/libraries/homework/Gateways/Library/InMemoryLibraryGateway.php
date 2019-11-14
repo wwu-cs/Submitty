@@ -47,10 +47,7 @@ class InMemoryLibraryGateway implements LibraryGateway {
 
     /** @inheritDoc */
     public function getAllLibraries(string $location): array {
-        if (!isset($this->libraries[$location])) {
-            return [];
-        }
-        return $this->libraries[$location];
+        return $this->libraries[$location] ?? [];
     }
 
     /** @inheritDoc */
