@@ -11,7 +11,6 @@ class TeamView extends AbstractView {
     * Show team management page
     * @param \app\models\gradeable\Gradeable $gradeable
     * @param \app\models\Team|null $team The team the user is on
-    * @param \app\models\Team[] $teams
     * @return string
     */
     public function showTeamPage(Gradeable $gradeable, $team, $members, $seekers, $invites_received, $seeking_partner, $lock) {

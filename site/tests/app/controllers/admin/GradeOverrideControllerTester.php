@@ -1,19 +1,19 @@
-<?php namespace tests\app\controllers\admin;
+<?php
+
+namespace tests\app\controllers\admin;
 
 use app\libraries\Core;
 use tests\BaseUnitTest;
 use app\controllers\admin\GradeOverrideController;
 
-class GradeOverrideControllerTester extends BaseUnitTest
-{
+class GradeOverrideControllerTester extends BaseUnitTest {
     /** @var GradeOverrideController */
     protected $controller;
 
     /** @var Core  */
     protected $core;
 
-    public function setUp(): void
-    {
+    public function setUp(): void {
         parent::setUp();
 
         $this->core = $this->createMockCore([], [], [
@@ -25,12 +25,10 @@ class GradeOverrideControllerTester extends BaseUnitTest
     }
 
     /** @test */
-    public function testQueriesAreCalledInViewOverriddenGrades()
-    {
+    public function testQueriesAreCalledInViewOverriddenGrades() {
         $this->controller->viewOverriddenGrades();
 
         $this->assertMethodCalled('getAllUsers');
         $this->assertMethodCalled('getAllGradeablesIdsAndTitles');
     }
-
 }

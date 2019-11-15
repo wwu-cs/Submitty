@@ -423,12 +423,10 @@ HTML;
 HTML;
     }
 
-    public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles = null, $prior_term_gradeables, $saved_config, $title = '') {
+    public function configureGradeableForPlagiarismForm($new_or_edit, $gradeable_ids_titles, $prior_term_gradeables, $saved_config, $title = '') {
         $this->core->getOutput()->addBreadcrumb('Plagiarism Detection', $this->core->buildCourseUrl(['plagiarism']));
         $this->core->getOutput()->addBreadcrumb('Configure New Gradeable');
         $prior_term_gradeables_json = json_encode($prior_term_gradeables);
-        $semester = $this->core->getConfig()->getSemester();
-        $course = $this->core->getConfig()->getCourse();
 
         #default values for the form
         $gradeable_id = "";

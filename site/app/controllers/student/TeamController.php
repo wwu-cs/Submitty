@@ -432,9 +432,10 @@ class TeamController extends AbstractController {
             foreach ($team->getMembers() as $teammate) {
                 $members[] = $this->core->getQueries()->getUserById($teammate);
             }
-        } else {
+        }
+        else {
             //Invites
-            foreach($teams as $t) {
+            foreach ($teams as $t) {
                 if ($t->sentInvite($user_id)) {
                     $invites_received[] = $t;
                 }

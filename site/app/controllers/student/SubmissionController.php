@@ -189,8 +189,11 @@ class SubmissionController extends AbstractController {
                                 'url' => $url,
                             ];
                         }
-                        if (strpos($filename, 'cover') === false || pathinfo($filename)['extension'] === 'json' ||
-                            pathinfo($filename)['extension'] === "jpg") {
+                        if (
+                            strpos($filename, 'cover') === false
+                            || pathinfo($filename)['extension'] === 'json'
+                            || pathinfo($filename)['extension'] === "jpg"
+                        ) {
                             continue;
                         }
                         // get the full filename for PDF popout
@@ -213,10 +216,10 @@ class SubmissionController extends AbstractController {
                         $count_array[$count] = FileUtils::joinPaths($timestamp, rawurlencode($filename_full));
                         //decode the filename after to display correctly for users
                         $filename_full = rawurldecode($filename_full);
-                        $cover_image_name = substr($filename,0,-3) . "jpg";
+                        $cover_image_name = substr($filename, 0, -3) . "jpg";
                         $cover_image = [];
                         foreach ($cover_images as $img) {
-                            if($img['filename'] === $cover_image_name) {
+                            if ($img['filename'] === $cover_image_name) {
                                 $cover_image = $img;
                             }
                         }
@@ -235,7 +238,13 @@ class SubmissionController extends AbstractController {
                 $is_valid = true;
 
                 for ($i = 0; $i < count($files); $i++) {
-                    if(array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr'] && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)) {
+                    $data = [];
+                    if (
+                        array_key_exists('is_qr', $bulk_upload_data)
+                        && $bulk_upload_data['is_qr']
+                        && !array_key_exists($files[$i]['filename_full'],
+                        $bulk_upload_data)
+                    ) {
                         continue;
                     }
                     elseif (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
@@ -243,7 +252,6 @@ class SubmissionController extends AbstractController {
                     }
 
                     $page_count = 0;
-                    $id = '';
 
                     //decoded.json may be read before the assoicated data is written, check if key exists first
                     if (array_key_exists('is_qr', $bulk_upload_data) && $bulk_upload_data['is_qr']) {
@@ -1435,7 +1443,7 @@ class SubmissionController extends AbstractController {
             $team_members = $graded_gradeable->getSubmitter()->getTeam()->getMembers();
 
             // notify other team members that a submission has been made
-            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable',$gradeable_id])]);
+            $metadata = json_encode(['url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id])]);
             $subject = "Team Member Submission: " . $graded_gradeable->getGradeable()->getTitle();
             $content = "A team member, $original_user_id, submitted in the gradeable, " . $graded_gradeable->getGradeable()->getTitle();
             $event = ['component' => 'team', 'metadata' => $metadata, 'subject' => $subject, 'content' => $content, 'type' => 'team_member_submission', 'sender_id' => $original_user_id];

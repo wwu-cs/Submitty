@@ -224,8 +224,7 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
      *
      * @param string $method
      */
-    public function assertMethodCalled(string $method)
-    {
+    public function assertMethodCalled(string $method) {
         $this->assertTrue(array_key_exists($method, $this->mocked_methods) && $this->mocked_methods[$method]);
     }
 }
