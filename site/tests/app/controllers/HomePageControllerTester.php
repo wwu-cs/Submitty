@@ -63,7 +63,7 @@ class HomePageControllerTester extends BaseUnitTest {
 
 	public function testHomePageSearchLibraryWithQueryThatSucceeds() {
 		$query = "LIVE";
-		$response = $controller->searchLibraryWithQuery($query, $this->library_path);
+		$response = $this->controller->searchLibraryWithQuery($query, $this->library_path);
 		
 		$this->assertTrue($response->json_response->json['status'] === "success");
 		$this->assertTrue($response->json_response->json['data'] === ["LIVE_UPDATES"]);
