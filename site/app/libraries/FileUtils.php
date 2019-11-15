@@ -261,12 +261,15 @@ class FileUtils {
      */
     public static function getDirWithText($path, $text) {
         $dirs = FileUtils::getAllDirs($path, $text);
+        $dirs_with_text = [];
         foreach ($dirs as $entry) {
-            if(!strpos($entry, $text)) {
-                unset($entry);
+            // https://www.php.net/manual/en/function.strpos.php
+            // PHP y u such headache -_-
+            if (strpos($entry, $text) !== false) {
+                $dirs_with_text[] = $entry;
             }
         }
-        return $dirs;
+        return $dirs_with_text;
     }
 
     /**
