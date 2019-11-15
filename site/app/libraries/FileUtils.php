@@ -110,7 +110,10 @@ class FileUtils {
      * @return bool
      */
     public static function rmFile(string $file): bool {
-        return unlink($file);
+        if (file_exists($file)) {
+            return unlink($file);
+        }
+        return true;
     }
 
     /**
