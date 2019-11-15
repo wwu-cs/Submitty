@@ -17,13 +17,12 @@ use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
 
 /**
- * Class LibraryManage
+ * Class LibraryManageController
  *
  * Following the clean architecture
  * https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html
  *
  * @package app\controllers\admin
- * @AccessControl(role="INSTRUCTOR")
  */
 class LibraryManageController extends AbstractController {
     /**
@@ -38,8 +37,8 @@ class LibraryManageController extends AbstractController {
             throw new AuthenticationException('You must sign in to access this route', 403);
         }
 
-        if ($this->core->getUser()->getAccessLevel() !== User::LEVEL_SUPERUSER) {
-            throw new AuthorizationException('You must be superuser to access this route', 401);
+        if (!$this->core->getConfig()->canAccessHomeworkLibrary()) {
+            throw new AuthorizationException('You do not have permission to access this route', 401);
         }
 
         if (!$this->core->getConfig()->useHomeworkLibrary()) {

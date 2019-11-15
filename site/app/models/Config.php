@@ -265,7 +265,8 @@ class Config extends AbstractModel {
 
         $this->homework_library_params = [
             'enabled' => $homework_library_enabled,
-            'location' => $homework_library_location
+            'location' => $homework_library_location,
+            'allowed' => $this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER,
         ];
 
         $this->submitty_log_path = $submitty_json['site_log_path'];
@@ -544,6 +545,13 @@ class Config extends AbstractModel {
      */
     public function useHomeworkLibrary(): bool {
         return $this->homework_library_params['enabled'];
+    }
+
+    /**
+     * @return bool
+     */
+    public function canAccessHomeworkLibrary(): bool {
+        return $this->homework_library_params['allowed'];
     }
 
     /**
