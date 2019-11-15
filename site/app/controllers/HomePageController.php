@@ -62,6 +62,17 @@ class HomePageController extends AbstractController {
             JsonResponse::getSuccessResponse($gradeable_ids)
         );
 	}
+
+    /**
+     * @Route("/homework/library/search_gradeable/{query}", methods={"GET"})
+     * @return Response
+     */
+    public function searchLibraryGradeableWithQuery($query, $path = "/usr/local/submitty/library") {
+        $config = FileUtils::getConfig($path, $query);
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($config)
+        );
+	}
     
     /**
      * Display the LibraryManagerView to the instructor/admin.
