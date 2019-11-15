@@ -13,16 +13,9 @@
 				{% for source in libraries %}
                     <div class="homework-library-panel-card homework-library-border">
                         {{ source }}
-                        <button onclick="deleteLibrary('source')">Delete</button>
-                        <button onclick="refreshLibrary('source')">Refresh</button>
+                        <button onclick="deleteLibrary('{{ source }}')">Delete</button>
                     </div>
                 {% endfor %}
-                <div 
-					class="homework-library-panel-card homework-library-border">
-					{{ "Example 1" }}    
-                    <button onclick="deleteLibrary('Example 1')">Delete</button>
-                    <button onclick="refreshLibrary('Example 1')">Refresh</button>
-				</div>
 			</div>
 		</div>
 
@@ -38,7 +31,7 @@
                     try {
                         var jsondata = JSON.parse(data);
                         console.log(data);
-                        if (jsondata['status'] == "success") {
+                        if (jsondata['status'] === "success") {
                             displaySubmissionMessage(jsondata);
                             location.reload(true);
                         } else {
@@ -72,7 +65,7 @@
                 success: function(data) {
                     try {
                         var jsondata = JSON.parse(data);
-                        if (jsondata['status'] == "success") {
+                        if (jsondata['status'] === "success") {
                             displaySubmissionMessage(jsondata);
                             location.reload(true);
                         } else {
