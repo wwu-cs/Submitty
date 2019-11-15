@@ -33,7 +33,7 @@
             .then(function(response){
                 e.target.disabled = false;
                 displaySubmissionMessage(response);
-                // todo: update list
+                location.reload(true);
             })
             .catch(function(response){
                 e.target.disabled = false;

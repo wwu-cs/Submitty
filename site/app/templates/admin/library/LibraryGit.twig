@@ -33,7 +33,7 @@
                         var jsondata = JSON.parse(data);
                         if (jsondata['status'] == "success") {
                             displaySubmissionMessage(jsondata);
-                            // updateLibraryList() or something similar here
+                            location.reload(true);
                         } else {
                             displaySubmissionMessage(jsondata);
                         }

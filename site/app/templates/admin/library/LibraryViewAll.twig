@@ -10,18 +10,92 @@
 				Sources
 			</div>
 			<div class="homework-library-panel-container">
-				<div 
+				{% for source in libraries %}
+                    <div class="homework-library-panel-card homework-library-border">
+                        {{ source }}
+                        <button onclick="deleteLibrary('source')">Delete</button>
+                        <button onclick="refreshLibrary('source')">Refresh</button>
+                    </div>
+                {% endfor %}
+                <div 
 					class="homework-library-panel-card homework-library-border">
-					{{ "Source 1" }}
-				</div>
-				<div 
-					class="homework-library-panel-card homework-library-border">
-					{{ "Source 2" }}
-				</div>
-				<div 
-					class="homework-library-panel-card homework-library-border">
-					{{ "Source 3" }}
+					{{ "Example 1" }}    
+                    <button onclick="deleteLibrary('Example 1')">Delete</button>
+                    <button onclick="refreshLibrary('Example 1')">Refresh</button>
 				</div>
 			</div>
 		</div>
+
+        <script type="text/javascript">
+        function deleteLibrary(libraryName) {
+            $.ajax({
+                url: '/homework/library/manage/remove/' + libraryName,
+                data: {
+                    csrf_token: '{{ csrf_token }}'
+                },
+                type: 'DELETE',
+                success: function(data) {
+                    try {
+                        var jsondata = JSON.parse(data);
+                        console.log(data);
+                        if (jsondata['status'] == "success") {
+                            displaySubmissionMessage(jsondata);
+                            location.reload(true);
+                        } else {
+                            displaySubmissionMessage(jsondata);
+                        }
+                    }
+                    catch (e) {
+                        displaySubmissionMessage({
+                            status: "fail",
+                            message: "Error parsing response from server."
+                        });
+                    }
+                    submitButton.disabled = false;
+                },
+                error: function(request, status, error) {
+                    displaySubmissionMessage({
+                        status: "fail",
+                        message: request.responseText
+                    });
+                    submitButton.disabled = false;
+                }
+            });
+        }
+        function refreshLibrary(libraryName) {
+            $.ajax({
+                url: '/homework/library/manage/refresh/' + libraryName,
+                data: {
+                    csrf_token: '{{ csrf_token }}'
+                },
+                type: 'GET',
+                success: function(data) {
+                    try {
+                        var jsondata = JSON.parse(data);
+                        if (jsondata['status'] == "success") {
+                            displaySubmissionMessage(jsondata);
+                            location.reload(true);
+                        } else {
+                            displaySubmissionMessage(jsondata);
+                        }
+                    }
+                    catch (e) {
+                        displaySubmissionMessage({
+                            status: "fail",
+                            message: "Error parsing response from server."
+                        });
+                        console.log(data);
+                    }
+                    submitButton.disabled = false;
+                },
+                error: function(request, status, error) {
+                    displaySubmissionMessage({
+                        status: "fail",
+                        message: request.responseText
+                    });
+                    submitButton.disabled = false;
+                }
+            });
+        }
+</script>
 	</div>
