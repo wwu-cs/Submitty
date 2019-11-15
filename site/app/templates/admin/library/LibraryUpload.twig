@@ -31,12 +31,12 @@
             e.target.disabled = true;
             uploadLibraryZip('{{ csrf_token }}', '{{ zip_submit_url }}')
             .then(function(response){
-                $('#libraryZipSubmit').removeAttr('disabled');
+                e.target.disabled = false;
                 displaySubmissionMessage(response);
                 // todo: update list
             })
             .catch(function(response){
-                $('#libraryZipSubmit').removeAttr('disabled');
+                e.target.disabled = false;
                 displaySubmissionMessage(response);
             });
         });

@@ -19,6 +19,8 @@
         $("#libraryGitForm").submit(function(e){
             e.preventDefault();
             var form = e.target;
+            var submitButton = form.querySelector("input[type='submit']");
+            submitButton.disabled = true;
             $.ajax({
                 url: '{{ git_submit_url }}',
                 data: {
@@ -30,19 +32,27 @@
                     try {
                         var jsondata = JSON.parse(data);
                         if (jsondata['status'] == "success") {
-                            alert("Successfully added git library.");
+                            displaySubmissionMessage(jsondata);
                             // updateLibraryList() or something similar here
                         } else {
-                            alert("Failed to add git library: " + jsondata.message);
+                            displaySubmissionMessage(jsondata);
                         }
                     }
                     catch (e) {
-                        alert("Error parsing response from server: " + data);
+                        displaySubmissionMessage({
+                            status: "fail",
+                            message: "Error parsing response from server."
+                        });
                         console.log(data);
                     }
+                    submitButton.disabled = false;
                 },
                 error: function(request, status, error) {
-                    alert(request.responseText);
+                    displaySubmissionMessage({
+                        status: "fail",
+                        message: request.responseText
+                    });
+                    submitButton.disabled = false;
                 }
             });
         });
