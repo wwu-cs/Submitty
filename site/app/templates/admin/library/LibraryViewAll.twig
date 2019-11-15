@@ -11,9 +11,9 @@
 			</div>
 			<div class="homework-library-panel-container">
 				{% for source in libraries %}
-                    <div class="homework-library-panel-card homework-library-border">
-                        {{ source }}
-                        <button onclick="deleteLibrary('{{ source }}')">Delete</button>
+                    <div class="homework-library-panel-card homework-library-border" style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>{{ source }}</span>
+                        <button class="btn" onclick="deleteLibrary('{{ source }}')">Delete</button>
                     </div>
                 {% endfor %}
 			</div>
@@ -21,6 +21,7 @@
 
         <script type="text/javascript">
         function deleteLibrary(libraryName) {
+            if (!confirm('Are you sure you want to delete "' + libraryName + '"?')) return;
             $.ajax({
                 url: '/homework/library/manage/remove/' + libraryName,
                 data: {
