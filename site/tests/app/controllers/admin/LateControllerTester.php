@@ -1,4 +1,6 @@
-<?php namespace tests\app\controllers\admin;
+<?php
+
+namespace tests\app\controllers\admin;
 
 use app\models\User;
 use app\libraries\Core;
@@ -6,8 +8,7 @@ use tests\BaseUnitTest;
 use app\libraries\response\WebResponse;
 use app\controllers\admin\LateController;
 
-class LateControllerTester extends BaseUnitTest
-{
+class LateControllerTester extends BaseUnitTest {
    /** @var LateController */
     protected $controller;
 
@@ -20,8 +21,7 @@ class LateControllerTester extends BaseUnitTest
     /** @var bool[] */
     protected $methodsCalled;
 
-    public function setUp(): void
-    {
+    public function setUp(): void {
         parent::setUp();
 
         $this->core = $this->createMockCore([], [], [
@@ -33,13 +33,11 @@ class LateControllerTester extends BaseUnitTest
     }
 
     /** @test */
-    public function testQueriesMadeInLateDaysView()
-    {
+    public function testQueriesMadeInLateDaysView() {
         $response = $this->controller->viewLateDays();
 
         $this->assertMethodCalled('getUsersWithLateDays');
         $this->assertMethodCalled('getAllUsers');
         $this->assertInstanceOf(WebResponse::class, $response->web_response);
     }
-
 }

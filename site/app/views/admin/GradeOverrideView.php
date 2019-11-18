@@ -11,7 +11,7 @@ class GradeOverrideView extends AbstractView {
 
         $student_full = Utils::getAutoFillData($students);
 
-        return $this->core->getOutput()->renderTwigTemplate("admin/GradeOverride.twig",[
+        return $this->core->getOutput()->renderTwigTemplate("admin/GradeOverride.twig", [
             "gradeables" => $gradeables,
             "student_full" => $student_full,
             "csrf_token" => $this->core->getCsrfToken()
