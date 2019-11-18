@@ -42,4 +42,12 @@ interface LibraryGateway {
      */
     public function libraryExists(LibraryEntity $library): bool;
 
+    /**
+     * Removes a library from disk.
+     *
+     * @param LibraryEntity $library
+     * @return bool
+     */
+    public function removeLibrary(LibraryEntity $library): bool;
+
 }

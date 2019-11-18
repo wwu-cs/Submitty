@@ -138,6 +138,24 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
     }
 
     /** @test */
+    public function testItRemovesLibraries() {
+        $library = new LibraryEntity('name', $this->location);
+        FileUtils::createDir($library->getLibraryPath());
+
+        $this->assertDirectoryExists($library->getLibraryPath());
+        $this->assertTrue($this->gateway->removeLibrary($library));
+        $this->assertDirectoryNotExists($library->getLibraryPath());
+    }
+
+    /** @test */
+    public function testItRemovesNonExistentLibraries() {
+        $library = new LibraryEntity('name', $this->location);
+
+        $this->assertTrue($this->gateway->removeLibrary($library));
+        $this->assertDirectoryNotExists($library->getLibraryPath());
+    }
+
+    /** @test */
     public function testTheDefaultGatewayIsFileSystemGateway() {
         LibraryGatewayFactory::clearInstance();
         $instance = LibraryGatewayFactory::getInstance();
