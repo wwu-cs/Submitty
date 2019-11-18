@@ -6,16 +6,16 @@ use app\libraries\FileUtils;
 use app\views\AbstractView;
 
 class LibraryManagerView extends AbstractView {
-    public function showLibraryManager(string $text, array $libraries) {
-        $this->core->getOutput()->addBreadcrumb("Manage");
+    public function showLibraryManager(String $text, array $libraries) {
+        $this->core->getOutput()->addBreadcrumb('Manage');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-        $this->core->getOutput()->addInternalJs("drag-and-drop.js");
+        $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));
         return $this->core->getOutput()->renderTwigTemplate("admin/library/LibraryManager.twig", [
             'text' => $text,
             'libraries' => $libraries,
-            'git_submit_url' => $this->core->buildUrl(['homework/library/manage', 'upload', 'git']),
-            'filepath_submit_url' => $this->core->buildUrl(['homework/library/manage', 'upload', 'filepath']),
+            'git_submit_url' => $this->core->buildUrl(['homework/library', 'upload', 'git']),
+            'filepath_submit_url' => $this->core->buildUrl(['homework/library', 'upload', 'filepath']),
             'zip_submit_url' => $this->core->buildUrl(['homework/library/manage', 'upload', 'zip'])
         ]);
     }
