@@ -242,8 +242,7 @@ class SubmissionController extends AbstractController {
                     if (
                         array_key_exists('is_qr', $bulk_upload_data)
                         && $bulk_upload_data['is_qr']
-                        && !array_key_exists($files[$i]['filename_full'],
-                        $bulk_upload_data)
+                        && !array_key_exists($files[$i]['filename_full'], $bulk_upload_data)
                     ) {
                         continue;
                     }
