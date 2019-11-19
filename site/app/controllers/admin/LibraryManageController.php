@@ -1,6 +1,4 @@
-<?php
-
-namespace app\controllers\admin;
+<?php namespace app\controllers\admin;
 
 
 use app\models\User;
@@ -15,6 +13,8 @@ use app\exceptions\AuthorizationException;
 use app\exceptions\AuthenticationException;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
+use app\libraries\homework\UseCases\LibraryGetUseCase;
+use app\libraries\homework\UseCases\LibraryRemoveUseCase;
 
 /**
  * Class LibraryManageController
@@ -95,4 +95,44 @@ class LibraryManageController extends AbstractController {
         return Response::JsonOnlyResponse($response);
     }
 
+    /**
+     * Function for returning all libraries stored on the system. This should be called via AJAX
+     * saving the result to the json_buffer of the Output object, returns a true or false on
+     * whether or not it succeeded.
+     *
+     * @Route("/homework/library/list", methods={"GET"})
+     * @return Response
+     */
+    public function ajaxGetLibraryList(): Response {
+        $useCase = new LibraryGetUseCase($this->core);
+
+        $results = $useCase->getLibraries();
+
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($results->getResults())
+        );
+    }
+
+    /**
+     * Function for deleting a specific library stored on the system. This should be called via
+     * a DELETE AJAX request. It then returns json data to the caller about the request specifying
+     * if it was successful or not and any error messages.
+     *
+     * @Route("/homework/library/remove/{name}", methods={"DELETE"})
+     * @param string $name
+     * @return Response
+     */
+    public function ajaxRemoveLibrary(string $name): Response {
+        $useCase = new LibraryRemoveUseCase($this->core);
+
+        $results = $useCase->removeLibrary($name);
+
+        if ($results->error) {
+            $response = JsonResponse::getFailResponse($results->error);
+        } else {
+            $response = JsonResponse::getSuccessResponse($results->getMessage());
+        }
+
+        return Response::JsonOnlyResponse($response);
+    }
 }

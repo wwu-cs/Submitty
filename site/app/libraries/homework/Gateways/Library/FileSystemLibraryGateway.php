@@ -3,7 +3,9 @@
 
 use ZipArchive;
 use app\libraries\FileUtils;
+use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
+use app\libraries\homework\Entities\LibraryAddStatus;
 
 class FileSystemLibraryGateway implements LibraryGateway {
     const SUCCESS = 0;
@@ -14,13 +16,17 @@ class FileSystemLibraryGateway implements LibraryGateway {
     }
 
     /** @inheritDoc */
-    public function addGitLibrary(string $repoUrl, string $location): string {
-        if (!$this->createFolderIfNotExists($location)) {
-            return 'Error when creating folder.';
+    public function addGitLibrary(LibraryEntity $library, string $repoUrl): LibraryAddStatus {
+        if ($this->libraryExists($library)) {
+            return LibraryAddStatus::error('Library already exists.');
+        }
+
+        if (!$this->createFolderIfNotExists($library->getLibraryPath())) {
+            return LibraryAddStatus::error('Error when creating folder for the library.');
         }
 
         $sanitizedRepoUrl = escapeshellarg($repoUrl);
-        $sanitizedLocation = escapeshellarg($location);
+        $sanitizedLocation = escapeshellarg($library->getLibraryPath());
 
         $cmd = "git clone $sanitizedRepoUrl $sanitizedLocation";
 
@@ -41,42 +47,59 @@ class FileSystemLibraryGateway implements LibraryGateway {
         $status = proc_close($git);
 
         if ($status != self::SUCCESS) {
-            FileUtils::recursiveRmdir($location);
-            return "Error when cloning the repository: $stderr";
+            FileUtils::recursiveRmdir($library->getLibraryPath());
+            return LibraryAddStatus::error("Error cloning repository. $stderr");
         }
 
-        return 'success';
+        return LibraryAddStatus::success($library);
     }
 
     /** @inheritDoc */
-    public function addZipLibrary(string $filePath, string $location): string {
-        if (!$this->createFolderIfNotExists($location)) {
-            return 'Error when creating folder.';
+    public function addZipLibrary(LibraryEntity $library, string $tmpFilePath): LibraryAddStatus {
+        if ($this->libraryExists($library)) {
+            return LibraryAddStatus::error('Library already exists.');
+        }
+
+        if (!$this->createFolderIfNotExists($library->getLibraryPath())) {
+            return LibraryAddStatus::error('Error when creating folder.');
         }
 
         $zip = new ZipArchive();
-        $res = $zip->open($filePath);
+        $res = $zip->open($tmpFilePath);
         if ($res === TRUE) {
-            if (!$zip->extractTo($location)) {
-                FileUtils::recursiveRmdir($location);
-                return 'Error extracting zip file.';
+            if (!$zip->extractTo($library->getLibraryPath())) {
+                FileUtils::recursiveRmdir($library->getLibraryPath());
+                return LibraryAddStatus::error('Error extracting zip file.');
             }
             $zip->close();
         } else {
-            FileUtils::recursiveRmdir($location);
-            return 'Error opening zip file.';
+            FileUtils::recursiveRmdir($library->getLibraryPath());
+            return LibraryAddStatus::error('Error opening zip file.');
         }
 
-        return 'success';
+        return LibraryAddStatus::success($library);
     }
 
     /** @inheritDoc */
     public function getAllLibraries(string $location): array {
-        return FileUtils::getAllDirs($location);
+        $libs = FileUtils::getAllDirs($location);
+
+        return array_map(function (string $lib) use ($location) {
+            return new LibraryEntity(basename($lib), $location);
+        }, $libs);
     }
 
     /** @inheritDoc */
-    public function libraryExists(string $name, string $location): bool {
-        return in_array($name, $this->getAllLibraries($location));
+    public function libraryExists(LibraryEntity $library): bool {
+        $libraries = $this->getAllLibraries($library->getLocation());
+
+        return count(array_filter($libraries, function (LibraryEntity $item) use ($library) {
+            return $item->is($library);
+        })) > 0;
+    }
+
+    /** @inheritDoc */
+    public function removeLibrary(LibraryEntity $library): bool {
+        return FileUtils::recursiveRmdir($library->getLibraryPath());
     }
 }

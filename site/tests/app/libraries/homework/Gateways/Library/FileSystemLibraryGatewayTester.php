@@ -2,6 +2,8 @@
 
 use ZipArchive;
 use app\libraries\FileUtils;
+use app\libraries\homework\Entities\LibraryEntity;
+use app\libraries\homework\Entities\LibraryAddStatus;
 use tests\app\libraries\homework\Gateways\BaseTestCase;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\Library\FileSystemLibraryGateway;
@@ -32,44 +34,125 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
 
     /** @test */
     public function testItClonesAGitRepository() {
-        $loc = FileUtils::joinPaths($this->location, 'Submitty');
-        $return = $this->gateway->addGitLibrary(self::VALID_GIT_URL, $loc);
+        $library = new LibraryEntity('Submitty', $this->location);
+        $return = $this->gateway->addGitLibrary($library, self::VALID_GIT_URL);
 
-        $this->assertEquals('success', $return);
-        $this->assertDirectoryExists($loc);
-        $this->assertDirectoryExists(FileUtils::joinPaths($loc, '.git'));
+        $this->assertLibraryAddStatusSuccess($return, $library);
+        $this->assertDirectoryExists($library->getLibraryPath());
+        $this->assertDirectoryExists(FileUtils::joinPaths($library->getLibraryPath(), '.git'));
     }
 
     /** @test */
     public function testItFailsCloningABadGitRepository() {
-        $loc = FileUtils::joinPaths($this->location, 'Submitty');
-        $return = $this->gateway->addGitLibrary('invalid url', $loc);
+        $library = new LibraryEntity('name', $this->location);
 
-        $this->assertEquals(
-            'Error when cloning the repository: fatal: repository \'invalid url\' does not exist',
-            $return
+        $return = $this->gateway->addGitLibrary($library, 'invalid url');
+
+        $this->assertLibraryAddStatusError(
+            $return,
+            'Error cloning repository. fatal: repository \'invalid url\' does not exist'
         );
-        $this->assertDirectoryNotExists($loc);
+        $this->assertDirectoryNotExists($library->getLibraryPath());
     }
 
     /** @test */
     public function testItDoesNotAddAnInvalidZipFile() {
-        $loc = FileUtils::joinPaths($this->location, 'Submitty');
-        $return = $this->gateway->addZipLibrary('invalid zip', $loc);
+        $library = new LibraryEntity('name', $this->location);
+        $return = $this->gateway->addZipLibrary($library, 'invalid zip');
 
-        $this->assertEquals('Error opening zip file.', $return);
-        $this->assertDirectoryNotExists($loc);
+        $this->assertLibraryAddStatusError($return, 'Error opening zip file.');
+        $this->assertDirectoryNotExists($library->getLibraryPath());
     }
 
     /** @test */
     public function testItAddsAZipFile() {
-        $loc = FileUtils::joinPaths($this->location, 'test');
         $zip = $this->createTestZip('test.zip');
 
-        $return = $this->gateway->addZipLibrary($zip, $loc);
-        $this->assertEquals('success', $return);
-        $this->assertDirectoryExists($loc);
-        $this->assertFileExists(FileUtils::joinPaths($loc, 'test.txt'));
+        $library = new LibraryEntity('test', $this->location);
+
+        $return = $this->gateway->addZipLibrary($library, $zip);
+        $this->assertLibraryAddStatusSuccess($return, $library);
+        $this->assertDirectoryExists($library->getLibraryPath());
+        $this->assertFileExists($library->getLibraryPath() . '/test.txt');
+    }
+
+    /** @test */
+    public function testItRetrievesAllLibrariesWhenEmpty() {
+        $results = $this->gateway->getAllLibraries($this->location);
+
+        $this->assertEquals([], $results);
+    }
+
+    /** @test */
+    public function testItRetrievesAllLibraries() {
+        FileUtils::createDir(FileUtils::joinPaths($this->location, 'lib1'));
+        FileUtils::createDir(FileUtils::joinPaths($this->location, 'lib2'));
+        FileUtils::createDir(FileUtils::joinPaths($this->location, 'lib3'));
+
+        /** @var LibraryEntity[] $results */
+        $results = $this->gateway->getAllLibraries($this->location);
+
+        $this->assertCount(3, $results);
+        $this->assertEquals('lib1', $results[0]->getName());
+        $this->assertEquals('lib2', $results[1]->getName());
+        $this->assertEquals('lib3', $results[2]->getName());
+    }
+
+    /** @test */
+    public function testItDoesNotOverwriteLibrariesZip() {
+        FileUtils::createDir(FileUtils::joinPaths($this->location, 'name'));
+        $library = new LibraryEntity('name', $this->location);
+        $status = $this->gateway->addZipLibrary($library, 'invalid zip');
+
+        $this->assertLibraryAddStatusError($status, 'Library already exists.');
+    }
+
+    /** @test */
+    public function testItDoesNotOverwriteLibrariesGit() {
+        FileUtils::createDir(FileUtils::joinPaths($this->location, 'name'));
+        $library = new LibraryEntity('name', $this->location);
+
+        $status = $this->gateway->addGitLibrary($library, 'url');
+
+        $this->assertLibraryAddStatusError($status, 'Library already exists.');
+    }
+
+    /**
+     * @param LibraryAddStatus $status
+     * @param LibraryEntity $library
+     */
+    protected function assertLibraryAddStatusSuccess(LibraryAddStatus $status, LibraryEntity $library) {
+        $this->assertNotNull($status->library);
+        $this->assertTrue($library->is($status->library));
+        $this->assertEquals(LibraryAddStatus::SUCCESS, $status->message);
+    }
+
+    /**
+     * @param LibraryAddStatus $status
+     * @param string $message
+     */
+    protected function assertLibraryAddStatusError(LibraryAddStatus $status, string $message) {
+        $this->assertNull($status->library);
+
+        $this->assertEquals($message, $status->message);
+    }
+
+    /** @test */
+    public function testItRemovesLibraries() {
+        $library = new LibraryEntity('name', $this->location);
+        FileUtils::createDir($library->getLibraryPath());
+
+        $this->assertDirectoryExists($library->getLibraryPath());
+        $this->assertTrue($this->gateway->removeLibrary($library));
+        $this->assertDirectoryNotExists($library->getLibraryPath());
+    }
+
+    /** @test */
+    public function testItRemovesNonExistentLibraries() {
+        $library = new LibraryEntity('name', $this->location);
+
+        $this->assertTrue($this->gateway->removeLibrary($library));
+        $this->assertDirectoryNotExists($library->getLibraryPath());
     }
 
     /** @test */

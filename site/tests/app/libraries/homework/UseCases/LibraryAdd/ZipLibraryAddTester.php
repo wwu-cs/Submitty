@@ -1,5 +1,6 @@
 <?php namespace tests\app\libraries\homework\UseCases\LibraryAdd;
 
+use app\libraries\homework\Entities\LibraryEntity;
 use tests\app\libraries\homework\UseCases\BaseTestCase;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
 use app\libraries\homework\UseCases\LibraryAddResponse;
@@ -74,14 +75,17 @@ class ZipLibraryAddTester extends BaseTestCase {
 
     /** @test */
     public function testItDoesNotOverwriteLibraries() {
-        $this->libraryGateway->addLibraryWithName('lib', $this->location);
+        $this->libraryGateway->addLibrary(new LibraryEntity(
+            'lib',
+            $this->location
+        ));
 
         $this->handleTest([
             'name' => 'lib.zip',
             'tmp_name' => 'tmp name'
         ]);
 
-        $this->assertEquals('Library already exists!', $this->response->error);
+        $this->assertEquals('Error adding the library. Library already exists', $this->response->error);
     }
 
     /** @test */
@@ -92,16 +96,9 @@ class ZipLibraryAddTester extends BaseTestCase {
         ]);
 
         $this->assertEquals('Successfully installed new library: lib', $this->response->getMessage());
-        $this->assertTrue($this->libraryGateway->libraryExists('lib', $this->location));
-    }
-
-    /** @test  */
-    public function testItDoesNotAddInvalidLibrary() {
-        $this->handleTest([
-            'name' => 'invalid.zip',
-            'tmp_name' => '169633'
-        ]);
-
-        $this->assertEquals('Error when adding the library. Invalid location', $this->response->error);
+        $this->assertTrue($this->libraryGateway->libraryExists(new LibraryEntity(
+            'lib',
+            $this->location
+        )));
     }
 }
