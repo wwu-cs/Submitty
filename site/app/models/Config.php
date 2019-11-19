@@ -258,9 +258,11 @@ class Config extends AbstractModel {
 
         $homework_library_enabled = false;
         $homework_library_location = '~/library';
+        $homework_library_allowed = false;
         if ($homework_library_json) {
             $homework_library_enabled = $homework_library_json['homework_library_enabled'];
             $homework_library_location = $homework_library_json['homework_library_location'];
+            $homework_library_allowed = $homework_library_json['homework_library_allowed'];
         }
 
         $this->homework_library_params = [
