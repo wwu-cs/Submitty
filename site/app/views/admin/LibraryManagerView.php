@@ -16,7 +16,8 @@ class LibraryManagerView extends AbstractView {
             'libraries' => $libraries,
             'git_submit_url' => $this->core->buildUrl(['homework/library', 'manage', 'upload', 'git']),
             'filepath_submit_url' => $this->core->buildUrl(['homework/library', 'manage', 'upload', 'filepath']),
-            'zip_submit_url' => $this->core->buildUrl(['homework/library', 'manage', 'upload', 'zip'])
+            'zip_submit_url' => $this->core->buildUrl(['homework/library', 'manage', 'upload', 'zip']),
+            "csrf_token" => $this->core->getCsrfToken()
         ]);
     }
 }
