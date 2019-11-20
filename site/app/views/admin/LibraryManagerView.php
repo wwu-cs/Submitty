@@ -14,9 +14,9 @@ class LibraryManagerView extends AbstractView {
         return $this->core->getOutput()->renderTwigTemplate("admin/library/LibraryManager.twig", [
             'text' => $text,
             'libraries' => $libraries,
-            'git_submit_url' => $this->core->buildUrl(['homework/library', 'upload', 'git']),
-            'filepath_submit_url' => $this->core->buildUrl(['homework/library', 'upload', 'filepath']),
-            'zip_submit_url' => $this->core->buildUrl(['homework/library/manage', 'upload', 'zip'])
+            'git_submit_url' => $this->core->buildUrl(['homework/library', 'manage', 'upload', 'git']),
+            'filepath_submit_url' => $this->core->buildUrl(['homework/library', 'manage', 'upload', 'filepath']),
+            'zip_submit_url' => $this->core->buildUrl(['homework/library', 'manage', 'upload', 'zip'])
         ]);
     }
 }
