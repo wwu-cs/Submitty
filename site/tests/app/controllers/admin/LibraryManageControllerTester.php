@@ -1,11 +1,11 @@
 <?php namespace tests\app\controllers\admin;
 
-
 use tests\BaseUnitTest;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\exceptions\NotEnabledException;
+use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\controllers\admin\LibraryManageController;
 use app\libraries\homework\Entities\LibraryEntity;
@@ -43,6 +43,17 @@ class LibraryManageControllerTester extends BaseUnitTest {
         LibraryGatewayFactory::setInstance($this->gateway);
 
         $this->createConfigWithLibrary();
+    }
+
+    /** @test */
+    public function testItShowsTheLibraryManagePage() {
+        $response = $this->controller->showLibraryManagePage()->web_response;
+
+        $this->assertInstanceOf(WebResponse::class, $response);
+        $this->assertEquals([
+            'admin', 'LibraryManager'
+        ], $response->view_class);
+        $this->assertEquals('showLibraryManager', $response->view_function);
     }
 
     /** @test */
