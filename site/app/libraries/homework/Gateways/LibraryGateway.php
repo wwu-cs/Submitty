@@ -2,6 +2,7 @@
 
 
 use app\libraries\homework\Entities\LibraryEntity;
+use app\libraries\homework\Entities\LibraryAddStatus;
 
 interface LibraryGateway {
     /**
@@ -10,9 +11,9 @@ interface LibraryGateway {
      *
      * @param LibraryEntity $library
      * @param string $repoUrl
-     * @return string
+     * @return LibraryAddStatus
      */
-    public function addGitLibrary(LibraryEntity $library, string $repoUrl): string;
+    public function addGitLibrary(LibraryEntity $library, string $repoUrl): LibraryAddStatus;
 
     /**
      * This will add a library via a zip file, and unzip the contents to the specified location.
@@ -20,9 +21,9 @@ interface LibraryGateway {
      *
      * @param LibraryEntity $library
      * @param string $tmpFilePath
-     * @return string
+     * @return LibraryAddStatus
      */
-    public function addZipLibrary(LibraryEntity $library, string $tmpFilePath): string;
+    public function addZipLibrary(LibraryEntity $library, string $tmpFilePath): LibraryAddStatus;
 
     /**
      * Returns all libraries from the specified homework library location

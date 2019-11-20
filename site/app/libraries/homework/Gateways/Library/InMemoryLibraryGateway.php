@@ -2,28 +2,29 @@
 
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
+use app\libraries\homework\Entities\LibraryAddStatus;
 
 class InMemoryLibraryGateway implements LibraryGateway {
     /** @var LibraryEntity[] */
     protected $libraries = [];
 
-    public function addLibrary(LibraryEntity $library): string {
+    public function addLibrary(LibraryEntity $library): LibraryAddStatus {
         if ($this->libraryExists($library)) {
-            return 'Library already exists';
+            return LibraryAddStatus::error('Library already exists');
         }
 
         $this->libraries[] = $library;
 
-        return 'success';
+        return LibraryAddStatus::success($library);
     }
 
     /** @inheritDoc */
-    public function addGitLibrary(LibraryEntity $library, string $repoUrl): string {
+    public function addGitLibrary(LibraryEntity $library, string $repoUrl): LibraryAddStatus {
         return $this->addLibrary($library);
     }
 
     /** @inheritDoc */
-    public function addZipLibrary(LibraryEntity $library, string $tmpFilePath): string {
+    public function addZipLibrary(LibraryEntity $library, string $tmpFilePath): LibraryAddStatus {
         return $this->addLibrary($library);
     }
 

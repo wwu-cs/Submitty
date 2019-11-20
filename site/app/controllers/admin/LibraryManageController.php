@@ -2,6 +2,7 @@
 
 
 use app\libraries\Core;
+use app\libraries\FileUtils;
 use app\libraries\response\Response;
 use app\controllers\AbstractController;
 use app\exceptions\NotEnabledException;
@@ -66,7 +67,13 @@ class LibraryManageController extends AbstractController {
     public function ajaxUploadLibraryFromZip(): Response {
         $useCase = new LibraryAddUseCase($this->core);
 
-        $results = $useCase->addZipLibrary($_FILES['zip'] ?? null);
+        $fileInfo = $_FILES['zip'] ?? null;
+
+        $results = $useCase->addZipLibrary($fileInfo);
+
+        if ($fileInfo && isset($fileInfo['tmp_name'])) {
+            FileUtils::rmFile($fileInfo['tmp_name']);
+        }
 
         if ($results->error) {
             $response = JsonResponse::getFailResponse($results->error);
