@@ -68,7 +68,7 @@ class HomePageController extends AbstractController {
      * @return Response
      */
     public function searchLibraryGradeableWithQuery($query, $path = "/usr/local/submitty/library") {
-        $config = FileUtils::getConfig($path, $query);
+        $config = FileUtils::getDetails($path, $query);
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($config)
         );

@@ -86,14 +86,28 @@ class FileUtils {
         return false;
     }
 
-    public static function getConfig($path, $query) {
+    public static function getDetails($path, $query) {
         $config_path = FileUtils::getConfigPath($path, $query);
         if ($config_path) {
-            $contents = file_get_contents($config_path);
-            return $contents;
+            $contents = FileUtils::json_decode_commented(file_get_contents($config_path), true);
+            var_dump($contents);
+            $parsed_contents = array(
+                'path' => $config_path,
+                'title' => isset($contents['testcases'][0]['title']) ? $contents['testcases'][0]['title'] : "Title not Specified",
+            );
+            return json_encode($parsed_contents);
         }
         return false;
     }
+
+    // Credit to Alexander Shostak at https://stackoverflow.com/questions/8148797/a-json-parser-for-php-that-supports-comments
+    public static function json_decode_commented($json, $assoc = false, $maxDepth = 512, $opts = 0) {
+        $json = preg_replace('~
+          (" (?:[^"\\\\] | \\\\\\\\ | \\\\")*+ ") | \# [^\v]*+ | // [^\v]*+ | /\* .*? \*/
+        ~xs', '$1', $json);
+      
+        return json_decode($json, $assoc, $maxDepth, $opts);
+      }
 
     /**
      * Recursively goes through a directory deleting everything in it before deleting the folder itself. Returns
