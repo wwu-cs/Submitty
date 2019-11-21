@@ -7,26 +7,24 @@
         When uploading multiple gradeables in a single zip file, each gradeable should be in its own folder, <br>
         with its own config file. For example:
     </p>
-    <p>
     <pre>
-        zipped_folder\
-            gradeable1\
-                gradeable1config.json
-            gradeable2\
-                gradeable2config.json
-            gradeable3\
-                gradeable3config.json
+    zipped_folder\
+        gradeable1\
+            gradeable1config.json
+        gradeable2\
+            gradeable2config.json
+        gradeable3\
+            gradeable3config.json
     </pre>
-    </p>
     <div id="upload-boxes">
         {# upload1 and input_file1 required for drag-and-drop.js #}
         <div id="upload1" class="file-input">
-            <label class="label" for="input-file">"Drag your file(s) here or click to open file browser"</label>
-            <input type="file" name="files" id="input_file1" onchange="addFilesFromInput(1,false)" multiple />
+            <label class="label" for="input-file">Drag zip file here or click to open file browser</label>
+            <input type="file" name="files" id="input_file1" accept=".zip" onchange="addFilesFromInput(1,false,1)" />
         </div>
     </div>
     <p>
-        Total files cannot exceed 10MB.
+        File size cannot exceed 10MB.
     </p>
 </div>
 
@@ -62,5 +60,5 @@
     dropzone.addEventListener("dragenter", draghandle, false);
     dropzone.addEventListener("dragover", draghandle, false);
     dropzone.addEventListener("dragleave", draghandle, false);
-    dropzone.addEventListener("drop", dropWithMultipleZips, false);
+    dropzone.addEventListener("drop", dropWithSingleZip, false);
 </script>

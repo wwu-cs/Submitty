@@ -82,13 +82,26 @@ function drop(e){
 }
 
 // add files dragged
-function dropWithMultipleZips(e){
+function dropWithMultipleZips(e, fileLimit=-1){
     draghandle(e);
-    var filestream= e.dataTransfer.files;
+    var filestream = e.dataTransfer.files;
     var part = get_part_number(e);
     for(var i=0; i<filestream.length; i++){
+        // check file limit
+        if (fileExists(filestream[i].name, part)[0] !== -1) {
+          // don't count file in the limit if it exists. It will replace the existing one
+          fileLimit++;
+        }
+        if (fileLimit > 0 && file_array[0].length >= fileLimit) {
+          alert("Error: Only " + fileLimit + " file(s) can be added at once.");
+          return;
+        }
         addFileWithCheck(filestream[i], part, false); // check for folders
     }
+}
+
+function dropWithSingleZip(e) {
+    dropWithMultipleZips(e, 1);
 }
 
 function get_part_number(e){
@@ -101,9 +114,18 @@ function get_part_number(e){
 }
 
 // copy files selected from the file browser
-function addFilesFromInput(part, check_duplicate_zip=true){
+function addFilesFromInput(part, check_duplicate_zip=true, fileLimit=-1){
     var filestream = document.getElementById("input_file" + part).files;
     for(var i=0; i<filestream.length; i++){
+        // check file limit
+        if (fileExists(filestream[i].name, part)[0] !== -1) {
+            // don't count file in the limit if it exists. It will replace the existing one
+            fileLimit++;
+        }
+        if (fileLimit > 0 && file_array[0].length >= fileLimit) {
+            alert("Error: Only " + fileLimit + " file(s) can be added at once.");
+            return;
+        }
         addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
     }
     $('#input_file' + part).val("");
