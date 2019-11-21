@@ -34,10 +34,6 @@ class LibraryManageController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
 
-        if (!$this->core->userLoaded()) {
-            throw new AuthenticationException('You must sign in to access this route', 403);
-        }
-
         if (!$this->core->getConfig()->canAccessHomeworkLibrary()) {
             throw new AuthorizationException('You do not have permission to access this route', 401);
         }

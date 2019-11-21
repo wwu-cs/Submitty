@@ -7,6 +7,7 @@ use app\libraries\FileUtils;
 use app\exceptions\NotEnabledException;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use app\exceptions\AuthorizationException;
 use app\controllers\admin\LibraryManageController;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
@@ -26,11 +27,12 @@ class LibraryManageControllerTester extends BaseUnitTest {
     /** @var LibraryManageController */
     protected $controller;
 
-    protected function createConfigWithLibrary(bool $enabled = true, string $location = 'library location') {
+    protected function createConfigWithLibrary(bool $enabled = true, string $location = 'library location', bool $allowed = true) {
         $this->location = $location;
         $this->core = $this->createMockCore([
             'homework_library_enable' => $enabled,
-            'homework_library_location' => $this->location
+            'homework_library_location' => $this->location,
+            'homework_library_allowed' => $allowed
         ]);
         $this->controller = new LibraryManageController($this->core);
     }
@@ -120,6 +122,13 @@ class LibraryManageControllerTester extends BaseUnitTest {
     public function testItThrowsNotEnabledException() {
         $this->expectException(NotEnabledException::class);
         $this->createConfigWithLibrary(false);
+    }
+
+    /** @test */
+    public function testItThrowsAuthorizationException() {
+        $this->expectException(AuthorizationException::class);
+        $this->expectExceptionMessage('You do not have permission to access this route');
+        $this->createConfigWithLibrary(true, 'library location', false);
     }
 
     /** @test */
