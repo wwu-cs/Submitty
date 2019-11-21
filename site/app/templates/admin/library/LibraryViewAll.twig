@@ -13,7 +13,10 @@
 				{% for source in libraries %}
                     <div class="homework-library-panel-card homework-library-border" style="display: flex; justify-content: space-between; align-items: center;">
                         <span>{{ source }}</span>
-                        <button class="btn" onclick="deleteLibrary('{{ source }}')">Delete</button>
+                        <span>
+                            <!--<button class="btn" onclick="refreshLibrary('{{ source }}')">Refresh</button>-->
+                            <button class="btn" onclick="deleteLibrary('{{ source }}')">Delete</button>
+                        </span>
                     </div>
                 {% endfor %}
 			</div>
