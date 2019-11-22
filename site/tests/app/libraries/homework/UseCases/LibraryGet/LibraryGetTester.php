@@ -2,8 +2,8 @@
 
 
 use app\libraries\homework\Entities\LibraryEntity;
-use app\libraries\homework\UseCases\LibraryGetResponse;
 use app\libraries\homework\UseCases\LibraryGetUseCase;
+use app\libraries\homework\UseCases\LibraryGetResponse;
 use tests\app\libraries\homework\UseCases\BaseTestCase;
 
 class LibraryGetTester extends BaseTestCase {
@@ -20,7 +20,7 @@ class LibraryGetTester extends BaseTestCase {
         $this->useCase = new LibraryGetUseCase($this->core);
     }
 
-    public function handleTest() {
+    protected function handleTest() {
         $this->response = $this->useCase->getLibraries();
     }
 

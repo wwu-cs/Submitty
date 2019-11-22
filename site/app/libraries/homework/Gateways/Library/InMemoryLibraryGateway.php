@@ -48,4 +48,17 @@ class InMemoryLibraryGateway implements LibraryGateway {
             return $item->is($library);
         })) > 0;
     }
+
+    /** @inheritDoc */
+    public function removeLibrary(LibraryEntity $library): bool {
+        if ($library->hasNameOf('fail to remove')) {
+            return false;
+        }
+
+        $this->libraries = array_filter($this->libraries, function (LibraryEntity $storedLib) use ($library) {
+            return $storedLib->isNot($library);
+        });
+
+        return true;
+    }
 }

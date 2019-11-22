@@ -73,12 +73,12 @@ class FileUtils {
         return $return;
     }
 
-    public static function getConfigPath($path, $query) {
+    public static function getPathWithQueryAndTip($path, $query, $tip) {
         // https://stackoverflow.com/questions/17160696/php-glob-scan-in-subfolders-for-a-file
         $iter = new \RecursiveDirectoryIterator($path);
         foreach (new \RecursiveIteratorIterator($iter) as $file){
-            if (strpos($file->getFilename() , 'config.json') !== false) {
-                if (preg_match("/.*" . $query . ".*config.json$/i", $file->getPathname()) > 0) {
+            if (strpos($file->getFilename() , $tip) !== false) {
+                if (preg_match("/.*" . $query . ".*" . $tip . "$/i", $file->getPathname()) > 0) {
                     return $file->getPathname();
                 }
             }
@@ -87,12 +87,15 @@ class FileUtils {
     }
 
     public static function getDetails($path, $query) {
-        $config_path = FileUtils::getConfigPath($path, $query);
+        $config_path = FileUtils::getPathWithQueryAndTip($path, $query, 'config.json');
+        $readme_path = FileUtils::getPathWithQueryAndTip($path, $query, 'README.md');
         if ($config_path) {
             $contents = FileUtils::json_decode_commented(file_get_contents($config_path), true);
             $parsed_contents = array(
                 'path' => $config_path,
-                'title' => isset($contents['testcases'][0]['title']) ? $contents['testcases'][0]['title'] : "Title not Specified",
+                'title' => $contents['testcases'][0]['title'] ?? 'Title not Specified',
+                'tags' => $contents['tags'] ?? [],
+                'readme' => $readme_path,
             );
             return json_encode($parsed_contents);
         }
