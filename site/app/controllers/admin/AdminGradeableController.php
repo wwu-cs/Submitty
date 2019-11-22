@@ -23,8 +23,11 @@ class AdminGradeableController extends AbstractController {
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/homework_library", methods={"GET"})
      */
-    public function selectFromHomeworkLibrary($gradeable_id, $semester, $course) {
-        $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableHomeworkLibrary.twig', []);
+    public function selectFromHomeworkLibrary($gradeable_id) {
+        $results = FileUtils::getAllDirs('/usr/local/submitty/library');
+        $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableHomeworkLibrary.twig', [
+            "results" => $results
+        ]);
     }
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"GET"})
