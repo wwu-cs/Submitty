@@ -30,6 +30,7 @@ class LibraryManageController extends AbstractController {
      * LibraryManage constructor.
      * @param Core $core
      * @throws NotEnabledException
+	 * @throws AuthorizationException
      */
     public function __construct(Core $core) {
         parent::__construct($core);
