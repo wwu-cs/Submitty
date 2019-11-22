@@ -171,6 +171,30 @@ class LibraryManageControllerTester extends BaseUnitTest {
     }
 
     /** @test */
+    public function testItUpdatesALibrary() {
+        $this->gateway->addLibrary(new LibraryEntity('imma sleep after this', $this->location));
+
+        $response = $this->controller->ajaxUpdateLibrary('imma sleep after this')->json_response;
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals([
+            'status' => 'success',
+            'data' => "Successfully updated 'imma sleep after this'"
+        ], $response->json);
+    }
+
+    /** @test */
+    public function testItDoesntUpdateNonExistentLibraries() {
+        $response = $this->controller->ajaxUpdateLibrary('Wherever you go, there you will be.')->json_response;
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals([
+            'status' => 'fail',
+            'message' => 'Library does not exist.'
+        ], $response->json);
+    }
+
+    /** @test */
     public function testItRemovesALibrary() {
         $this->gateway->addLibrary(new LibraryEntity('name', $this->location));
 
