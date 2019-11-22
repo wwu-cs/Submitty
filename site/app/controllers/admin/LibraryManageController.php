@@ -8,11 +8,11 @@ use app\controllers\AbstractController;
 use app\exceptions\NotEnabledException;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
-use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
 use app\libraries\homework\UseCases\LibraryGetUseCase;
 use app\libraries\homework\UseCases\LibraryRemoveUseCase;
+use app\libraries\homework\UseCases\LibraryUpdateUseCase;
 
 /**
  * Class LibraryManage
@@ -142,6 +142,31 @@ class LibraryManageController extends AbstractController {
             $response = JsonResponse::getFailResponse($results->error);
         } else {
             $response = JsonResponse::getSuccessResponse($results->getMessage());
+        }
+
+        return Response::JsonOnlyResponse($response);
+    }
+
+
+    /**
+     * Function for updating a specific git library stored on the system. This should be called via
+     * a PATCH AJAX request. It then returns json data to the caller with a status message saying why
+     * the request failed if it failed, otherwise it will just return a success message to be displayed
+     * to the user.
+     *
+     * @Route("/homework/library/manage/update/{name}", methods={"PATCH"})
+     * @param string $name
+     * @return Response
+     */
+    public function ajaxUpdateLibrary(string $name): Response {
+        $useCase = new LibraryUpdateUseCase($this->core);
+
+        $result = $useCase->updateLibrary($name);
+
+        if ($result->error) {
+            $response = JsonResponse::getFailResponse($result->error);
+        } else {
+            $response = JsonResponse::getSuccessResponse($result->getMessage());
         }
 
         return Response::JsonOnlyResponse($response);
