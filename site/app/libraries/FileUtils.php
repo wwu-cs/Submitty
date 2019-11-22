@@ -90,7 +90,6 @@ class FileUtils {
         $config_path = FileUtils::getConfigPath($path, $query);
         if ($config_path) {
             $contents = FileUtils::json_decode_commented(file_get_contents($config_path), true);
-            var_dump($contents);
             $parsed_contents = array(
                 'path' => $config_path,
                 'title' => isset($contents['testcases'][0]['title']) ? $contents['testcases'][0]['title'] : "Title not Specified",

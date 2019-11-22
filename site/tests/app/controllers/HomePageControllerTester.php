@@ -2,6 +2,7 @@
 
 namespace tests\app\controllers;
 
+use app\libraries\homework\UseCases\LibraryAddUseCase;
 use app\libraries\response\RedirectResponse;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
@@ -31,7 +32,9 @@ class HomePageControllerTester extends BaseUnitTest {
 		$this->library_path = FileUtils::joinPaths(sys_get_temp_dir(), "library");
 
 		$this->core = $this->createMockCore([
-			'getUsernameChangeText' => True
+			'getUsernameChangeText' => True,
+            'homework_library_enable' => True,
+            'homework_library_location' => '/tmp/library'
 		], [
 			'accessGrading' => True
 		], [
@@ -51,6 +54,17 @@ class HomePageControllerTester extends BaseUnitTest {
 			FileUtils::createDir($dir_full_path);
 		}
 	}
+
+	public function testGitLibrary() {
+        $useCase = new LibraryAddUseCase($this->core);
+
+        $testRepoUrl = 'https://github.com/Submitty/Tutorial.git';
+        $useCase->addGitLibrary($testRepoUrl);
+
+	    $response = $this->controller->searchLibraryGradeableWithQuery('Tutorial', $this->library_path);
+        $this->assertTrue($response->json_response->json['status'] === "success");
+        $this->assertTrue($response->json_response->json['data'] === '{"path":"\/tmp\/library\/Tutorial\/examples\/07_loop_depth\/config\/config.json","title":"Python - Determine Loop Depth"}');
+    }
 
 	public function testHomePageSearchLibrary() {
 		$response = $this->controller->searchLibrary($this->library_path);
