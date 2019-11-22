@@ -5,7 +5,12 @@
 				Sources
 			</div>
 			<div class="homework-library-panel-container">
-				{% for source in libraries %}
+				{% if  libraries == null %}
+                <div>
+                    <center>No loaded sources. To upload a source, select the <i>Upload</i> or <i>Git</i> tab above.</center>
+                </div>
+                {% endif %}
+                {% for source in libraries %}
                     <div class="homework-library-panel-card homework-library-border" style="display: flex; justify-content: space-between; align-items: center;">
                         <span>{{ source }}</span>
                         <span>
