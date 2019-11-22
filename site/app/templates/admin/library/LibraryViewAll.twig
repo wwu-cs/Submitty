@@ -14,7 +14,7 @@
                     <div class="homework-library-panel-card homework-library-border" style="display: flex; justify-content: space-between; align-items: center;">
                         <span>{{ source }}</span>
                         <span>
-                            <!--<button class="btn" onclick="refreshLibrary('{{ source }}')">Refresh</button>-->
+                            <button class="btn" onclick="refreshLibrary('{{ source }}')">Refresh</button>
                             <button class="btn" onclick="deleteLibrary('{{ source }}')">Delete</button>
                         </span>
                     </div>
@@ -48,26 +48,25 @@
                             message: "Error parsing response from server."
                         });
                     }
-                    submitButton.disabled = false;
                 },
                 error: function(request, status, error) {
                     displaySubmissionMessage({
                         status: "fail",
                         message: request.responseText
                     });
-                    submitButton.disabled = false;
                 }
             });
         }
         function refreshLibrary(libraryName) {
             $.ajax({
-                url: '/homework/library/manage/refresh/' + libraryName,
+                url: '/homework/library/manage/update/' + libraryName,
                 data: {
                     csrf_token: '{{ csrf_token }}'
                 },
-                type: 'GET',
+                type: 'PATCH',
                 success: function(data) {
                     try {
+                        console.log(data);
                         var jsondata = JSON.parse(data);
                         if (jsondata['status'] === "success") {
                             displaySubmissionMessage(jsondata);
@@ -83,14 +82,12 @@
                         });
                         console.log(data);
                     }
-                    submitButton.disabled = false;
                 },
                 error: function(request, status, error) {
                     displaySubmissionMessage({
                         status: "fail",
                         message: request.responseText
                     });
-                    submitButton.disabled = false;
                 }
             });
         }
