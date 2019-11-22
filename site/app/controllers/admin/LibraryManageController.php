@@ -1,7 +1,6 @@
 <?php namespace app\controllers\admin;
 
 
-use app\models\User;
 use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\response\Response;
@@ -11,7 +10,6 @@ use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\routers\AccessControl;
 use app\exceptions\AuthorizationException;
-use app\exceptions\AuthenticationException;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
 use app\libraries\homework\UseCases\LibraryGetUseCase;
