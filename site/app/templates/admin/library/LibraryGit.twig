@@ -17,6 +17,7 @@
 <script type="text/javascript">
     $(function() {
         $("#libraryGitForm").submit(function(e){
+            document.body.style.cursor='wait';
             e.preventDefault();
             var form = e.target;
             var submitButton = form.querySelector("input[type='submit']");
@@ -37,6 +38,7 @@
                         } else {
                             displaySubmissionMessage(jsondata);
                         }
+                    document.body.style.cursor='default';
                     }
                     catch (e) {
                         displaySubmissionMessage({
@@ -46,6 +48,7 @@
                         console.log(data);
                     }
                     submitButton.disabled = false;
+                    document.body.style.cursor='default';
                 },
                 error: function(request, status, error) {
                     displaySubmissionMessage({

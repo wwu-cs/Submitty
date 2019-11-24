@@ -37,6 +37,7 @@
     // Add form submit listener
     $(function() {
         $("#libraryZipSubmit").click(function(e){ // Submit button
+            document.body.style.cursor='wait';
             e.stopPropagation();
             // disable button while uploading files
             e.target.disabled = true;
@@ -45,10 +46,12 @@
                 e.target.disabled = false;
                 displaySubmissionMessage(response);
                 location.reload(true);
+                document.body.style.cursor='default';
             })
             .catch(function(response){
                 e.target.disabled = false;
                 displaySubmissionMessage(response);
+                document.body.style.cursor='default';
             });
         });
     });
