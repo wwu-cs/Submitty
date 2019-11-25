@@ -14,8 +14,8 @@
                     <div class="homework-library-panel-card homework-library-border" style="display: flex; justify-content: space-between; align-items: center;">
                         <span>{{ source }}</span>
                         <span>
-                            <button class="btn" onclick="refreshLibrary('{{ source }}')">Refresh</button>
-                            <button class="btn" onclick="deleteLibrary('{{ source }}')">Delete</button>
+                            <button class="btn" onclick="refreshLibrary('{{ source }}', this)">Refresh</button>
+                            <button class="btn" onclick="deleteLibrary('{{ source }}', this)">Delete</button>
                         </span>
                     </div>
                 {% endfor %}
@@ -23,9 +23,10 @@
 		</div>
 
         <script type="text/javascript">
-        function deleteLibrary(libraryName) {
+        function deleteLibrary(libraryName, ele) {
             if (!confirm('Are you sure you want to delete "' + libraryName + '"?')) return;
             document.body.style.cursor='wait';
+            ele.disabled = true;
             $.ajax({
                 url: '/homework/library/manage/remove/' + libraryName,
                 data: {
@@ -43,6 +44,7 @@
                             displaySubmissionMessage(jsondata);
                         }
                     document.body.style.cursor='default';
+                    ele.disabled = false;
                     }
                     catch (e) {
                         displaySubmissionMessage({
@@ -51,6 +53,7 @@
                         });
                     }
                     document.body.style.cursor='default';
+                    ele.disabled = false;
                 },
                 error: function(request, status, error) {
                     displaySubmissionMessage({
@@ -60,8 +63,9 @@
                 }
             });
         }
-        function refreshLibrary(libraryName) {
-            document.body.style.cursor='wait';        
+        function refreshLibrary(libraryName, ele) {
+            document.body.style.cursor='wait';
+            ele.disabled = true;
             $.ajax({
                 url: '/homework/library/manage/update/' + libraryName,
                 data: {
@@ -78,7 +82,8 @@
                         } else {
                             displaySubmissionMessage(jsondata);
                         }
-                    document.body.style.cursor='default';                    
+                    document.body.style.cursor='default';    
+                    ele.disabled = false;                
                     }
                     catch (e) {
                         displaySubmissionMessage({
@@ -88,6 +93,7 @@
                         console.log(data);
                     }
                     document.body.style.cursor='default';
+                    ele.disabled = false;
                 },
                 error: function(request, status, error) {
                     displaySubmissionMessage({
