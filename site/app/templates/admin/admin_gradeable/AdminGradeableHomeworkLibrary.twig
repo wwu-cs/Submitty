@@ -1,38 +1,48 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
 
-<div class="content shadow" id="login-box">
-    <h2>Homework Library -- Work In Progress</h2>
-
+<div class="content shadow">
+    <header>
+        <h2>Assign Gradeable from Homework Library</h2>
+    </header>
 	<label for="homework-name" class="homework-library-search">
-		<div class="option-title">Search for Preset</div>
+		<div class="option-title">Search for Autograding Configuration</div>
 		<div class="option-alt">Input the Preset title or any related information</div>
 	</label>
-	<input class="homework-library-search" type="text" name="homework_name" id="homework-name" value="{{ fields['course_name'] }}" />
+	<input class="homework-library-search" type="text" name="homework_name" id="homework-name" placeholder="Title" value="{{ fields['course_name'] }}" />
+	<input class="homework-library-search" type="text" name="homework_tags" id="homework-tags" placeholder="Tags" value="{{ fields['course_tags'] }}" />
 
 	<div class="homework-library-results">
 		<div class="homework-library-preview homework-library-border">
 			<div class="homework-library-panel-header">
-				Preview
+				Search Results
 			</div>
 			<div class="homework-library-panel-container">
 				{% for key, value in results %}
-					<div 
+					<div
 						class="homework-library-panel-card homework-library-border"
-						data-index={{ key }}
-					>
-						{{ value }}
+						data-index={{ key }}>
+                        {{ value }}
 					</div>
 				{% endfor %}
 			</div>
 		</div>
 
-		<div class="homework-library-detail">
-			<div class="homework-library-panel-header homework-library-border">
-				Detail
+		<div class="homework-library-preview homework-library-border">
+            <div class="homework-library-panel-header">
+				Assignment Details
 			</div>
 			<div class="homework-library-panel-container">
 				<div class="homework-library-panel-content homework-library-border"></div>
-			</div>
+{#                        <div class="btn-wrapper">#}
+{#                            <a class="btn btn-primary" href="/homework/library/manage">Manage Libraries</a>#}
+{#                        </div>#}
+            </div>
 		</div>
-	</div>
+    </div>
+
+    <div class="btn-wrapper" style="float: right;">
+        <a class="btn btn-default" href="/homework">Back</a>
+        <a class="btn btn-primary" href="/homework/library/manage">Assign</a>
+    </div>
+
 </div>
