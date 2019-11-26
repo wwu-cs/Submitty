@@ -469,6 +469,7 @@ if not args.worker:
 config = OrderedDict()
 config['homework_library_enabled'] = False
 config['homework_library_location'] = os.path.join(SUBMITTY_INSTALL_DIR, 'library')
+config['homework_library_allowed'] = False
 with open(HOMEWORK_LIBRARY_JSON, 'w') as json_file:
     json.dump(config, json_file, indent=2)
 shutil.chown(HOMEWORK_LIBRARY_JSON, 'root', DAEMONPHP_GROUP)
