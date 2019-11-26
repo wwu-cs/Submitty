@@ -17,47 +17,11 @@
 <script type="text/javascript">
     $(function() {
         $("#libraryGitForm").submit(function(e){
-            document.body.style.cursor='wait';
             e.preventDefault();
             var form = e.target;
             var submitButton = form.querySelector("input[type='submit']");
-            submitButton.disabled = true;
-            $.ajax({
-                url: '{{ git_submit_url }}',
-                data: {
-                    csrf_token: '{{ csrf_token }}',
-                    git_url: form.git_url.value
-                },
-                type: 'POST',
-                success: function(data) {
-                    try {
-                        var jsondata = JSON.parse(data);
-                        if (jsondata['status'] == "success") {
-                            displaySubmissionMessage(jsondata);
-                            location.reload(true);
-                        } else {
-                            displaySubmissionMessage(jsondata);
-                        }
-                    document.body.style.cursor='default';
-                    }
-                    catch (e) {
-                        displaySubmissionMessage({
-                            status: "fail",
-                            message: "Error parsing response from server."
-                        });
-                        console.log(data);
-                    }
-                    submitButton.disabled = false;
-                    document.body.style.cursor='default';
-                },
-                error: function(request, status, error) {
-                    displaySubmissionMessage({
-                        status: "fail",
-                        message: request.responseText
-                    });
-                    submitButton.disabled = false;
-                }
-            });
+            var data = { git_url: form.git_url.value };
+            managerSubmitAjax('{{ git_submit_url }}', 'POST', data, submitButton);
         });
     });
 </script>

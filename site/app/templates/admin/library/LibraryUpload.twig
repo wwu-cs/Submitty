@@ -43,9 +43,9 @@
             e.target.disabled = true;
             uploadLibraryZip('{{ csrf_token }}', '{{ zip_submit_url }}')
             .then(function(response){
-                e.target.disabled = false;
                 displaySubmissionMessage(response);
-                location.reload(true);
+                // reload after showing message for a second
+                setTimeout(function(){ location.reload(true); }, 1000);
                 document.body.style.cursor='default';
             })
             .catch(function(response){

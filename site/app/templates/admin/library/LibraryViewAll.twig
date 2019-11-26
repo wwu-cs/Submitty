@@ -25,83 +25,12 @@
         <script type="text/javascript">
         function deleteLibrary(libraryName, ele) {
             if (!confirm('Are you sure you want to delete "' + libraryName + '"?')) return;
-            document.body.style.cursor='wait';
-            ele.disabled = true;
-            $.ajax({
-                url: '/homework/library/manage/remove/' + libraryName,
-                data: {
-                    csrf_token: '{{ csrf_token }}'
-                },
-                type: 'DELETE',
-                success: function(data) {
-                    try {
-                        var jsondata = JSON.parse(data);
-                        console.log(data);
-                        if (jsondata['status'] === "success") {
-                            displaySubmissionMessage(jsondata);
-                            location.reload(true);
-                        } else {
-                            displaySubmissionMessage(jsondata);
-                        }
-                    document.body.style.cursor='default';
-                    ele.disabled = false;
-                    }
-                    catch (e) {
-                        displaySubmissionMessage({
-                            status: "fail",
-                            message: "Error parsing response from server."
-                        });
-                    }
-                    document.body.style.cursor='default';
-                    ele.disabled = false;
-                },
-                error: function(request, status, error) {
-                    displaySubmissionMessage({
-                        status: "fail",
-                        message: request.responseText
-                    });
-                }
-            });
+            var url =  '/homework/library/manage/remove/' + libraryName;
+            managerSubmitAjax(url, 'DELETE', {}, ele);
         }
         function refreshLibrary(libraryName, ele) {
-            document.body.style.cursor='wait';
-            ele.disabled = true;
-            $.ajax({
-                url: '/homework/library/manage/update/' + libraryName,
-                data: {
-                    csrf_token: '{{ csrf_token }}'
-                },
-                type: 'PATCH',
-                success: function(data) {                    
-                    try {
-                        console.log(data);
-                        var jsondata = JSON.parse(data);
-                        if (jsondata['status'] === "success") {
-                            displaySubmissionMessage(jsondata);
-                            location.reload(true);
-                        } else {
-                            displaySubmissionMessage(jsondata);
-                        }
-                    document.body.style.cursor='default';    
-                    ele.disabled = false;                
-                    }
-                    catch (e) {
-                        displaySubmissionMessage({
-                            status: "fail",
-                            message: "Error parsing response from server."
-                        });
-                        console.log(data);
-                    }
-                    document.body.style.cursor='default';
-                    ele.disabled = false;
-                },
-                error: function(request, status, error) {
-                    displaySubmissionMessage({
-                        status: "fail",
-                        message: request.responseText
-                    });
-                }
-            });
+            var url = '/homework/library/manage/update/' + libraryName;
+            managerSubmitAjax(url, 'PATCH', {}, ele);
         }
 </script>
 	</div>

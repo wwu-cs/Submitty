@@ -39,5 +39,44 @@
         }
         $('#page_' + tab + '_nav').addClass('active-btn');
     }
+    function managerSubmitAjax(url, type, data, disableBtn) {
+        data.csrf_token = '{{ csrf_token }}';
+        document.body.style.cursor='wait';
+        disableBtn.disabled = true;
+        $.ajax({
+            url: url,
+            data: data,
+            type: type,
+            success: function(returnedData) {
+                try {
+                    var jsondata = JSON.parse(returnedData);
+                    console.log(returnedData);
+                    if (jsondata['status'] === "success") {
+                        displaySubmissionMessage(jsondata);
+                        // reload after showing message for a second
+                        setTimeout(function(){ location.reload(true); }, 1000);
+                    } else {
+                        displaySubmissionMessage(jsondata);
+                    }
+                    document.body.style.cursor='default';
+                    disableBtn.disabled = false;
+                }
+                catch (e) {
+                    displaySubmissionMessage({
+                        status: "fail",
+                        message: "Error parsing response from server."
+                    });
+                }
+                document.body.style.cursor='default';
+                disableBtn.disabled = false;
+            },
+            error: function(request, status, error) {
+                displaySubmissionMessage({
+                    status: "fail",
+                    message: request.responseText
+                });
+            }
+        });
+    }
 </script>
 
