@@ -89,6 +89,7 @@ class HomePageController extends AbstractController {
         );
     }
 
+    /**
      * @Route("/current_user/change_password", methods={"POST"})
      * @return Response
      */
