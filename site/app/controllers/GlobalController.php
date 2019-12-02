@@ -67,10 +67,10 @@ class GlobalController extends AbstractController {
                 ]);
 
                 $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['homework', 'library']),
-                    "title" => "Homework Library",
+                    "href" => $this->core->buildUrl(['homework', 'library', 'manage']),
+                    "title" => "Library Manager",
                     "class" => "nav-row",
-                    "id" => "nav-sidebar-homework-library",
+                    "id" => "nav-sidebar-library-manager",
                     "icon" => "fa-book-open"
                 ]);
             }

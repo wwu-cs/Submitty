@@ -28,19 +28,6 @@ class HomePageController extends AbstractController {
     }
 	
     /**
-     * Display the HomePageView to the student.
-     *
-     * @Route("/homework/library")
-     * @return Response
-     */
-    public function showLibrary() {
-        $this->core->getOutput()->addBreadcrumb("Homework Library");
-		return Response::WebOnlyResponse(
-			new WebResponse('Homework', 'library')
-		);
-    }
-
-    /**
      * @Route("/current_user/change_password", methods={"POST"})
      * @return Response
      */

@@ -7,7 +7,7 @@ use app\views\AbstractView;
 
 class LibraryManagerView extends AbstractView {
     public function showLibraryManager(String $text, array $libraries) {
-        $this->core->getOutput()->addBreadcrumb('Manage');
+        $this->core->getOutput()->addBreadcrumb('Library Manager');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
         $this->core->getOutput()->addInternalJs('drag-and-drop.js');
         $this->core->getOutput()->addInternalCss(FileUtils::joinPaths('fileinput.css'));

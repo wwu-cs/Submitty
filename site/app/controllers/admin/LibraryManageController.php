@@ -37,7 +37,7 @@ class LibraryManageController extends AbstractController {
     }
 
     /**
-     * Controller route to show the homework library page.
+     * Controller route to show the library manager page.
      *
      * @Route("/homework/library/manage", methods={"GET"})
      * @return Response
@@ -51,7 +51,7 @@ class LibraryManageController extends AbstractController {
             new WebResponse([
                 'admin', 'LibraryManager'
             ], 'showLibraryManager',
-                'Do all your fancy homework library things here!',
+                'View, upload, refresh, & delete your homework libraries here! ',
                 $response->getResults()
             )
         );
