@@ -86,6 +86,19 @@ class FileUtils {
         return false;
     }
 
+    public static function getPathsWithQuery($path, $query) {
+        $iter = new \RecursiveDirectoryIterator($path);
+        $paths = [];
+        foreach (new \RecursiveIteratorIterator($iter) as $file){
+            if (strpos($file->getFilename() , $query) !== false) {
+                if (preg_match("/.*" . $query . "$/i", $file->getPathname()) > 0) {
+                    $paths[] = $file->getPathname();
+                }
+            }
+        }
+        return $paths;
+    }
+
     public static function getDetails($path, $query) {
         $config_path = FileUtils::getPathWithQueryAndTip($path, $query, 'config.json');
         $readme_path = FileUtils::getPathWithQueryAndTip($path, $query, 'README.md');
@@ -97,7 +110,7 @@ class FileUtils {
                 'tags' => $contents['tags'] ?? [],
                 'readme' => $readme_path,
             );
-            return json_encode($parsed_contents);
+            return $parsed_contents;
         }
         return false;
     }
@@ -312,7 +325,7 @@ class FileUtils {
      * @return array
      */
     public static function getDirWithText($path, $text) {
-        $dirs = FileUtils::getAllDirs($path, $text);
+        $dirs = FileUtils::getPathsWithQuery($path, $text);
         $dirs_with_text = [];
         foreach ($dirs as $entry) {
             // https://www.php.net/manual/en/function.strpos.php
