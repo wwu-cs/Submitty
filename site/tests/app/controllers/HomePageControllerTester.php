@@ -34,7 +34,7 @@ class HomePageControllerTester extends BaseUnitTest {
 		$this->core = $this->createMockCore([
 			'getUsernameChangeText' => True,
             'homework_library_enable' => True,
-            'homework_library_location' => '/tmp/library'
+            'homework_library_location' => $this->library_path
 		], [
 			'accessGrading' => True
 		], [
@@ -61,17 +61,22 @@ class HomePageControllerTester extends BaseUnitTest {
         $testRepoUrl = 'https://github.com/Submitty/Tutorial.git';
         $useCase->addGitLibrary($testRepoUrl);
 
-	    $response = $this->controller->searchLibraryGradeableWithQuery('Tutorial', $this->library_path);
+		$response = $this->controller->searchLibraryGradeableWithQuery('Tutorial', $this->library_path);
+
         $this->assertTrue($response->json_response->json['status'] === "success");
-        $this->assertTrue($response->json_response->json['data'] === '{"path":"\/tmp\/library\/Tutorial\/examples\/07_loop_depth\/config\/config.json","title":"Python - Determine Loop Depth"}');
+        $this->assertTrue(count($response->json_response->json['data']) === 17);
     }
 
 	public function testHomePageSearchLibrary() {
+        $useCase = new LibraryAddUseCase($this->core);
+
+        $testRepoUrl = 'https://github.com/Submitty/Tutorial.git';
+		$useCase->addGitLibrary($testRepoUrl);
+		
 		$response = $this->controller->searchLibrary($this->library_path);
 		
 		$this->assertTrue($response->json_response->json['status'] === "success");
-		$this->assertTrue($response->json_response->json['data'] === $this->tmp_dirs);
-		$this->assertTrue(count($response->json_response->json['data']) === 5);
+		$this->assertTrue(count($response->json_response->json['data']) === 17);
 		$this->assertInstanceOf(JsonResponse::class, $response->json_response);
 	}
 
@@ -80,8 +85,7 @@ class HomePageControllerTester extends BaseUnitTest {
 		$response = $this->controller->searchLibraryWithQuery($query, $this->library_path);
 		
 		$this->assertTrue($response->json_response->json['status'] === "success");
-		$this->assertTrue($response->json_response->json['data'] === ["LIVE_UPDATES"]);
-		$this->assertTrue(count($response->json_response->json['data']) === 1);
+		$this->assertTrue(count($response->json_response->json['data']) === 2);
 		$this->assertInstanceOf(JsonResponse::class, $response->json_response);
 	}
 

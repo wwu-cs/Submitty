@@ -89,11 +89,10 @@ class FileUtils {
     public static function getPathsWithQuery($path, $query) {
         $iter = new \RecursiveDirectoryIterator($path);
         $paths = [];
-        foreach (new \RecursiveIteratorIterator($iter) as $file){
-            if (strpos($file->getFilename() , $query) !== false) {
-                if (preg_match("/.*" . $query . "$/i", $file->getPathname()) > 0) {
-                    $paths[] = $file->getPathname();
-                }
+        foreach (new \RecursiveIteratorIterator($iter) as $file) {
+            $url = "/.*" . $query . ".*$/i";
+            if (preg_match($url, $file->getPathname())) {
+                $paths[] = $file->getPathname();
             }
         }
         return $paths;
