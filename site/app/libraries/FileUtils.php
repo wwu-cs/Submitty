@@ -98,22 +98,6 @@ class FileUtils {
         return $paths;
     }
 
-    public static function getDetails($path, $query) {
-        $config_path = FileUtils::getPathWithQueryAndTip($path, $query, 'config.json');
-        $readme_path = FileUtils::getPathWithQueryAndTip($path, $query, 'README.md');
-        if ($config_path) {
-            $contents = FileUtils::json_decode_commented(file_get_contents($config_path), true);
-            $parsed_contents = array(
-                'path' => $config_path,
-                'title' => $contents['testcases'][0]['title'] ?? 'Title not Specified',
-                'tags' => $contents['tags'] ?? [],
-                'readme' => $readme_path,
-            );
-            return $parsed_contents;
-        }
-        return false;
-    }
-
     // Credit to Alexander Shostak at https://stackoverflow.com/questions/8148797/a-json-parser-for-php-that-supports-comments
     public static function json_decode_commented($json, $assoc = false, $maxDepth = 512, $opts = 0) {
         $json = preg_replace('~

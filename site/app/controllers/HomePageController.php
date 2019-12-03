@@ -68,11 +68,27 @@ class HomePageController extends AbstractController {
      * @return Response
      */
     public function searchLibraryGradeableWithQuery($query, $path = "/usr/local/submitty/library") {
-        $config = FileUtils::getDetails($path, $query);
+        $config = $this->getDetails($path, $query);
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($config)
         );
 	}
+
+    public static function getDetails($path, $query) {
+        $config_path = FileUtils::getPathWithQueryAndTip($path, $query, 'config.json');
+        $readme_path = FileUtils::getPathWithQueryAndTip($path, $query, 'README.md');
+        if ($config_path) {
+            $contents = FileUtils::json_decode_commented(file_get_contents($config_path), true);
+            $parsed_contents = array(
+                'path' => $config_path,
+                'title' => $contents['testcases'][0]['title'] ?? 'Title not Specified',
+                'tags' => $contents['tags'] ?? [],
+                'readme' => $readme_path,
+            );
+            return $parsed_contents;
+        }
+        return false;
+    }
     
     /**
      * Display the LibraryManagerView to the instructor/admin.
