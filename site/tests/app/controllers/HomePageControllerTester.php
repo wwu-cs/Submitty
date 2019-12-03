@@ -39,11 +39,7 @@ class HomePageControllerTester extends BaseUnitTest {
 			'accessGrading' => True
 		], [
 			'updateUser' => []
-		], [], [
-			'addSuccessMessage' => true,
-			'addErrorMessage' => true,
-			'buildUrl' => 'http://192.168.56.111/home'
-		]);
+		], [], []);
 
 		$this->controller = new HomePageController($this->core);
 
