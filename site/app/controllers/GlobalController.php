@@ -66,13 +66,15 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-plus-square"
                 ]);
 
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['homework', 'library', 'manage']),
-                    "title" => "Library Manager",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-library-manager",
-                    "icon" => "fa-book-open"
-                ]);
+                if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildUrl(['homework', 'library', 'manage']),
+                        "title" => "Library Manager",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-library-manager",
+                        "icon" => "fa-book-open"
+                    ]);
+                }
             }
 
             if ($unread_notifications_count !== null) {
