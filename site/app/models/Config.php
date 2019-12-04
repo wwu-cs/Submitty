@@ -258,7 +258,7 @@ class Config extends AbstractModel {
 
         $homework_library_enabled = false;
         $homework_library_location = '~/library';
-        $homework_library_access_level = false;
+        $homework_library_access_level = User::LEVEL_SUPERUSER;
         if ($homework_library_json) {
             $homework_library_enabled = $homework_library_json['homework_library_enabled'];
             $homework_library_location = $homework_library_json['homework_library_location'];
