@@ -57,10 +57,10 @@ class HomePageControllerTester extends BaseUnitTest {
         $testRepoUrl = 'https://github.com/Submitty/Tutorial.git';
         $useCase->addGitLibrary($testRepoUrl);
 
-		$response = $this->controller->searchLibraryGradeableWithQuery('Tutorial', $this->library_path);
+		$response = $this->controller->searchLibraryGradeableWithQuery('16_docker_network_python', $this->library_path);
 
         $this->assertTrue($response->json_response->json['status'] === "success");
-        $this->assertTrue(count($response->json_response->json['data']) === 17);
+        $this->assertTrue(preg_match("/.*16_docker_network_python\/config\/config\.json$/i", $response->json_response->json['data']['path']) === 1);
     }
 
 	public function testHomePageSearchLibrary() {
