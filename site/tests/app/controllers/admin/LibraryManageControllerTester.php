@@ -28,7 +28,7 @@ class LibraryManageControllerTester extends BaseUnitTest {
     /** @var LibraryManageController */
     protected $controller;
 
-    protected function createConfigWithLibrary(bool $enabled = true, string $location = 'library location', int $access_level = User::LEVEL_SUPERUSER) {
+    protected function createConfigWithLibrary(bool $enabled = true, string $location = 'library location', int $access_level = User::LEVEL_USER) {
         $this->location = $location;
         $this->core = $this->createMockCore([
             'homework_library_enable' => $enabled,
