@@ -33,8 +33,9 @@ class LibraryManageController extends AbstractController {
      */
     public function __construct(Core $core) {
         parent::__construct($core);
+        $homeworkLibraryAccessLevel = $this->core->getConfig()->homeworkLibraryAccessLevel();
 
-        if (!$this->core->getConfig()->canAccessHomeworkLibrary()) {
+        if (!$this->core->getUser()->canAccess($homeworkLibraryAccessLevel)) {
             throw new AuthorizationException('You do not have permission to access this route', 401);
         }
 

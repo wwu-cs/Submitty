@@ -59,8 +59,8 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $config->method('getHomeworkLibraryLocation')->willReturn($config_values['homework_library_location']);
         }
 
-        if (isset($config_values['homework_library_allowed'])) {
-            $config->method('canAccessHomeworkLibrary')->willReturn($config_values['homework_library_allowed']);
+        if (isset($config_values['homework_library_access_level'])) {
+            $config->method('homeworkLibraryAccessLevel')->willReturn($config_values['homework_library_access_level']);
         }
 
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
