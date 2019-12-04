@@ -68,7 +68,7 @@ class GlobalController extends AbstractController {
 
                 if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
                     $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildUrl(['homework', 'library', 'manage']),
+                        "href" => $this->core->buildUrl(['manage']),
                         "title" => "Library Manager",
                         "class" => "nav-row",
                         "id" => "nav-sidebar-library-manager",

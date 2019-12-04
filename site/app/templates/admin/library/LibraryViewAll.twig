@@ -25,11 +25,11 @@
         <script type="text/javascript">
         function deleteLibrary(libraryName, ele) {
             if (!confirm('Are you sure you want to delete "' + libraryName + '"?')) return;
-            var url =  '/homework/library/manage/remove/' + libraryName;
+            var url =  '/manage/remove/' + libraryName;
             managerSubmitAjax(url, 'DELETE', {}, ele);
         }
         function refreshLibrary(libraryName, ele) {
-            var url = '/homework/library/manage/update/' + libraryName;
+            var url = '/manage/update/' + libraryName;
             managerSubmitAjax(url, 'PATCH', {}, ele);
         }
 </script>
