@@ -26,6 +26,7 @@ class HomePageController extends AbstractController {
      */
     public function __construct(Core $core) {
         parent::__construct($core);
+        $this->homework_path = $this->core->getConfig()->getHomeworkLibraryLocation();
     }
 	
     /**
@@ -45,7 +46,10 @@ class HomePageController extends AbstractController {
      * @Route("/homework/library/search", methods={"GET"})
      * @return Response
      */
-    public function searchLibrary($path = "/usr/local/submitty/library") {
+    public function searchLibrary($path = null) {
+        if ($path === null) {
+            $path = $this->homework_path;
+        }
         $gradeable_ids = FileUtils::getDirWithText($path, "config.json");
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($gradeable_ids)
@@ -56,7 +60,10 @@ class HomePageController extends AbstractController {
      * @Route("/homework/library/search/{query}", methods={"GET"})
      * @return Response
      */
-    public function searchLibraryWithQuery($query, $path = "/usr/local/submitty/library") {
+    public function searchLibraryWithQuery($query, $path = null) {
+        if ($path === null) {
+            $path = $this->homework_path;
+        }
         $gradeable_ids = FileUtils::getPathsWithQuery($path, $query);
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($gradeable_ids)
@@ -67,7 +74,10 @@ class HomePageController extends AbstractController {
      * @Route("/homework/library/search_gradeable/{query}", methods={"GET"})
      * @return Response
      */
-    public function searchLibraryGradeableWithQuery($query, $path = "/usr/local/submitty/library") {
+    public function searchLibraryGradeableWithQuery($query, $path = null) {
+        if ($path === null) {
+            $path = $this->homework_path;
+        }
         $config = $this->getDetails($path, $query);
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($config)
