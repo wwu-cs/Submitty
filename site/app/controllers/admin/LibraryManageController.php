@@ -8,7 +8,6 @@ use app\controllers\AbstractController;
 use app\exceptions\NotEnabledException;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
-use app\exceptions\AuthorizationException;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
 use app\libraries\homework\UseCases\LibraryGetUseCase;
