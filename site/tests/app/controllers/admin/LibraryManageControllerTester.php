@@ -28,13 +28,12 @@ class LibraryManageControllerTester extends BaseUnitTest {
     /** @var LibraryManageController */
     protected $controller;
 
-    protected function createConfigWithLibrary(bool $enabled = true, string $location = 'library location', int $access_level = User::LEVEL_USER) {
+    protected function createConfigWithLibrary(bool $enabled = true, string $location = 'library location', bool $allow_access = true) {
         $this->location = $location;
         $this->core = $this->createMockCore([
             'homework_library_enable' => $enabled,
-            'homework_library_location' => $this->location,
-            'homework_library_access_level' => $access_level
-        ], ['access_admin']);
+            'homework_library_location' => $this->location
+        ], ['can_access' => $allow_access]);
         $this->controller = new LibraryManageController($this->core);
     }
 
@@ -129,7 +128,7 @@ class LibraryManageControllerTester extends BaseUnitTest {
     public function testItThrowsAuthorizationException() {
         $this->expectException(AuthorizationException::class);
         $this->expectExceptionMessage('You do not have permission to access this route');
-        $this->createConfigWithLibrary(true, 'library location', 0);
+        $this->createConfigWithLibrary(true, 'library location', false);
     }
 
     /** @test */

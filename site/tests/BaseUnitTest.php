@@ -115,6 +115,9 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             /** @noinspection PhpUnhandledExceptionInspection */
             $user = $this->createMockModel(User::class);
             $user->method('getId')->willReturn("testUser");
+            if (isset($user_config['can_access'])) {
+                $user->method('canAccess')->willReturn($user_config['can_access'] == true);
+            }
             if (isset($user_config['access_grading'])) {
                 $user->method('accessGrading')->willReturn($user_config['access_grading'] == true);
             } else {
