@@ -8,6 +8,7 @@ use app\controllers\AbstractController;
 use app\exceptions\NotEnabledException;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use app\exceptions\AuthorizationException;
 use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
 use app\libraries\homework\UseCases\LibraryGetUseCase;
@@ -15,7 +16,7 @@ use app\libraries\homework\UseCases\LibraryRemoveUseCase;
 use app\libraries\homework\UseCases\LibraryUpdateUseCase;
 
 /**
- * Class LibraryManage
+ * Class LibraryManageController
  *
  * Following the clean architecture
  * https://blog.cleancoder.com/uncle-bob/2012/08/13/the-clean-architecture.html
@@ -27,9 +28,15 @@ class LibraryManageController extends AbstractController {
      * LibraryManage constructor.
      * @param Core $core
      * @throws NotEnabledException
+	 * @throws AuthorizationException
      */
     public function __construct(Core $core) {
         parent::__construct($core);
+        $homeworkLibraryAccessLevel = $this->core->getConfig()->homeworkLibraryAccessLevel();
+
+        if (!$this->core->getUser()->canAccess($homeworkLibraryAccessLevel)) {
+            throw new AuthorizationException('You do not have permission to access this route', 401);
+        }
 
         if (!$this->core->getConfig()->useHomeworkLibrary()) {
             throw new NotEnabledException();

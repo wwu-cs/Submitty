@@ -211,6 +211,15 @@ class User extends AbstractModel {
     }
 
     /**
+     * Gets whether the user is allowed to access an interface that requires the given access level
+     * @param $level
+     * @return bool
+     */
+    public function canAccess($level) {
+        return $this->access_level <= $level;
+    }
+
+    /**
      * Gets whether the user is allowed to access the faculty interface
      * @return bool
      */
