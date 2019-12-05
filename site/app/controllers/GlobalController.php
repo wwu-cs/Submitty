@@ -66,7 +66,7 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-plus-square"
                 ]);
 
-                if ($this->core->getUser()->getAccessLevel() === User::LEVEL_SUPERUSER) {
+                if ($this->core->getUser()->canAccess($this->core->getConfig()->homeworkLibraryAccessLevel())) {
                     $sidebar_buttons[] = new Button($this->core, [
                         "href" => $this->core->buildUrl(['manage']),
                         "title" => "Library Manager",
