@@ -34,7 +34,7 @@ class LibraryManageControllerTester extends BaseUnitTest {
             'homework_library_enable' => $enabled,
             'homework_library_location' => $this->location,
             'homework_library_access_level' => $access_level
-        ]);
+        ], ['access_admin']);
         $this->controller = new LibraryManageController($this->core);
     }
 
