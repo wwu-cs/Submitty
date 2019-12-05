@@ -228,20 +228,13 @@ class WebRouter {
             );
         }
 
-<<<<<<< HEAD
-        if(!$this->core->getConfig()->isCourseLoaded() && !Utils::endsWith($this->parameters['_controller'], 'MiscController')) {
-            if ($logged_in){
-                if ($this->parameters['_method'] !== 'logout' &&
-                    !Utils::endsWith($this->parameters['_controller'], 'HomePageController') &&
-                    !Utils::endsWith($this->parameters['_controller'], 'LibraryManageController')) {
-=======
         if (!$this->core->getConfig()->isCourseLoaded() && !Utils::endsWith($this->parameters['_controller'], 'MiscController')) {
             if ($logged_in) {
                 if (
-                    $this->parameters['_method'] !== 'logout'
-                    && !Utils::endsWith($this->parameters['_controller'], 'HomePageController')
+                    $this->parameters['_method'] !== 'logout' &&
+                    !Utils::endsWith($this->parameters['_controller'], 'HomePageController') &&
+                    !Utils::endsWith($this->parameters['_controller'], 'LibraryManageController')
                 ) {
->>>>>>> 5d2302a4973c9641fd0bf72350f5cc6f165fd131
                     return Response::RedirectOnlyResponse(
                         new RedirectResponse($this->core->buildUrl(['home']))
                     );

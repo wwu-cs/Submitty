@@ -1,5 +1,6 @@
-<?php namespace tests\app\libraries\homework\UseCases\LibraryRemove;
+<?php
 
+namespace tests\app\libraries\homework\UseCases\LibraryRemove;
 
 use app\libraries\homework\Entities\LibraryEntity;
 use tests\app\libraries\homework\UseCases\BaseTestCase;
@@ -53,5 +54,4 @@ class LibraryRemoveTester extends BaseTestCase {
 
         $this->assertEquals('Error when removing library \'fail to remove\'', $this->response->error);
     }
-
 }

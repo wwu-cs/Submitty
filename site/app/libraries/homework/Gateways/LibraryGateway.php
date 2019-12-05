@@ -1,5 +1,6 @@
-<?php namespace app\libraries\homework\Gateways;
+<?php
 
+namespace app\libraries\homework\Gateways;
 
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Entities\LibraryAddStatus;
@@ -49,5 +50,4 @@ interface LibraryGateway {
      * @return bool
      */
     public function removeLibrary(LibraryEntity $library): bool;
-
 }

@@ -1,5 +1,6 @@
-<?php namespace tests\app\libraries\homework\UseCases\LibraryAdd;
+<?php
 
+namespace tests\app\libraries\homework\UseCases\LibraryAdd;
 
 use app\libraries\homework\Entities\LibraryEntity;
 use tests\app\libraries\homework\UseCases\BaseTestCase;
@@ -41,8 +42,10 @@ class GitLibraryAddTester extends BaseTestCase {
     public function testItDoesNotAddInvalidGitUrl() {
         $this->handleTest('not an actual git url lol');
 
-        $this->assertEquals('The git url is not of the right format.',
-            $this->response->error);
+        $this->assertEquals(
+            'The git url is not of the right format.',
+            $this->response->error
+        );
     }
 
     /** @test */

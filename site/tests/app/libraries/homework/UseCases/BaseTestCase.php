@@ -1,4 +1,6 @@
-<?php namespace tests\app\libraries\homework\UseCases;
+<?php
+
+namespace tests\app\libraries\homework\UseCases;
 
 use app\libraries\Core;
 use tests\BaseUnitTest;

@@ -26,7 +26,7 @@ class HomePageController extends AbstractController {
     public function __construct(Core $core) {
         parent::__construct($core);
     }
-	
+    
     /**
      * Display the HomePageView to the student.
      *
@@ -35,9 +35,9 @@ class HomePageController extends AbstractController {
      */
     public function showLibrary() {
         $this->core->getOutput()->addBreadcrumb("Homework Library");
-		return Response::WebOnlyResponse(
-			new WebResponse('Homework', 'library')
-		);
+        return Response::WebOnlyResponse(
+            new WebResponse('Homework', 'library')
+        );
     }
 
     /**

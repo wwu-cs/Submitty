@@ -1,5 +1,6 @@
-<?php namespace app\controllers\admin;
+<?php
 
+namespace app\controllers\admin;
 
 use app\libraries\Core;
 use app\libraries\FileUtils;
@@ -56,7 +57,8 @@ class LibraryManageController extends AbstractController {
 
         if ($results->error) {
             $response = JsonResponse::getFailResponse($results->error);
-        } else {
+        }
+        else {
             $response = JsonResponse::getSuccessResponse($results->getMessage());
         }
 
@@ -78,7 +80,8 @@ class LibraryManageController extends AbstractController {
 
         if ($results->error) {
             $response = JsonResponse::getFailResponse($results->error);
-        } else {
+        }
+        else {
             $response = JsonResponse::getSuccessResponse($results->getMessage());
         }
 
@@ -119,7 +122,8 @@ class LibraryManageController extends AbstractController {
 
         if ($results->error) {
             $response = JsonResponse::getFailResponse($results->error);
-        } else {
+        }
+        else {
             $response = JsonResponse::getSuccessResponse($results->getMessage());
         }
 

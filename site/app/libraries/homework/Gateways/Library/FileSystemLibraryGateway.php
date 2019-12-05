@@ -1,5 +1,6 @@
-<?php namespace app\libraries\homework\Gateways\Library;
+<?php
 
+namespace app\libraries\homework\Gateways\Library;
 
 use ZipArchive;
 use app\libraries\FileUtils;
@@ -66,13 +67,14 @@ class FileSystemLibraryGateway implements LibraryGateway {
 
         $zip = new ZipArchive();
         $res = $zip->open($tmpFilePath);
-        if ($res === TRUE) {
+        if ($res === true) {
             if (!$zip->extractTo($library->getLibraryPath())) {
                 FileUtils::recursiveRmdir($library->getLibraryPath());
                 return LibraryAddStatus::error('Error extracting zip file.');
             }
             $zip->close();
-        } else {
+        }
+        else {
             FileUtils::recursiveRmdir($library->getLibraryPath());
             return LibraryAddStatus::error('Error opening zip file.');
         }

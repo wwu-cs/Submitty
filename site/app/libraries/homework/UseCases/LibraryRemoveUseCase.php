@@ -1,31 +1,11 @@
-<?php namespace app\libraries\homework\UseCases;
+<?php
+
+namespace app\libraries\homework\UseCases;
 
 use app\libraries\Core;
-use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\LibraryGateway;
-
-class LibraryRemoveResponse {
-    /** @var string */
-    protected $message;
-
-    /** @var string */
-    public $error;
-
-    public function __construct(string $message = '') {
-        $this->message = $message;
-    }
-
-    public function getMessage(): string {
-        return $this->message;
-    }
-
-    public static function error(string $message): LibraryRemoveResponse {
-        $response = new static;
-        $response->error = $message;
-        return $response;
-    }
-}
+use app\libraries\homework\UseCases\LibraryRemoveResponse;
 
 class LibraryRemoveUseCase extends BaseUseCase {
     /** @var LibraryGateway */
@@ -56,5 +36,4 @@ class LibraryRemoveUseCase extends BaseUseCase {
 
         return LibraryRemoveResponse::error("Error when removing library '$name'");
     }
-
 }

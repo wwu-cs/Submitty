@@ -1,5 +1,6 @@
-<?php namespace tests\app\libraries\homework\UseCases\LibraryGet;
+<?php
 
+namespace tests\app\libraries\homework\UseCases\LibraryGet;
 
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\UseCases\LibraryGetUseCase;

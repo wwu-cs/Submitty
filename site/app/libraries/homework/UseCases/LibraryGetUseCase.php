@@ -1,24 +1,12 @@
-<?php namespace app\libraries\homework\UseCases;
+<?php
 
+namespace app\libraries\homework\UseCases;
 
 use app\libraries\Core;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
-
-class LibraryGetResponse {
-    /** @var string[] */
-    protected $libraries = [];
-
-    public function addLibrary(string $lib) {
-        $this->libraries[] = $lib;
-    }
-
-    public function getResults(): array {
-        return $this->libraries;
-    }
-}
-
+use app\libraries\homework\UseCases\LibraryGetResponse;
 
 class LibraryGetUseCase extends BaseUseCase {
 

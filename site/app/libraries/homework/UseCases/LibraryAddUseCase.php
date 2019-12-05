@@ -1,33 +1,13 @@
-<?php namespace app\libraries\homework\UseCases;
+<?php
+
+namespace app\libraries\homework\UseCases;
 
 use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
-
-class LibraryAddResponse {
-    /** @var string */
-    protected $message;
-
-    /** @var string */
-    public $error;
-
-    public function __construct(string $message = '') {
-        $this->message = $message;
-    }
-
-    public function getMessage(): string {
-        return $this->message;
-    }
-
-    public static function error(string $message): LibraryAddResponse {
-        $response = new static;
-        $response->error = $message;
-        return $response;
-    }
-
-}
+use app\libraries\homework\UseCases\LibraryAddResponse;
 
 class LibraryAddUseCase extends BaseUseCase {
     /** @var LibraryGateway */
@@ -53,11 +33,13 @@ class LibraryAddUseCase extends BaseUseCase {
         // Regex can be viewed in detail here.
         // https://www.debuggex.com/r/H4kRw1G0YPyBFjfm
         // It validates .git repository urls.
-        if (!preg_match(
-            '/((git|ssh|http(s)?)|(git@[\w\.]+))(:(\/\/)?)([\w\.@\:\/\-~]+)(\.git)(\/)?/',
-            $repoUrl,
-            $matches
-        )) {
+        if (
+            !preg_match(
+                '/((git|ssh|http(s)?)|(git@[\w\.]+))(:(\/\/)?)([\w\.@\:\/\-~]+)(\.git)(\/)?/',
+                $repoUrl,
+                $matches
+            )
+        ) {
             return LibraryAddResponse::error('The git url is not of the right format.');
         }
 
@@ -96,7 +78,7 @@ class LibraryAddUseCase extends BaseUseCase {
         $name = $zipFile['name'];
         $tmpName = $zipFile['tmp_name'];
 
-        if (!FileUtils::isValidFileName($name) || strpos($name, '/') !== FALSE) {
+        if (!FileUtils::isValidFileName($name) || strpos($name, '/') !== false) {
             return LibraryAddResponse::error('Invalid file name.');
         }
 

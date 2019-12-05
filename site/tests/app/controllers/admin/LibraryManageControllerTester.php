@@ -1,5 +1,6 @@
-<?php namespace tests\app\controllers\admin;
+<?php
 
+namespace tests\app\controllers\admin;
 
 use tests\BaseUnitTest;
 use app\libraries\Core;
@@ -198,8 +199,7 @@ class LibraryManageControllerTester extends BaseUnitTest {
         ], $response->json);
     }
 
-    public function tearDown(): void
-    {
+    public function tearDown(): void {
         parent::tearDown();
 
         $_FILES = [];
