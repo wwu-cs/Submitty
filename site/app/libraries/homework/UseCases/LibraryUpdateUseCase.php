@@ -1,4 +1,6 @@
-<?php namespace app\libraries\homework\UseCases;
+<?php
+
+namespace app\libraries\homework\UseCases;
 
 use app\libraries\Core;
 use app\libraries\homework\Entities\LibraryEntity;
