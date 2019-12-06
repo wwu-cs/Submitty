@@ -9,35 +9,15 @@ use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\Library\FileSystemLibraryGateway;
 
 class FileSystemLibraryGatewayTester extends BaseTestCase {
+    const VALID_GIT_URL = "https://github.com/Submitty/Submitty.git";
+
     /** @var FileSystemLibraryGateway */
     protected $gateway;
-
-    const VALID_GIT_URL = "https://github.com/Submitty/Submitty.git";
 
     public function setUp(): void {
         parent::setUp();
 
         $this->gateway = new FileSystemLibraryGateway();
-    }
-
-    protected function createLibraryWithName(string $name) {
-        FileUtils::createDir(FileUtils::joinPaths($this->location, $name));
-    }
-
-    protected function createLibrary(LibraryEntity $library) {
-        $this->createLibraryWithName($library->getName());
-    }
-
-    protected function createTestZip(string $zipName): string {
-        $zip = new ZipArchive();
-
-        $f = FileUtils::joinPaths($this->location, $zipName);
-
-        $res = $zip->open($f, ZipArchive::CREATE);
-        $this->assertTrue($res);
-        $zip->addFromString('test.txt', 'File content. Hurray.');
-        $zip->close();
-        return $f;
     }
 
     /** @test */
@@ -48,6 +28,16 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
         $this->assertLibraryAddStatusSuccess($return, $library);
         $this->assertDirectoryExists($library->getLibraryPath());
         $this->assertDirectoryExists(FileUtils::joinPaths($library->getLibraryPath(), '.git'));
+    }
+
+    /**
+     * @param LibraryAddStatus $status
+     * @param LibraryEntity    $library
+     */
+    protected function assertLibraryAddStatusSuccess(LibraryAddStatus $status, LibraryEntity $library) {
+        $this->assertNotNull($status->library);
+        $this->assertTrue($library->is($status->library));
+        $this->assertEquals(LibraryAddStatus::SUCCESS, $status->message);
     }
 
     /** @test */
@@ -61,6 +51,16 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
             'Error cloning repository. fatal: repository \'invalid url\' does not exist'
         );
         $this->assertDirectoryNotExists($library->getLibraryPath());
+    }
+
+    /**
+     * @param LibraryAddStatus $status
+     * @param string           $message
+     */
+    protected function assertLibraryAddStatusError(LibraryAddStatus $status, string $message) {
+        $this->assertNull($status->library);
+
+        $this->assertEquals($message, $status->message);
     }
 
     /** @test */
@@ -82,6 +82,18 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
         $this->assertLibraryAddStatusSuccess($return, $library);
         $this->assertDirectoryExists($library->getLibraryPath());
         $this->assertFileExists($library->getLibraryPath() . '/test.txt');
+    }
+
+    protected function createTestZip(string $zipName): string {
+        $zip = new ZipArchive();
+
+        $f = FileUtils::joinPaths($this->location, $zipName);
+
+        $res = $zip->open($f, ZipArchive::CREATE);
+        $this->assertTrue($res);
+        $zip->addFromString('test.txt', 'File content. Hurray.');
+        $zip->close();
+        return $f;
     }
 
     /** @test */
@@ -106,6 +118,10 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
         $this->assertEquals('lib3', $results[2]->getName());
     }
 
+    protected function createLibraryWithName(string $name) {
+        FileUtils::createDir(FileUtils::joinPaths($this->location, $name));
+    }
+
     /** @test */
     public function testItDoesNotOverwriteLibrariesZip() {
         $library = new LibraryEntity('name', $this->location);
@@ -116,6 +132,10 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
         $this->assertLibraryAddStatusError($status, 'Library already exists.');
     }
 
+    protected function createLibrary(LibraryEntity $library) {
+        $this->createLibraryWithName($library->getName());
+    }
+
     /** @test */
     public function testItDoesNotOverwriteLibrariesGit() {
         $library = new LibraryEntity('name', $this->location);
@@ -124,26 +144,6 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
         $status = $this->gateway->addGitLibrary($library, 'url');
 
         $this->assertLibraryAddStatusError($status, 'Library already exists.');
-    }
-
-    /**
-     * @param LibraryAddStatus $status
-     * @param LibraryEntity $library
-     */
-    protected function assertLibraryAddStatusSuccess(LibraryAddStatus $status, LibraryEntity $library) {
-        $this->assertNotNull($status->library);
-        $this->assertTrue($library->is($status->library));
-        $this->assertEquals(LibraryAddStatus::SUCCESS, $status->message);
-    }
-
-    /**
-     * @param LibraryAddStatus $status
-     * @param string $message
-     */
-    protected function assertLibraryAddStatusError(LibraryAddStatus $status, string $message) {
-        $this->assertNull($status->library);
-
-        $this->assertEquals($message, $status->message);
     }
 
     /** @test */

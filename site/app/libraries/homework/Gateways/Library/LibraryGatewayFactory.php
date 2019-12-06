@@ -11,7 +11,7 @@ class LibraryGatewayFactory {
      *
      * @return LibraryGateway
      */
-    public static function getInstance() {
+    public static function getInstance(): LibraryGateway {
         if (!static::$instance) {
             static::$instance = new FileSystemLibraryGateway;
         }
@@ -34,5 +34,4 @@ class LibraryGatewayFactory {
     public static function clearInstance() {
         static::$instance = null;
     }
-
 }

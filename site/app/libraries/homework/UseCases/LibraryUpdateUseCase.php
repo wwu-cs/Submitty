@@ -16,13 +16,6 @@ class LibraryUpdateResponse {
     }
 
     /**
-     * @return string
-     */
-    public function getMessage() {
-        return $this->message;
-    }
-
-    /**
      * @param string $message
      * @return static
      */
@@ -30,6 +23,13 @@ class LibraryUpdateResponse {
         $instance = new static('');
         $instance->error = $message;
         return $instance;
+    }
+
+    /**
+     * @return string
+     */
+    public function getMessage() {
+        return $this->message;
     }
 }
 

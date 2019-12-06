@@ -11,7 +11,7 @@ interface LibraryGateway {
      * On success will return 'success', and on failure will return an error message
      *
      * @param LibraryEntity $library
-     * @param string $repoUrl
+     * @param string        $repoUrl
      * @return LibraryAddStatus
      */
     public function addGitLibrary(LibraryEntity $library, string $repoUrl): LibraryAddStatus;
@@ -21,7 +21,7 @@ interface LibraryGateway {
      * On success will return 'success', and on failure will return an error message
      *
      * @param LibraryEntity $library
-     * @param string $tmpFilePath
+     * @param string        $tmpFilePath
      * @return LibraryAddStatus
      */
     public function addZipLibrary(LibraryEntity $library, string $tmpFilePath): LibraryAddStatus;

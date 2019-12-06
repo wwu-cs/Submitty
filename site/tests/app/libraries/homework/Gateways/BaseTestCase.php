@@ -1,9 +1,9 @@
 <?php namespace tests\app\libraries\homework\Gateways;
 
 use app\libraries\Core;
-use app\libraries\FileUtils;
-use app\libraries\Utils;
 use tests\BaseUnitTest;
+use app\libraries\Utils;
+use app\libraries\FileUtils;
 
 class BaseTestCase extends BaseUnitTest {
     /** @var Core */
@@ -18,9 +18,9 @@ class BaseTestCase extends BaseUnitTest {
         FileUtils::createDir($this->location);
 
         $this->core = $this->createMockCore([
-            'homework_library_enable' => true,
-            'homework_library_location' => $this->location
-        ]);
+                                                'homework_library_enable'   => true,
+                                                'homework_library_location' => $this->location,
+                                            ]);
     }
 
     /**

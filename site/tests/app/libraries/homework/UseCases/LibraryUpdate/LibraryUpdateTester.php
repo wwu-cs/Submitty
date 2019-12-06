@@ -19,10 +19,6 @@ class LibraryUpdateTester extends BaseTestCase {
         $this->useCase = new LibraryUpdateUseCase($this->core);
     }
 
-    public function handleTest($library) {
-        $this->response = $this->useCase->updateLibrary($library);
-    }
-
     /** @test */
     public function testUpdateLibrary() {
         $library = new LibraryEntity('name', $this->location);
@@ -31,6 +27,10 @@ class LibraryUpdateTester extends BaseTestCase {
         $this->handleTest($library->getName());
 
         $this->assertEquals('Successfully updated \'name\'', $this->response->getMessage());
+    }
+
+    public function handleTest($library) {
+        $this->response = $this->useCase->updateLibrary($library);
     }
 
     /** @test */

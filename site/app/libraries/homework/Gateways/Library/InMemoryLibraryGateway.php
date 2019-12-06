@@ -9,6 +9,11 @@ class InMemoryLibraryGateway implements LibraryGateway {
     /** @var LibraryEntity[] */
     protected $libraries = [];
 
+    /** @inheritDoc */
+    public function addGitLibrary(LibraryEntity $library, string $repoUrl): LibraryAddStatus {
+        return $this->addLibrary($library);
+    }
+
     public function addLibrary(LibraryEntity $library): LibraryAddStatus {
         if ($this->libraryExists($library)) {
             return LibraryAddStatus::error('Library already exists');
@@ -20,8 +25,13 @@ class InMemoryLibraryGateway implements LibraryGateway {
     }
 
     /** @inheritDoc */
-    public function addGitLibrary(LibraryEntity $library, string $repoUrl): LibraryAddStatus {
-        return $this->addLibrary($library);
+    public function libraryExists(LibraryEntity $library): bool {
+        return count(array_filter($this->libraries,
+                         function (LibraryEntity $item) use ($library) {
+                             return $item->is($library);
+                         }
+                     )
+               ) > 0;
     }
 
     /** @inheritDoc */
@@ -44,21 +54,16 @@ class InMemoryLibraryGateway implements LibraryGateway {
     }
 
     /** @inheritDoc */
-    public function libraryExists(LibraryEntity $library): bool {
-        return count(array_filter($this->libraries, function (LibraryEntity $item) use ($library) {
-            return $item->is($library);
-        })) > 0;
-    }
-
-    /** @inheritDoc */
     public function removeLibrary(LibraryEntity $library): bool {
         if ($library->hasNameOf('fail to remove')) {
             return false;
         }
 
-        $this->libraries = array_filter($this->libraries, function (LibraryEntity $storedLib) use ($library) {
-            return $storedLib->isNot($library);
-        });
+        $this->libraries = array_filter($this->libraries,
+            function (LibraryEntity $storedLib) use ($library) {
+                return $storedLib->isNot($library);
+            }
+        );
 
         return true;
     }

@@ -1,73 +1,5 @@
 <?php namespace app\libraries\homework\Entities;
 
-class LibraryAddStatus {
-    const SUCCESS = 'success';
-
-    /** @var LibraryEntity|null */
-    public $library;
-
-    /** @var string */
-    public $message;
-
-    /**
-     * @param string $error
-     * @return LibraryAddStatus
-     */
-    public static function error(string $error): LibraryAddStatus {
-        return new static(null, $error);
-    }
-
-    /**
-     * @param LibraryEntity $library
-     * @return LibraryAddStatus
-     */
-    public static function success(LibraryEntity $library): LibraryAddStatus {
-        return new static($library, self::SUCCESS);
-    }
-
-    /**
-     * @param LibraryEntity|null $library
-     * @param string $message
-     */
-    public function __construct($library, string $message) {
-        $this->library = $library;
-        $this->message = $message;
-    }
-}
-
-class LibraryUpdateStatus {
-    /** @var string */
-    public $message;
-
-    /** @var bool */
-    public $success;
-
-    /**
-     * @param string $error
-     * @return LibraryUpdateStatus
-     */
-    public static function error(string $error): LibraryUpdateStatus {
-        return new static(false, $error);
-    }
-
-    /**
-     * @param string $message
-     * @return LibraryUpdateStatus
-     */
-    public static function success(string $message): LibraryUpdateStatus {
-        return new static(true, $message);
-    }
-
-    /**
-     * @param bool $success
-     * @param string $message
-     */
-    public function __construct(bool $success, string $message) {
-        $this->success = $success;
-        $this->message = $message;
-    }
-}
-
 class LibraryEntity {
 
     /** @var string */
@@ -86,19 +18,20 @@ class LibraryEntity {
     }
 
     /**
-     * @return string
+     * @param LibraryEntity $library
+     * @return bool
      */
-    public function getName(): string {
-        return $this->name;
+    public function isNot(LibraryEntity $library): bool {
+        return !$this->is($library);
     }
 
     /**
-     * Get the library container location
-     *
-     * @return string
+     * @param LibraryEntity $library
+     * @return bool
      */
-    public function getLocation(): string {
-        return $this->location;
+    public function is(LibraryEntity $library): bool {
+        return $this->hasNameOf($library->getName()) &&
+               $this->hasLocationOf($library->getLocation());
     }
 
     /**
@@ -112,6 +45,13 @@ class LibraryEntity {
     }
 
     /**
+     * @return string
+     */
+    public function getName(): string {
+        return $this->name;
+    }
+
+    /**
      * @param string $location
      * @return bool
      */
@@ -120,20 +60,12 @@ class LibraryEntity {
     }
 
     /**
-     * @param LibraryEntity $library
-     * @return bool
+     * Get the library container location
+     *
+     * @return string
      */
-    public function is(LibraryEntity $library): bool {
-        return $this->hasNameOf($library->getName()) &&
-            $this->hasLocationOf($library->getLocation());
-    }
-
-    /**
-     * @param LibraryEntity $library
-     * @return bool
-     */
-    public function isNot(LibraryEntity $library): bool {
-        return !$this->is($library);
+    public function getLocation(): string {
+        return $this->location;
     }
 
     /**
@@ -142,6 +74,6 @@ class LibraryEntity {
      * @return string
      */
     public function getLibraryPath(): string {
-        return $this->location . '/' .  $this->name;
+        return $this->location . '/' . $this->name;
     }
 }

@@ -2,9 +2,9 @@
 
 
 use app\libraries\homework\Entities\LibraryEntity;
-use tests\app\libraries\homework\UseCases\BaseTestCase;
-use app\libraries\homework\UseCases\LibraryAddResponse;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
+use tests\app\libraries\homework\UseCases\BaseTestCase;
+use app\libraries\homework\Responses\LibraryAddResponse;
 
 class GitLibraryAddTester extends BaseTestCase {
     /** @var LibraryAddUseCase */
@@ -19,15 +19,15 @@ class GitLibraryAddTester extends BaseTestCase {
         $this->useCase = new LibraryAddUseCase($this->core);
     }
 
-    protected function handleTest($gitUrl) {
-        $this->response = $this->useCase->addGitLibrary($gitUrl);
-    }
-
     /** @test */
     public function testItDoesNotAddNullGitUrl() {
         $this->handleTest(null);
 
         $this->assertEquals('A repo url is required.', $this->response->error);
+    }
+
+    protected function handleTest($gitUrl) {
+        $this->response = $this->useCase->addGitLibrary($gitUrl);
     }
 
     /** @test */
@@ -42,7 +42,7 @@ class GitLibraryAddTester extends BaseTestCase {
         $this->handleTest('not an actual git url lol');
 
         $this->assertEquals('The git url is not of the right format.',
-            $this->response->error);
+                            $this->response->error);
     }
 
     /** @test */

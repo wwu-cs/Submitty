@@ -4,30 +4,8 @@ use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
+use app\libraries\homework\Responses\LibraryAddResponse;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
-
-class LibraryAddResponse {
-    /** @var string */
-    protected $message;
-
-    /** @var string */
-    public $error;
-
-    public function __construct(string $message = '') {
-        $this->message = $message;
-    }
-
-    public function getMessage(): string {
-        return $this->message;
-    }
-
-    public static function error(string $message): LibraryAddResponse {
-        $response = new static;
-        $response->error = $message;
-        return $response;
-    }
-
-}
 
 class LibraryAddUseCase extends BaseUseCase {
     /** @var LibraryGateway */
@@ -43,7 +21,7 @@ class LibraryAddUseCase extends BaseUseCase {
      * Takes a string representing the git url to clone, and adds it to the library
      *
      * @param null|string $repoUrl
-     * @return LibraryAddResponse
+     * @return \app\libraries\homework\Responses\LibraryAddResponse
      */
     public function addGitLibrary($repoUrl): LibraryAddResponse {
         if (!$repoUrl) {
@@ -54,11 +32,12 @@ class LibraryAddUseCase extends BaseUseCase {
         // https://www.debuggex.com/r/H4kRw1G0YPyBFjfm
         // It validates .git repository urls.
         if (!preg_match(
-            '/((git|ssh|http(s)?)|(git@[\w\.]+))(:(\/\/)?)([\w\.@\:\/\-~]+)(\.git)(\/)?/',
+            '/((git|ssh|http(s)?)|(git@[\w.]+))(:(\/\/)?)([\w.@:\/\-~]+)(\.git)(\/)?/',
             $repoUrl,
-            $matches
-        )) {
-            return LibraryAddResponse::error('The git url is not of the right format.');
+            $matches)
+        ) {
+            return LibraryAddResponse::error('The git url is not of the right format.'
+            );
         }
 
         /*
@@ -76,7 +55,9 @@ class LibraryAddUseCase extends BaseUseCase {
         $status = $this->gateway->addGitLibrary($library, $repoUrl);
 
         if (!$status->library) {
-            return LibraryAddResponse::error('Error adding the library. ' . $status->message);
+            return LibraryAddResponse::error('Error adding the library. ' .
+                                             $status->message
+            );
         }
 
         return new LibraryAddResponse("Successfully cloned $repoUrl.");
@@ -86,7 +67,7 @@ class LibraryAddUseCase extends BaseUseCase {
      * Takes in a $_FILES file and adds it to the library
      *
      * @param array|null $zipFile
-     * @return LibraryAddResponse
+     * @return \app\libraries\homework\Responses\LibraryAddResponse
      */
     public function addZipLibrary($zipFile): LibraryAddResponse {
         if (!$zipFile || !isset($zipFile['name']) || !isset($zipFile['tmp_name'])) {
@@ -96,7 +77,7 @@ class LibraryAddUseCase extends BaseUseCase {
         $name = $zipFile['name'];
         $tmpName = $zipFile['tmp_name'];
 
-        if (!FileUtils::isValidFileName($name) || strpos($name, '/') !== FALSE) {
+        if (!FileUtils::isValidFileName($name) || strpos($name, '/') !== false) {
             return LibraryAddResponse::error('Invalid file name.');
         }
 
@@ -115,7 +96,9 @@ class LibraryAddUseCase extends BaseUseCase {
         $status = $this->gateway->addZipLibrary($library, $tmpName);
 
         if (!$status->library) {
-            return LibraryAddResponse::error('Error adding the library. ' . $status->message);
+            return LibraryAddResponse::error('Error adding the library. ' .
+                                             $status->message
+            );
         }
 
         return new LibraryAddResponse("Successfully installed new library: $libName");

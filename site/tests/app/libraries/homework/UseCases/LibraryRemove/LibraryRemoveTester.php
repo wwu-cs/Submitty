@@ -4,7 +4,7 @@
 use app\libraries\homework\Entities\LibraryEntity;
 use tests\app\libraries\homework\UseCases\BaseTestCase;
 use app\libraries\homework\UseCases\LibraryRemoveUseCase;
-use app\libraries\homework\UseCases\LibraryRemoveResponse;
+use app\libraries\homework\Responses\LibraryRemoveResponse;
 
 class LibraryRemoveTester extends BaseTestCase {
     /** @var LibraryRemoveUseCase */
@@ -19,10 +19,6 @@ class LibraryRemoveTester extends BaseTestCase {
         $this->useCase = new LibraryRemoveUseCase($this->core);
     }
 
-    public function handleTest($library) {
-        $this->response = $this->useCase->removeLibrary($library);
-    }
-
     /** @test */
     public function testRemoveLibrary() {
         $library = new LibraryEntity('name', $this->location);
@@ -32,6 +28,10 @@ class LibraryRemoveTester extends BaseTestCase {
 
         $this->assertFalse($this->libraryGateway->libraryExists($library));
         $this->assertEquals('Successfully removed library \'name\'', $this->response->getMessage());
+    }
+
+    public function handleTest($library) {
+        $this->response = $this->useCase->removeLibrary($library);
     }
 
     /** @test */
