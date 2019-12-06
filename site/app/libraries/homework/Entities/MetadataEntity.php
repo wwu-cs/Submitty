@@ -78,6 +78,17 @@ class MetadataEntity {
         );
     }
 
+    public static function copyWithGradeableCount(MetadataEntity $entity, int $count) {
+        return new static(
+            $entity->getLibrary(),
+            $entity->getName(),
+            $entity->getSourceType(),
+            $count,
+            $entity->getLastUpdatedDate(),
+            $entity->getCreatedDate()
+        );
+    }
+
     /**
      * Returns associated library information.
      *
@@ -134,19 +145,19 @@ class MetadataEntity {
     }
 
     /**
-     * @param string $name
-     * @return bool
-     */
-    public function hasNameOf(string $name): bool {
-        return $this->getName() === $name;
-    }
-
-    /**
      * Returns the library's name
      *
      * @return string
      */
     public function getName(): string {
         return $this->name;
+    }
+
+    /**
+     * @param string $source
+     * @return bool
+     */
+    public function hasSourceTypeOf(string $source): bool {
+        return $this->getSourceType() === $source;
     }
 }

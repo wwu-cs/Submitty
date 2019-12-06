@@ -35,22 +35,22 @@ class LibraryUpdateUseCase extends BaseUseCase {
         // Construct library representation
         $library = new LibraryEntity($name, $this->location);
 
-        // Update the library
-        $response = $this->gateway->updateLibrary($library);
-
-        if (!$response->success) {
-            return LibraryUpdateResponse::error('Could not update library because: ' . $response->message);
-        }
-
-        // Update metadata
+        // First check the type
         $currentMetadata = $this->metadata->get($library);
-
         if (!$currentMetadata->error) {
+            if ($currentMetadata->result->hasSourceTypeOf('git')) {
+                // Update the library only if it's supposed to be a git repo
+                $response = $this->gateway->updateLibrary($library);
+
+                if (!$response->success) {
+                    return LibraryUpdateResponse::error('Could not update library because: ' . $response->message);
+                }
+            }
+
             $metadataStatus = $this->metadata->update(
                 $currentMetadata->result->touch()
             );
-        }
-        else {
+        } else {
             // If we get here, a library was probably somehow added without metadata
             $metadataStatus = $this->metadata->update(
                 MetadataEntity::createNewMetadata(

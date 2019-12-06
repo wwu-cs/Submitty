@@ -97,7 +97,8 @@ class LibraryUpdateTester extends BaseTestCase {
     public function testUpdateLibraryThatDoesntExist() {
         $this->handleTest('name');
 
-        $this->assertEquals('Could not update library because: Library does not exist.', $this->response->getMessage());
+        $this->assertEquals('There was a problem updating the metadata: Library does not exist.',
+                            $this->response->getMessage());
         $this->assertFalse($this->response->success);
     }
 
@@ -106,12 +107,32 @@ class LibraryUpdateTester extends BaseTestCase {
         $library = new LibraryEntity('name', $this->location);
         $this->libraryGateway->addLibrary($library);
         $this->libraryGateway->makeNextAddOrUpdateFailWithMessage('get rekt 173911 times');
+        // Has to be git source if we want to trigger update
+        $this->metadataGateway->add(MetadataEntity::createNewMetadata(
+            $library,
+            'name',
+            'git'
+        ));
         $this->handleTest('name');
 
         $this->assertEquals(
             'Could not update library because: get rekt 173911 times',
             $this->response->getMessage()
         );
+    }
+
+    /** @test */
+    public function testItDoesntUpdateZipLibraries() {
+        $library = new LibraryEntity('name', $this->location);
+
+        // Try to make it fail
+        $this->libraryGateway->addLibrary($library);
+        $this->libraryGateway->makeNextAddOrUpdateFailWithMessage('get rekt 173911 times');
+
+        $this->handleTest('name');
+
+        $this->assertEquals('Successfully updated \'name\'', $this->response->getMessage());
+        $this->assertCount(1, $this->metadataGateway->getAll($this->location));
     }
 
     /** @test */

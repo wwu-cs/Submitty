@@ -1,4 +1,6 @@
-<?php namespace app\libraries\homework\Gateways\Library;
+<?php
+
+namespace app\libraries\homework\Gateways\Library;
 
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;

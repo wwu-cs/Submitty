@@ -90,26 +90,4 @@ class InMemoryMetadataGateway implements MetadataGateway {
             }
         );
     }
-
-    /** @inheritDoc */
-    public function nameExists(string $name): bool {
-        /** @var MetadataEntity $metadata */
-        foreach ($this->metadata as $metadata) {
-            if ($metadata->hasNameOf($name)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /** @inheritDoc */
-    public function getFromName(string $name): MetadataGetStatus {
-        foreach ($this->metadata as $metadata) {
-            if ($metadata->hasNameOf($name)) {
-                return MetadataGetStatus::success($metadata);
-            }
-        }
-        return MetadataGetStatus::error('No library with that name.');
-    }
 }

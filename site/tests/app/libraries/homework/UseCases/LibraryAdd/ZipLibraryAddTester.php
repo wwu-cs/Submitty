@@ -1,4 +1,6 @@
-<?php namespace tests\app\libraries\homework\UseCases\LibraryAdd;
+<?php
+
+namespace tests\app\libraries\homework\UseCases\LibraryAdd;
 
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Entities\MetadataEntity;

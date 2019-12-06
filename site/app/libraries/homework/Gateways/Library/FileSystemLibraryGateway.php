@@ -1,5 +1,14 @@
-<?php namespace app\libraries\homework\Gateways\Library;
+<?php
 
+/*
+ * When running in vagrant, PHPStorm doesn't have access to composer.json and doesn't
+ * know about some requirements,
+ *thereby complaining.
+ */
+
+/** @noinspection PhpComposerExtensionStubsInspection */
+
+namespace app\libraries\homework\Gateways\Library;
 
 use ZipArchive;
 use app\libraries\FileUtils;
