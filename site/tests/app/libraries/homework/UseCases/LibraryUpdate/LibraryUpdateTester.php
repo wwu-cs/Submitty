@@ -24,7 +24,7 @@ class LibraryUpdateTester extends BaseTestCase {
         $library = new LibraryEntity('name', $this->location);
         $this->libraryGateway->addLibrary($library);
 
-        $this->handleTest($library->getName());
+        $this->handleTest($library->getKey());
 
         $this->assertEquals('Successfully updated \'name\'', $this->response->getMessage());
     }

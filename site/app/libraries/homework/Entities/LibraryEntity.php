@@ -3,17 +3,17 @@
 class LibraryEntity {
 
     /** @var string */
-    protected $name;
+    protected $key;
 
     /** @var string */
     protected $location;
 
     /**
-     * @param string $name
+     * @param string $key
      * @param string $location
      */
-    public function __construct(string $name, string $location) {
-        $this->name = $name;
+    public function __construct(string $key, string $location) {
+        $this->key = $key;
         $this->location = rtrim($location, "/ \n\r");
     }
 
@@ -30,7 +30,7 @@ class LibraryEntity {
      * @return bool
      */
     public function is(LibraryEntity $library): bool {
-        return $this->hasNameOf($library->getName()) &&
+        return $this->hasNameOf($library->getKey()) &&
                $this->hasLocationOf($library->getLocation());
     }
 
@@ -41,14 +41,14 @@ class LibraryEntity {
      * @return bool
      */
     public function hasNameOf(string $name): bool {
-        return $this->getName() === $name;
+        return $this->getKey() === $name;
     }
 
     /**
      * @return string
      */
-    public function getName(): string {
-        return $this->name;
+    public function getKey(): string {
+        return $this->key;
     }
 
     /**
@@ -74,6 +74,6 @@ class LibraryEntity {
      * @return string
      */
     public function getLibraryPath(): string {
-        return $this->location . '/' . $this->name;
+        return $this->location . '/' . $this->key;
     }
 }

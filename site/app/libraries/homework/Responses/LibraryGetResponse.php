@@ -2,18 +2,20 @@
 
 namespace app\libraries\homework\Responses;
 
+use app\libraries\homework\Entities\MetadataEntity;
+
 class LibraryGetResponse {
-    /** @var string[] */
+    /** @var MetadataEntity[] */
     protected $libraries = [];
 
-    public function addLibrary(string $lib) {
+    public function addLibrary(MetadataEntity $lib) {
         $this->libraries[] = $lib;
     }
 
     /**
      * Returns an array the library names
      *
-     * @return string[]
+     * @return MetadataEntity[]
      */
     public function getResults(): array {
         return $this->libraries;

@@ -113,9 +113,9 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
         $results = $this->gateway->getAllLibraries($this->location);
 
         $this->assertCount(3, $results);
-        $this->assertEquals('lib1', $results[0]->getName());
-        $this->assertEquals('lib2', $results[1]->getName());
-        $this->assertEquals('lib3', $results[2]->getName());
+        $this->assertEquals('lib1', $results[0]->getKey());
+        $this->assertEquals('lib2', $results[1]->getKey());
+        $this->assertEquals('lib3', $results[2]->getKey());
     }
 
     protected function createLibraryWithName(string $name) {
@@ -133,7 +133,7 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
     }
 
     protected function createLibrary(LibraryEntity $library) {
-        $this->createLibraryWithName($library->getName());
+        $this->createLibraryWithName($library->getKey());
     }
 
     /** @test */

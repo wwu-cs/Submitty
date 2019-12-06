@@ -134,6 +134,6 @@ class FileSystemLibraryGateway implements LibraryGateway {
             return LibraryUpdateStatus::error("Error updating repository. $stderr");
         }
 
-        return LibraryUpdateStatus::success("Successfully updated {$library->getName()}");
+        return LibraryUpdateStatus::success("Successfully updated {$library->getKey()}");
     }
 }

@@ -24,7 +24,7 @@ class LibraryRemoveTester extends BaseTestCase {
         $library = new LibraryEntity('name', $this->location);
         $this->libraryGateway->addLibrary($library);
 
-        $this->handleTest($library->getName());
+        $this->handleTest($library->getKey());
 
         $this->assertFalse($this->libraryGateway->libraryExists($library));
         $this->assertEquals('Successfully removed library \'name\'', $this->response->getMessage());

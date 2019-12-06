@@ -77,6 +77,6 @@ class InMemoryLibraryGateway implements LibraryGateway {
             return LibraryUpdateStatus::error('Library does not exist.');
         }
 
-        return LibraryUpdateStatus::success("Successfully updated '{$library->getName()}'");
+        return LibraryUpdateStatus::success("Successfully updated '{$library->getKey()}'");
     }
 }

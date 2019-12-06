@@ -1,5 +1,6 @@
-<?php namespace app\controllers\admin;
+<?php
 
+namespace app\controllers\admin;
 
 use app\libraries\Core;
 use app\libraries\FileUtils;
@@ -10,6 +11,7 @@ use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\exceptions\AuthorizationException;
 use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\homework\Entities\MetadataEntity;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
 use app\libraries\homework\UseCases\LibraryGetUseCase;
 use app\libraries\homework\UseCases\LibraryRemoveUseCase;
@@ -26,9 +28,10 @@ use app\libraries\homework\UseCases\LibraryUpdateUseCase;
 class LibraryManageController extends AbstractController {
     /**
      * LibraryManage constructor.
+     *
      * @param Core $core
      * @throws NotEnabledException
-	 * @throws AuthorizationException
+     * @throws AuthorizationException
      */
     public function __construct(Core $core) {
         parent::__construct($core);
@@ -43,6 +46,30 @@ class LibraryManageController extends AbstractController {
     }
 
     /**
+     * Takes an array of metadata entities and translates them into presentable arrays
+     *
+     * @param array $libraryMetadata
+     * @return MetadataEntity[]
+     */
+    protected function presentMetadata(array $libraryMetadata): array {
+        $response = [];
+
+        /** @var MetadataEntity $meta */
+        foreach ($libraryMetadata as $meta) {
+            $response[] = [
+                'key'               => $meta->getLibrary()->getKey(),
+                'name'              => $meta->getName(),
+                'source'            => $meta->getSourceType(),
+                'num_of_gradeables' => $meta->getGradeableCount(),
+                'updated_at'        => $meta->getLastUpdatedDate(),
+                'created_at'        => $meta->getCreatedDate(),
+            ];
+        }
+
+        return $response;
+    }
+
+    /**
      * Controller route to show the homework library page.
      *
      * @Route("/homework/library/manage", methods={"GET"})
@@ -51,14 +78,18 @@ class LibraryManageController extends AbstractController {
     public function showLibraryManagePage() {
         $useCase = new LibraryGetUseCase($this->core);
 
-        $response = $useCase->getLibraries();
+        $results = $useCase->getLibraries()->getResults();
+
+        $response = $this->presentMetadata($results);
 
         return Response::WebOnlyResponse(
-            new WebResponse([
-                'admin', 'LibraryManager'
-            ], 'showLibraryManager',
+            new WebResponse(
+                [
+                    'admin',
+                    'LibraryManager',
+                ], 'showLibraryManager',
                 'Do all your fancy homework library things here!',
-                $response->getResults()
+                $response
             )
         );
     }
@@ -83,7 +114,8 @@ class LibraryManageController extends AbstractController {
 
         if ($results->error) {
             $response = JsonResponse::getFailResponse($results->error);
-        } else {
+        }
+        else {
             $response = JsonResponse::getSuccessResponse($results->getMessage());
         }
 
@@ -105,7 +137,8 @@ class LibraryManageController extends AbstractController {
 
         if ($results->error) {
             $response = JsonResponse::getFailResponse($results->error);
-        } else {
+        }
+        else {
             $response = JsonResponse::getSuccessResponse($results->getMessage());
         }
 
@@ -123,10 +156,12 @@ class LibraryManageController extends AbstractController {
     public function ajaxGetLibraryList(): Response {
         $useCase = new LibraryGetUseCase($this->core);
 
-        $results = $useCase->getLibraries();
+        $results = $useCase->getLibraries()->getResults();
+
+        $response = $this->presentMetadata($results);
 
         return Response::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse($results->getResults())
+            JsonResponse::getSuccessResponse($response)
         );
     }
 
@@ -146,7 +181,8 @@ class LibraryManageController extends AbstractController {
 
         if ($results->error) {
             $response = JsonResponse::getFailResponse($results->error);
-        } else {
+        }
+        else {
             $response = JsonResponse::getSuccessResponse($results->getMessage());
         }
 
@@ -171,7 +207,8 @@ class LibraryManageController extends AbstractController {
 
         if ($result->error) {
             $response = JsonResponse::getFailResponse($result->error);
-        } else {
+        }
+        else {
             $response = JsonResponse::getSuccessResponse($result->getMessage());
         }
 
