@@ -59,7 +59,7 @@ class HomePageControllerTester extends BaseUnitTest {
 
 		$response = $this->controller->searchLibraryGradeableWithQuery('16_docker_network_python', $this->library_path);
 
-        $this->assertTrue($response->json_response->json['status'] === "success");
+        $this->assertEquals("success", $response->json_response->json['status']);
         $this->assertTrue(preg_match("/.*16_docker_network_python\/config\/config\.json$/i", $response->json_response->json['data']['path']) === 1);
     }
 
@@ -71,27 +71,27 @@ class HomePageControllerTester extends BaseUnitTest {
 		
 		$response = $this->controller->searchLibrary($this->library_path);
 		
-		$this->assertTrue($response->json_response->json['status'] === "success");
-		$this->assertTrue(count($response->json_response->json['data']) === 17);
 		$this->assertInstanceOf(JsonResponse::class, $response->json_response);
+		$this->assertEquals("success", $response->json_response->json['status']);
+		$this->assertCount(17, $response->json_response->json['data']);
 	}
 
 	public function testHomePageSearchLibraryWithQueryThatSucceeds() {
 		$query = "LIVE";
 		$response = $this->controller->searchLibraryWithQuery($query, $this->library_path);
 		
-		$this->assertTrue($response->json_response->json['status'] === "success");
-		$this->assertTrue(count($response->json_response->json['data']) === 2);
 		$this->assertInstanceOf(JsonResponse::class, $response->json_response);
+		$this->assertEquals("success", $response->json_response->json['status']);
+		$this->assertCount(2, $response->json_response->json['data']);
 	}
 
 	public function testHomePageSearchLibraryWithQueryThatFails() {
 		$query = "BLATANT NONEXISTENCE BLASPHEME AGAINST MAHAPARINIRVANA";
 		$response = $this->controller->searchLibraryWithQuery($query, $this->library_path);
 		
+		$this->assertInstanceOf(JsonResponse::class, $response->json_response);
 		$this->assertEquals($response->json_response->json['status'], "success");
 		$this->assertEmpty($response->json_response->json['data'], "Test array is not empty");
-		$this->assertInstanceOf(JsonResponse::class, $response->json_response);
 	}
 
 }
