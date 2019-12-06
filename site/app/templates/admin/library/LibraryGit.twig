@@ -31,7 +31,7 @@
             e.preventDefault();
             var form = e.target;
             var submitButton = form.querySelector("input[type='submit']");
-            var data = { git_url: form.git_url.value, git_src_name: form.git_src_name.value };
+            var data = { git_url: form.git_url.value, name: form.git_src_name.value };
             managerSubmitAjax('{{ git_submit_url }}', 'POST', data, submitButton);
         });
     });

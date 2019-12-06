@@ -12,7 +12,7 @@
                 {% endif %}
                 {% for source in libraries %}
                     <div class="homework-library-panel-card homework-library-border" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>{{ source }}</span>
+                        <span>{{ source['name'] }}</span>
                         <span> Updated: 12.02.2019 12:23:48 </span>
                         <span>
                             <button class="btn" onclick="refreshLibrary('{{ source }}', this)">Refresh</button>
