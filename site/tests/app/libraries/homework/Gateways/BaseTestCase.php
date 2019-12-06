@@ -17,10 +17,12 @@ class BaseTestCase extends BaseUnitTest {
         $this->location = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         FileUtils::createDir($this->location);
 
-        $this->core = $this->createMockCore([
-                                                'homework_library_enable'   => true,
-                                                'homework_library_location' => $this->location,
-                                            ]);
+        $this->core = $this->createMockCore(
+            [
+                'homework_library_enable'   => true,
+                'homework_library_location' => $this->location,
+            ]
+        );
     }
 
     /**

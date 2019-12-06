@@ -38,9 +38,12 @@ class LibraryGetTester extends BaseTestCase {
 
         $this->handleTest();
 
-        $this->assertEquals([
-                                'name',
-                                'name2',
-                            ], $this->response->getResults());
+        $this->assertEquals(
+            [
+                'name',
+                'name2',
+            ],
+            $this->response->getResults()
+        );
     }
 }

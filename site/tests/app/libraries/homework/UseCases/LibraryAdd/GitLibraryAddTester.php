@@ -41,8 +41,10 @@ class GitLibraryAddTester extends BaseTestCase {
     public function testItDoesNotAddInvalidGitUrl() {
         $this->handleTest('not an actual git url lol');
 
-        $this->assertEquals('The git url is not of the right format.',
-                            $this->response->error);
+        $this->assertEquals(
+            'The git url is not of the right format.',
+            $this->response->error
+        );
     }
 
     /** @test */

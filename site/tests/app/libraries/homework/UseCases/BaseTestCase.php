@@ -25,10 +25,12 @@ class BaseTestCase extends BaseUnitTest {
 
         $this->location = 'library location';
 
-        $this->core = $this->createMockCore([
-                                                'homework_library_enable'   => true,
-                                                'homework_library_location' => $this->location,
-                                            ]);
+        $this->core = $this->createMockCore(
+            [
+                'homework_library_enable'   => true,
+                'homework_library_location' => $this->location,
+            ]
+        );
 
         $this->libraryGateway = new InMemoryLibraryGateway();
         $this->metadataGateway = new InMemoryMetadataGateway();
