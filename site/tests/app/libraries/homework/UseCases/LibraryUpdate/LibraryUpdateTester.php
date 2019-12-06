@@ -125,6 +125,26 @@ class LibraryUpdateTester extends BaseTestCase {
     }
 
     /** @test */
+    public function testUpdateGitLibrary() {
+        $library = new LibraryEntity('name', $this->location);
+        $this->libraryGateway->addLibrary($library);
+        // Has to be git source if we want to trigger update
+        $this->metadataGateway->add(
+            MetadataEntity::createNewMetadata(
+                $library,
+                'name',
+                'git'
+            )
+        );
+        $this->handleTest('name');
+
+        $this->assertEquals(
+            'Successfully updated \'name\'',
+            $this->response->getMessage()
+        );
+    }
+
+    /** @test */
     public function testItDoesntUpdateZipLibraries() {
         $library = new LibraryEntity('name', $this->location);
 
