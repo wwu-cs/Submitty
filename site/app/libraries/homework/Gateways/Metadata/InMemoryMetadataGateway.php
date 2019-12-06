@@ -45,9 +45,12 @@ class InMemoryMetadataGateway implements MetadataGateway {
 
         $meta = array_pop($this->updateQueue);
 
-        $this->metadata = array_filter($this->metadata, function (MetadataEntity $mEntity) use ($entity) {
-            return $mEntity->getLibrary()->isNot($entity);
-        });
+        $this->metadata = array_filter(
+            $this->metadata,
+            function (MetadataEntity $mEntity) use ($entity) {
+                return $mEntity->getLibrary()->isNot($entity);
+            }
+        );
 
         $this->metadata[] = $meta;
 
@@ -70,8 +73,11 @@ class InMemoryMetadataGateway implements MetadataGateway {
 
     /** @inheritDoc */
     public function getAll(string $location): array {
-        return array_filter($this->metadata, function (MetadataEntity $entity) use ($location) {
-            return $entity->getLibrary()->hasLocationOf($location);
-        });
+        return array_filter(
+            $this->metadata,
+            function (MetadataEntity $entity) use ($location) {
+                return $entity->getLibrary()->hasLocationOf($location);
+            }
+        );
     }
 }

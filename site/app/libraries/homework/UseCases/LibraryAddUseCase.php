@@ -31,12 +31,14 @@ class LibraryAddUseCase extends BaseUseCase {
         // Regex can be viewed in detail here.
         // https://www.debuggex.com/r/H4kRw1G0YPyBFjfm
         // It validates .git repository urls.
-        if (!preg_match(
+        $match = preg_match(
             '/((git|ssh|http(s)?)|(git@[\w.]+))(:(\/\/)?)([\w.@:\/\-~]+)(\.git)(\/)?/',
             $repoUrl,
-            $matches)
-        ) {
-            return LibraryAddResponse::error('The git url is not of the right format.'
+            $matches
+        );
+        if (!$match) {
+            return LibraryAddResponse::error(
+                'The git url is not of the right format.'
             );
         }
 
@@ -55,8 +57,9 @@ class LibraryAddUseCase extends BaseUseCase {
         $status = $this->gateway->addGitLibrary($library, $repoUrl);
 
         if (!$status->library) {
-            return LibraryAddResponse::error('Error adding the library. ' .
-                                             $status->message
+            return LibraryAddResponse::error(
+                'Error adding the library. ' .
+                $status->message
             );
         }
 
@@ -96,8 +99,9 @@ class LibraryAddUseCase extends BaseUseCase {
         $status = $this->gateway->addZipLibrary($library, $tmpName);
 
         if (!$status->library) {
-            return LibraryAddResponse::error('Error adding the library. ' .
-                                             $status->message
+            return LibraryAddResponse::error(
+                'Error adding the library. ' .
+                $status->message
             );
         }
 

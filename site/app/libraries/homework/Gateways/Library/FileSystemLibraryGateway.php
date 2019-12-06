@@ -40,11 +40,13 @@ class FileSystemLibraryGateway implements LibraryGateway {
     public function libraryExists(LibraryEntity $library): bool {
         $libraries = $this->getAllLibraries($library->getLocation());
 
-        return count(array_filter($libraries,
-                         function (LibraryEntity $item) use ($library) {
-                             return $item->is($library);
-                         }
-                     )
+        return count(
+                   array_filter(
+                       $libraries,
+                       function (LibraryEntity $item) use ($library) {
+                           return $item->is($library);
+                       }
+                   )
                ) > 0;
     }
 
@@ -52,9 +54,10 @@ class FileSystemLibraryGateway implements LibraryGateway {
     public function getAllLibraries(string $location): array {
         $libs = FileUtils::getAllDirs($location);
 
-        return array_map(function (string $lib) use ($location) {
-            return new LibraryEntity(basename($lib), $location);
-        },
+        return array_map(
+            function (string $lib) use ($location) {
+                return new LibraryEntity(basename($lib), $location);
+            },
             $libs
         );
     }

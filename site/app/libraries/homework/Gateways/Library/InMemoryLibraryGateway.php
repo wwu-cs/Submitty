@@ -26,11 +26,13 @@ class InMemoryLibraryGateway implements LibraryGateway {
 
     /** @inheritDoc */
     public function libraryExists(LibraryEntity $library): bool {
-        return count(array_filter($this->libraries,
-                         function (LibraryEntity $item) use ($library) {
-                             return $item->is($library);
-                         }
-                     )
+        return count(
+                   array_filter(
+                       $this->libraries,
+                       function (LibraryEntity $item) use ($library) {
+                           return $item->is($library);
+                       }
+                   )
                ) > 0;
     }
 
@@ -59,7 +61,8 @@ class InMemoryLibraryGateway implements LibraryGateway {
             return false;
         }
 
-        $this->libraries = array_filter($this->libraries,
+        $this->libraries = array_filter(
+            $this->libraries,
             function (LibraryEntity $storedLib) use ($library) {
                 return $storedLib->isNot($library);
             }
