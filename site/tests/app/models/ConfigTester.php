@@ -7,6 +7,7 @@ use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\Config;
+use app\models\User;
 
 class ConfigTester extends \PHPUnit\Framework\TestCase {
     private $core;
@@ -287,6 +288,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'homework_library_params' => [
                 'enabled' => false,
                 'location' => '/usr/local/submitty/library'
+                'access_level' => User::LEVEL_SUPERUSER,
             ]
         );
         $actual = $config->toArray();

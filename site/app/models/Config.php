@@ -258,14 +258,17 @@ class Config extends AbstractModel {
 
         $homework_library_enabled = false;
         $homework_library_location = '/usr/local/submitty/library';
+        $homework_library_access_level = User::LEVEL_SUPERUSER;
         if ($homework_library_json) {
             $homework_library_enabled = $homework_library_json['homework_library_enabled'];
             $homework_library_location = $homework_library_json['homework_library_location'];
+            $homework_library_access_level = $homework_library_json['homework_library_access_level'];
         }
 
         $this->homework_library_params = [
             'enabled' => $homework_library_enabled,
-            'location' => $homework_library_location
+            'location' => $homework_library_location,
+            'access_level' => $homework_library_access_level,
         ];
 
         $this->submitty_log_path = $submitty_json['site_log_path'];
@@ -544,6 +547,13 @@ class Config extends AbstractModel {
      */
     public function useHomeworkLibrary(): bool {
         return $this->homework_library_params['enabled'];
+    }
+
+    /**
+     * @return int
+     */
+    public function homeworkLibraryAccessLevel(): int {
+        return $this->homework_library_params['access_level'];
     }
 
     /**
