@@ -1,7 +1,9 @@
-<?php namespace tests\app\libraries\homework\UseCases\LibraryGet;
+<?php
 
+namespace tests\app\libraries\homework\UseCases\LibraryGet;
 
 use app\libraries\homework\Entities\LibraryEntity;
+use app\libraries\homework\Entities\MetadataEntity;
 use app\libraries\homework\UseCases\LibraryGetUseCase;
 use tests\app\libraries\homework\UseCases\BaseTestCase;
 use app\libraries\homework\Responses\LibraryGetResponse;
@@ -33,16 +35,27 @@ class LibraryGetTester extends BaseTestCase {
 
     /** @test */
     public function testItShouldReturnResults() {
-        $this->libraryGateway->addLibrary(new LibraryEntity('name', $this->location));
-        $this->libraryGateway->addLibrary(new LibraryEntity('name2', $this->location));
+        $metadata = [
+            MetadataEntity::createNewMetadata(
+                new LibraryEntity('name', $this->location),
+                'name',
+                'source'
+            ),
+            MetadataEntity::createNewMetadata(
+                new LibraryEntity('name2', $this->location),
+                'name2',
+                'source'
+            ),
+        ];
+
+        foreach ($metadata as $metadatum) {
+            $this->metadataGateway->add($metadatum);
+        }
 
         $this->handleTest();
 
         $this->assertEquals(
-            [
-                'name',
-                'name2',
-            ],
+            $metadata,
             $this->response->getResults()
         );
     }

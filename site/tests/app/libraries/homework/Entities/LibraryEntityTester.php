@@ -1,5 +1,6 @@
-<?php namespace tests\app\libraries\homework\Entities;
+<?php
 
+namespace tests\app\libraries\homework\Entities;
 
 use PHPUnit\Framework\TestCase;
 use app\libraries\homework\Entities\LibraryEntity;

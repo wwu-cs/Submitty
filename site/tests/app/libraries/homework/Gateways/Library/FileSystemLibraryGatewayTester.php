@@ -1,4 +1,6 @@
-<?php namespace tests\app\libraries\homework\Gateways\Library;
+<?php
+
+namespace tests\app\libraries\homework\Gateways\Library;
 
 use ZipArchive;
 use app\libraries\FileUtils;

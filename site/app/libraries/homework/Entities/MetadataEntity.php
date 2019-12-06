@@ -1,9 +1,16 @@
 <?php
 
+/*
+ * Suppress code inspection for throws tags as the only time an exception would get thrown
+ * is on an invalid date input to datetime, and we are always using the default now, so an
+ * exception will never get thrown.
+ */
+
+/** @noinspection PhpDocMissingThrowsInspection */
+
 namespace app\libraries\homework\Entities;
 
 use DateTime;
-use Exception;
 
 class MetadataEntity {
     /** @var LibraryEntity */
@@ -55,7 +62,6 @@ class MetadataEntity {
      * @param string        $name
      * @param string        $sourceType
      * @return MetadataEntity
-     * @throws Exception
      */
     public static function createNewMetadata(
         LibraryEntity $entity,
@@ -79,15 +85,6 @@ class MetadataEntity {
      */
     public function getLibrary() {
         return $this->baseEntity;
-    }
-
-    /**
-     * Returns the library's name
-     *
-     * @return string
-     */
-    public function getName(): string {
-        return $this->name;
     }
 
     /**
@@ -130,10 +127,26 @@ class MetadataEntity {
      * Update the updated date
      *
      * @return MetadataEntity
-     * @throws Exception
      */
     public function touch(): MetadataEntity {
         $this->dateUpdated = new DateTime;
         return $this;
+    }
+
+    /**
+     * @param string $name
+     * @return bool
+     */
+    public function hasNameOf(string $name): bool {
+        return $this->getName() === $name;
+    }
+
+    /**
+     * Returns the library's name
+     *
+     * @return string
+     */
+    public function getName(): string {
+        return $this->name;
     }
 }

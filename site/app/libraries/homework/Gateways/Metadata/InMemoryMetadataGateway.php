@@ -8,7 +8,6 @@ use app\libraries\homework\Gateways\LibraryGateway;
 use app\libraries\homework\Gateways\MetadataGateway;
 use app\libraries\homework\Entities\MetadataGetStatus;
 use app\libraries\homework\Entities\MetadataUpdateStatus;
-use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 
 class InMemoryMetadataGateway implements MetadataGateway {
     /** @var MetadataEntity[] */
@@ -17,8 +16,24 @@ class InMemoryMetadataGateway implements MetadataGateway {
     /** @var LibraryGateway */
     protected $libraryGateway;
 
-    public function __construct() {
-        $this->libraryGateway = LibraryGatewayFactory::getInstance();
+
+    /** @var string[] */
+    protected $failMessageQueue;
+
+    /**
+     * @param LibraryGateway $libraryGateway
+     */
+    public function __construct(LibraryGateway $libraryGateway) {
+        $this->libraryGateway = $libraryGateway;
+    }
+
+    /**
+     * For when you need a method to fail for testing
+     *
+     * @param string $message
+     */
+    public function makeNextUpdateFailWithMessage(string $message) {
+        $this->failMessageQueue[] = $message;
     }
 
     /**
@@ -32,6 +47,10 @@ class InMemoryMetadataGateway implements MetadataGateway {
 
     /** @inheritDoc */
     public function update(MetadataEntity $entity): MetadataUpdateStatus {
+        if (!empty($this->failMessageQueue)) {
+            return MetadataUpdateStatus::error(array_pop($this->failMessageQueue));
+        }
+
         if (!$this->libraryGateway->libraryExists($entity->getLibrary())) {
             return MetadataUpdateStatus::error('Library does not exist.');
         }
@@ -70,5 +89,27 @@ class InMemoryMetadataGateway implements MetadataGateway {
                 return $entity->getLibrary()->hasLocationOf($location);
             }
         );
+    }
+
+    /** @inheritDoc */
+    public function nameExists(string $name): bool {
+        /** @var MetadataEntity $metadata */
+        foreach ($this->metadata as $metadata) {
+            if ($metadata->hasNameOf($name)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /** @inheritDoc */
+    public function getFromName(string $name): MetadataGetStatus {
+        foreach ($this->metadata as $metadata) {
+            if ($metadata->hasNameOf($name)) {
+                return MetadataGetStatus::success($metadata);
+            }
+        }
+        return MetadataGetStatus::error('No library with that name.');
     }
 }

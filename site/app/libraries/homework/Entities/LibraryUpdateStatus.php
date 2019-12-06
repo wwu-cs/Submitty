@@ -1,4 +1,6 @@
-<?php namespace app\libraries\homework\Entities;
+<?php
+
+namespace app\libraries\homework\Entities;
 
 class LibraryUpdateStatus {
     /** @var string */

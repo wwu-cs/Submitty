@@ -9,12 +9,28 @@ class InMemoryLibraryGateway implements LibraryGateway {
     /** @var LibraryEntity[] */
     protected $libraries = [];
 
+    /** @var string[] */
+    protected $failMessageQueue;
+
+    /**
+     * For when you need a method to fail for testing
+     *
+     * @param string $message
+     */
+    public function makeNextAddOrUpdateFailWithMessage(string $message) {
+        $this->failMessageQueue[] = $message;
+    }
+
     /** @inheritDoc */
     public function addGitLibrary(LibraryEntity $library, string $repoUrl): LibraryAddStatus {
         return $this->addLibrary($library);
     }
 
     public function addLibrary(LibraryEntity $library): LibraryAddStatus {
+        if (!empty($this->failMessageQueue)) {
+            return LibraryAddStatus::error(array_pop($this->failMessageQueue));
+        }
+
         if ($this->libraryExists($library)) {
             return LibraryAddStatus::error('Library already exists');
         }
@@ -73,6 +89,10 @@ class InMemoryLibraryGateway implements LibraryGateway {
 
     /** @inheritDoc */
     public function updateLibrary(LibraryEntity $library): LibraryUpdateStatus {
+        if (!empty($this->failMessageQueue)) {
+            return LibraryUpdateStatus::error(array_pop($this->failMessageQueue));
+        }
+
         if (!$this->libraryExists($library)) {
             return LibraryUpdateStatus::error('Library does not exist.');
         }

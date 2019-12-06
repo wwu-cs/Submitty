@@ -2,7 +2,6 @@
 
 namespace app\libraries\homework\UseCases;
 
-use Exception;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\libraries\homework\Entities\LibraryEntity;
@@ -67,7 +66,7 @@ class LibraryAddUseCase extends BaseUseCase {
 
         $status = $this->gateway->addGitLibrary($this->generateNewLibrary(), $repoUrl);
 
-        if (!$status->library) {
+        if ($status->failed()) {
             return LibraryAddResponse::error(
                 'Error adding the library. ' .
                 $status->message
@@ -80,20 +79,18 @@ class LibraryAddUseCase extends BaseUseCase {
         }
 
         // Create metadata for the library
-        try {
-            $metadataStatus = $this->metadata->update(
-                MetadataEntity::createNewMetadata(
-                    $status->library,
-                    $metaName,
-                    'git'
-                )
-            );
-        } catch (Exception $exception) {
-            return LibraryAddResponse::error('Unable to set timestamps on metadata.');
-        }
+        $metadataStatus = $this->metadata->update(
+            MetadataEntity::createNewMetadata(
+                $status->library,
+                $metaName,
+                'git'
+            )
+        );
 
         // Check for error when adding the metadata
         if ($metadataStatus->error) {
+            // Cleanup
+            $this->gateway->removeLibrary($status->library);
             return LibraryAddResponse::error(
                 'Library was cloned, however the metadata was not able to be created because: ' . $metadataStatus->error
             );
@@ -127,7 +124,6 @@ class LibraryAddUseCase extends BaseUseCase {
             return LibraryAddResponse::error('A file must be provided.');
         }
 
-
         // Parsing
         $origName = $zipFile['name'];
         // Separate extension from name
@@ -142,7 +138,7 @@ class LibraryAddUseCase extends BaseUseCase {
         // Attempt to add the library
         $status = $this->gateway->addZipLibrary($this->generateNewLibrary(), $zipFile['tmp_name']);
 
-        if (!$status->library) {
+        if ($status->failed()) {
             return LibraryAddResponse::error(
                 'Error adding the library. ' .
                 $status->message
@@ -155,20 +151,18 @@ class LibraryAddUseCase extends BaseUseCase {
         }
 
         // Update metadata
-        try {
-            $metadataStatus = $this->metadata->update(
-                MetadataEntity::createNewMetadata(
-                    $status->library,
-                    $metaName,
-                    'zip'
-                )
-            );
-        } catch (Exception $exception) {
-            return LibraryAddResponse::error('Unable to set timestamps on metadata.');
-        }
+        $metadataStatus = $this->metadata->update(
+            MetadataEntity::createNewMetadata(
+                $status->library,
+                $metaName,
+                'zip'
+            )
+        );
 
         // Check for error when adding the metadata
         if ($metadataStatus->error) {
+            // Cleanup
+            $this->gateway->removeLibrary($status->library);
             return LibraryAddResponse::error(
                 'Library was created, however the metadata was not able to be created because: ' .
                 $metadataStatus->error

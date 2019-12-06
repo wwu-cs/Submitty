@@ -1,4 +1,6 @@
-<?php namespace app\libraries\homework\Entities;
+<?php
+
+namespace app\libraries\homework\Entities;
 
 class LibraryAddStatus {
     const SUCCESS = 'success';
@@ -32,5 +34,9 @@ class LibraryAddStatus {
      */
     public static function success(LibraryEntity $library): LibraryAddStatus {
         return new static($library, self::SUCCESS);
+    }
+
+    public function failed() {
+        return $this->message != self::SUCCESS;
     }
 }

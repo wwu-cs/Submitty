@@ -2,7 +2,6 @@
 
 namespace app\libraries\homework\UseCases;
 
-use Exception;
 use app\libraries\Core;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
@@ -40,36 +39,32 @@ class LibraryUpdateUseCase extends BaseUseCase {
         $response = $this->gateway->updateLibrary($library);
 
         if (!$response->success) {
-            return LibraryUpdateResponse::error($response->message);
+            return LibraryUpdateResponse::error('Could not update library because: ' . $response->message);
         }
 
         // Update metadata
-        try {
-            $currentMetadata = $this->metadata->get($library);
+        $currentMetadata = $this->metadata->get($library);
 
-            if (!$currentMetadata->error) {
-                $metadataStatus = $this->metadata->update(
-                    $currentMetadata->result->touch()
-                );
-            }
-            else {
-                // If we get here, a library was probably somehow added without metadata
-                $metadataStatus = $this->metadata->update(
-                    MetadataEntity::createNewMetadata(
-                        $library,
-                        $library->getKey(),
-                        'unknown'
-                    )
-                );
-            }
-        } catch (Exception $e) {
-            return LibraryUpdateResponse::error('Could not set metadata timestamps');
+        if (!$currentMetadata->error) {
+            $metadataStatus = $this->metadata->update(
+                $currentMetadata->result->touch()
+            );
+        }
+        else {
+            // If we get here, a library was probably somehow added without metadata
+            $metadataStatus = $this->metadata->update(
+                MetadataEntity::createNewMetadata(
+                    $library,
+                    $library->getKey(),
+                    'unknown'
+                )
+            );
         }
 
         if ($metadataStatus->error) {
-            return LibraryUpdateResponse::error($metadataStatus->error);
+            return LibraryUpdateResponse::error('There was a problem updating the metadata: ' . $metadataStatus->error);
         }
 
-        return LibraryUpdateResponse::success($response->message);
+        return LibraryUpdateResponse::success("Successfully updated '{$metadataStatus->result->getName()}'");
     }
 }

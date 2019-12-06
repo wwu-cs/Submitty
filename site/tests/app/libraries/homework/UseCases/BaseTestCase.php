@@ -33,7 +33,7 @@ class BaseTestCase extends BaseUnitTest {
         );
 
         $this->libraryGateway = new InMemoryLibraryGateway();
-        $this->metadataGateway = new InMemoryMetadataGateway();
+        $this->metadataGateway = new InMemoryMetadataGateway($this->libraryGateway);
         LibraryGatewayFactory::setInstance($this->libraryGateway);
         MetadataGatewayFactory::setInstance($this->metadataGateway);
     }

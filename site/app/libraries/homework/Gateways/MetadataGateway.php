@@ -30,4 +30,20 @@ interface MetadataGateway {
      * @return MetadataEntity[]
      */
     public function getAll(string $location): array;
+
+    /**
+     * Checks whether a name is taken or not.
+     *
+     * @param string $name
+     * @return bool
+     */
+    public function nameExists(string $name): bool;
+
+    /**
+     * Retrieves a library and its metadata by a user defined name
+     *
+     * @param string $name
+     * @return MetadataGetStatus
+     */
+    public function getFromName(string $name): MetadataGetStatus;
 }
