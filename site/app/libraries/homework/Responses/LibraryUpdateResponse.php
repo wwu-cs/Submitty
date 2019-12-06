@@ -3,13 +3,15 @@
 namespace app\libraries\homework\Responses;
 
 class LibraryUpdateResponse {
-    /** @var string */
-    public $error;
+    /** @var bool */
+    public $success;
 
+    /** @var string */
     protected $message;
 
-    public function __construct(string $message) {
+    protected function __construct(string $message, bool $success) {
         $this->message = $message;
+        $this->success = $success;
     }
 
     /**
@@ -17,9 +19,11 @@ class LibraryUpdateResponse {
      * @return static
      */
     public static function error(string $message) {
-        $instance = new static('');
-        $instance->error = $message;
-        return $instance;
+        return new static($message, false);
+    }
+
+    public static function success(string $message) {
+        return new static($message, true);
     }
 
     /**

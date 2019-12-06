@@ -9,7 +9,7 @@ class LibraryAddResponse {
     /** @var string */
     protected $message;
 
-    public function __construct(string $message = '') {
+    protected function __construct(string $message = '') {
         $this->message = $message;
     }
 
@@ -17,6 +17,10 @@ class LibraryAddResponse {
         $response = new static;
         $response->error = $message;
         return $response;
+    }
+
+    public static function success(string $message) {
+        return new static($message);
     }
 
     public function getMessage(): string {

@@ -4,17 +4,23 @@ use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
+use app\libraries\homework\Gateways\MetadataGateway;
 use app\libraries\homework\Responses\LibraryAddResponse;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
+use app\libraries\homework\Gateways\Metadata\MetadataGatewayFactory;
 
 class LibraryAddUseCase extends BaseUseCase {
     /** @var LibraryGateway */
     protected $gateway;
 
+    /** @var MetadataGateway */
+    protected $metadata;
+
     public function __construct(Core $core) {
         parent::__construct($core);
 
         $this->gateway = LibraryGatewayFactory::getInstance();
+        $this->metadata = MetadataGatewayFactory::getInstance();
     }
 
     /**
@@ -63,7 +69,16 @@ class LibraryAddUseCase extends BaseUseCase {
             );
         }
 
-        return new LibraryAddResponse("Successfully cloned $repoUrl.");
+        // Create metadata for the library
+        $metadataStatus = $this->metadata->update($status->library);
+
+        if ($metadataStatus->error) {
+            return LibraryAddResponse::error(
+                'Library was cloned, however the metadata was not able to be created because: ' . $metadataStatus->error
+            );
+        }
+
+        return LibraryAddResponse::success("Successfully cloned $repoUrl.");
     }
 
     /**
@@ -105,6 +120,16 @@ class LibraryAddUseCase extends BaseUseCase {
             );
         }
 
-        return new LibraryAddResponse("Successfully installed new library: $libName");
+        // Create metadata for the library
+        $metadataStatus = $this->metadata->update($status->library);
+
+        if ($metadataStatus->error) {
+            return LibraryAddResponse::error(
+                'Library was created, however the metadata was not able to be created because: ' .
+                $metadataStatus->error
+            );
+        }
+
+        return LibraryAddResponse::success("Successfully installed new library: $libName");
     }
 }

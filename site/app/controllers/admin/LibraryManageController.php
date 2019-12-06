@@ -205,8 +205,8 @@ class LibraryManageController extends AbstractController {
 
         $result = $useCase->updateLibrary($name);
 
-        if ($result->error) {
-            $response = JsonResponse::getFailResponse($result->error);
+        if (!$result->success) {
+            $response = JsonResponse::getFailResponse($result->getMessage());
         }
         else {
             $response = JsonResponse::getSuccessResponse($result->getMessage());
