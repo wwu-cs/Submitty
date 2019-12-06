@@ -3,7 +3,6 @@
 namespace tests\app\controllers\admin;
 
 use DateTime;
-use app\models\User;
 use tests\BaseUnitTest;
 use app\libraries\Core;
 use app\libraries\Utils;
@@ -37,12 +36,17 @@ class LibraryManageControllerTester extends BaseUnitTest {
     /** @var LibraryManageController */
     protected $controller;
 
-    protected function createConfigWithLibrary(bool $enabled = true, string $location = 'library location', bool $allow_access = true) {
+    protected function createConfigWithLibrary(bool $enabled = true,
+                                               string $location = 'library location',
+                                               bool $allow_access = true) {
         $this->location = $location;
-        $this->core = $this->createMockCore([
-            'homework_library_enable' => $enabled,
-            'homework_library_location' => $this->location
-        ], ['can_access' => $allow_access]);
+        $this->core = $this->createMockCore(
+            [
+                'homework_library_enable'   => $enabled,
+                'homework_library_location' => $this->location,
+            ],
+            ['can_access' => $allow_access]
+        );
         $this->controller = new LibraryManageController($this->core);
     }
 
