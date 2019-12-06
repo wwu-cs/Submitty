@@ -1,5 +1,6 @@
 <?php namespace tests\app\controllers\admin;
 
+use app\models\User;
 use tests\BaseUnitTest;
 use app\libraries\Core;
 use app\libraries\Utils;
@@ -7,6 +8,7 @@ use app\libraries\FileUtils;
 use app\exceptions\NotEnabledException;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
+use app\exceptions\AuthorizationException;
 use app\controllers\admin\LibraryManageController;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
@@ -26,12 +28,12 @@ class LibraryManageControllerTester extends BaseUnitTest {
     /** @var LibraryManageController */
     protected $controller;
 
-    protected function createConfigWithLibrary(bool $enabled = true, string $location = 'library location') {
+    protected function createConfigWithLibrary(bool $enabled = true, string $location = 'library location', bool $allow_access = true) {
         $this->location = $location;
         $this->core = $this->createMockCore([
             'homework_library_enable' => $enabled,
             'homework_library_location' => $this->location
-        ]);
+        ], ['can_access' => $allow_access]);
         $this->controller = new LibraryManageController($this->core);
     }
 
@@ -123,6 +125,13 @@ class LibraryManageControllerTester extends BaseUnitTest {
     }
 
     /** @test */
+    public function testItThrowsAuthorizationException() {
+        $this->expectException(AuthorizationException::class);
+        $this->expectExceptionMessage('You do not have permission to access this route');
+        $this->createConfigWithLibrary(true, 'library location', false);
+    }
+
+    /** @test */
     public function testItDeletesAFileAfterHandling() {
         $location = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         $this->createConfigWithLibrary(true, $location);
@@ -167,6 +176,30 @@ class LibraryManageControllerTester extends BaseUnitTest {
         $this->assertEquals([
             'status' => 'success',
             'data' => ['name']
+        ], $response->json);
+    }
+
+    /** @test */
+    public function testItUpdatesALibrary() {
+        $this->gateway->addLibrary(new LibraryEntity('imma sleep after this', $this->location));
+
+        $response = $this->controller->ajaxUpdateLibrary('imma sleep after this')->json_response;
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals([
+            'status' => 'success',
+            'data' => "Successfully updated 'imma sleep after this'"
+        ], $response->json);
+    }
+
+    /** @test */
+    public function testItDoesntUpdateNonExistentLibraries() {
+        $response = $this->controller->ajaxUpdateLibrary('Wherever you go, there you will be.')->json_response;
+
+        $this->assertInstanceOf(JsonResponse::class, $response);
+        $this->assertEquals([
+            'status' => 'fail',
+            'message' => 'Library does not exist.'
         ], $response->json);
     }
 
