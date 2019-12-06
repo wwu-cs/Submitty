@@ -13,11 +13,12 @@ class TestLibraryAdmin(BaseTestCase):
         # This is just a random repository picked because it wasn't as big as the main Submitty repo
         self.sourceUrl = "https://github.com/Submitty/Tutorial.git"
         self.sourceName = "Tutorial"
-        self.manageUrl = "/homework/library/manage"
+        self.manageUrl = "/manage"
 
     # test that a source can be added from github
     def test_add_git_source(self):
-        self.get(self.manageUrl)
+        # skip test if library not enabled
+        if (not self.get(self.manageUrl)): return
         # Make sure the source doesn't exist
         self.test_delete_source()
         # Change tabs
@@ -35,7 +36,8 @@ class TestLibraryAdmin(BaseTestCase):
 
     # Delete the source if it exists
     def test_delete_source(self):
-        self.get(self.manageUrl)
+        # skip test if library not enabled
+        if (not self.get(self.manageUrl)): return
         try:
             # source divs
             sources = self.driver.find_elements(By.CSS_SELECTOR, "#library-source-list>div>div")
@@ -63,6 +65,25 @@ class TestLibraryAdmin(BaseTestCase):
             return True
         except NoSuchElementException:
             return False
+
+    # override get() to allow not enabled errors. Return false if not enabled
+    def get(self, url=None, parts=None):
+        if url is None:
+            # Can specify parts = [('semester', 's18'), ...]
+            self.assertIsNotNone(parts)
+            url = "/index.php?" + urlencode(parts)
+
+        if url[0] != "/":
+            url = "/" + url
+        self.driver.get(self.test_url + url)
+
+        try:
+            self.driver.find_elements_by_xpath("//*[contains(text(), 'Feature is not enabled.')]")
+            return False
+        except NoSuchElementException:
+            # Frog robot
+            self.assertNotEqual(self.driver.title, "Submitty - Error", "Got Error Page")
+        return True
 
 if __name__ == "__main__":
     import unittest
