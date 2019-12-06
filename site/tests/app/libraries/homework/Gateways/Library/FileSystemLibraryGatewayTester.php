@@ -5,6 +5,7 @@
  * know about some requirements,
  *thereby complaining.
  */
+
 /** @noinspection PhpComposerExtensionStubsInspection */
 
 namespace tests\app\libraries\homework\Gateways\Library;

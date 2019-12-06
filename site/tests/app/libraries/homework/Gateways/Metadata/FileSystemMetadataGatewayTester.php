@@ -5,6 +5,7 @@
  * know about some requirements,
  *thereby complaining.
  */
+
 /** @noinspection PhpComposerExtensionStubsInspection */
 
 namespace tests\app\libraries\homework\Gateways\Metadata;
@@ -32,42 +33,6 @@ class FileSystemMetadataGatewayTester extends BaseTestCase {
         $this->libraryGateway = new FileSystemLibraryGateway();
         $this->metadataGateway = new FileSystemMetadataGateway($this->libraryGateway);
     }
-
-    /**
-     * Creates a temporary zip file in the tempdir location with the given
-     * files and content form the key value pair array fileList
-     *
-     * @param string   $zipName
-     * @param string[] $fileList
-     * @return string
-     */
-    protected function createTestZipWithFiles(string $zipName, array $fileList): string {
-        $zip = new ZipArchive();
-
-        $f = FileUtils::joinPaths($this->location, $zipName);
-
-        $res = $zip->open($f, ZipArchive::CREATE);
-        $this->assertTrue($res);
-        foreach ($fileList as $fileName => $content) {
-            $zip->addFromString($fileName, $content);
-        }
-        $zip->close();
-        return $f;
-    }
-
-    /**
-     * Create zip file and add it to the repo
-     *
-     * @param string $name
-     * @param array  $fileList
-     * @return LibraryEntity
-     */
-    protected function addZipLibrary(string $name, array $fileList): LibraryEntity {
-        $zip = $this->createTestZipWithFiles($name . '.zip', $fileList);
-        $library = new LibraryEntity($name, $this->location);
-        return $this->libraryGateway->addZipLibrary($library, $zip)->library;
-    }
-
 
     /** @test */
     public function testItDoesntUpdateNonExistentLibraries() {
@@ -103,6 +68,41 @@ class FileSystemMetadataGatewayTester extends BaseTestCase {
         $this->assertEquals('nomen!', $result->getName());
         $this->assertTrue($result->hasSourceTypeOf('bring me dat sauce!'));
         $this->assertFileExists(FileUtils::joinPaths($library->getLibraryPath(), 'library.json'));
+    }
+
+    /**
+     * Create zip file and add it to the repo
+     *
+     * @param string $name
+     * @param array  $fileList
+     * @return LibraryEntity
+     */
+    protected function addZipLibrary(string $name, array $fileList): LibraryEntity {
+        $zip = $this->createTestZipWithFiles($name . '.zip', $fileList);
+        $library = new LibraryEntity($name, $this->location);
+        return $this->libraryGateway->addZipLibrary($library, $zip)->library;
+    }
+
+    /**
+     * Creates a temporary zip file in the tempdir location with the given
+     * files and content form the key value pair array fileList
+     *
+     * @param string   $zipName
+     * @param string[] $fileList
+     * @return string
+     */
+    protected function createTestZipWithFiles(string $zipName, array $fileList): string {
+        $zip = new ZipArchive();
+
+        $f = FileUtils::joinPaths($this->location, $zipName);
+
+        $res = $zip->open($f, ZipArchive::CREATE);
+        $this->assertTrue($res);
+        foreach ($fileList as $fileName => $content) {
+            $zip->addFromString($fileName, $content);
+        }
+        $zip->close();
+        return $f;
     }
 
     /** @test */

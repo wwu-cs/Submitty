@@ -50,7 +50,8 @@ class LibraryUpdateUseCase extends BaseUseCase {
             $metadataStatus = $this->metadata->update(
                 $currentMetadata->result->touch()
             );
-        } else {
+        }
+        else {
             // If we get here, a library was probably somehow added without metadata
             $metadataStatus = $this->metadata->update(
                 MetadataEntity::createNewMetadata(

@@ -99,21 +99,21 @@ class MetadataEntity {
     }
 
     /**
+     * Returns the library's name
+     *
+     * @return string
+     */
+    public function getName(): string {
+        return $this->name;
+    }
+
+    /**
      * Get the library source type, git or zip
      *
      * @return string
      */
     public function getSourceType(): string {
         return $this->sourceType;
-    }
-
-    /**
-     * Returns number of gradeables in the library
-     *
-     * @return int
-     */
-    public function getGradeableCount(): int {
-        return $this->gradeableCount;
     }
 
     /**
@@ -135,6 +135,15 @@ class MetadataEntity {
     }
 
     /**
+     * Returns number of gradeables in the library
+     *
+     * @return int
+     */
+    public function getGradeableCount(): int {
+        return $this->gradeableCount;
+    }
+
+    /**
      * Update the updated date
      *
      * @return MetadataEntity
@@ -142,15 +151,6 @@ class MetadataEntity {
     public function touch(): MetadataEntity {
         $this->dateUpdated = new DateTime;
         return $this;
-    }
-
-    /**
-     * Returns the library's name
-     *
-     * @return string
-     */
-    public function getName(): string {
-        return $this->name;
     }
 
     /**

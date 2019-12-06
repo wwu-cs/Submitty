@@ -22,16 +22,6 @@ class LibraryUpdateTester extends BaseTestCase {
         $this->useCase = new LibraryUpdateUseCase($this->core);
     }
 
-    /**
-     * Execute the test with given parameters and store the result
-     *
-     * @param $library
-     */
-    public function handleTest($library) {
-        $this->response = $this->useCase->updateLibrary($library);
-    }
-
-
     /** @test */
     public function testUpdateLibraryWithNoPreExistingMetadata() {
         $library = new LibraryEntity('name', $this->location);
@@ -47,6 +37,15 @@ class LibraryUpdateTester extends BaseTestCase {
         $metadata = $metadata[0];
         $this->assertEquals('unknown', $metadata->getSourceType());
         $this->assertEquals('name', $metadata->getName());
+    }
+
+    /**
+     * Execute the test with given parameters and store the result
+     *
+     * @param $library
+     */
+    public function handleTest($library) {
+        $this->response = $this->useCase->updateLibrary($library);
     }
 
     /** @test */
@@ -97,8 +96,10 @@ class LibraryUpdateTester extends BaseTestCase {
     public function testUpdateLibraryThatDoesntExist() {
         $this->handleTest('name');
 
-        $this->assertEquals('There was a problem updating the metadata: Library does not exist.',
-                            $this->response->getMessage());
+        $this->assertEquals(
+            'There was a problem updating the metadata: Library does not exist.',
+            $this->response->getMessage()
+        );
         $this->assertFalse($this->response->success);
     }
 
@@ -108,11 +109,13 @@ class LibraryUpdateTester extends BaseTestCase {
         $this->libraryGateway->addLibrary($library);
         $this->libraryGateway->makeNextAddOrUpdateFailWithMessage('get rekt 173911 times');
         // Has to be git source if we want to trigger update
-        $this->metadataGateway->add(MetadataEntity::createNewMetadata(
-            $library,
-            'name',
-            'git'
-        ));
+        $this->metadataGateway->add(
+            MetadataEntity::createNewMetadata(
+                $library,
+                'name',
+                'git'
+            )
+        );
         $this->handleTest('name');
 
         $this->assertEquals(

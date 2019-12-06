@@ -26,30 +26,34 @@ class FileSystemMetadataGateway implements MetadataGateway {
         $this->libraryGateway = $libraryGateway;
     }
 
-    /**
-     * Formats a date
-     *
-     * @param DateTime $d
-     * @return string
-     */
-    protected function formatDate(DateTime $d): string {
-        return $d->format('Y-m-d\TH:i:s.u');
-    }
+    /** @inheritDoc */
+    public function update(MetadataEntity $entity): MetadataUpdateStatus {
+        // We already have the name, base entity, source type, and dates set.
+        // We just need to go count the number of gradeables now.
 
-    /**
-     * Pulls a date back in from a config file
-     *
-     * @param string $s
-     * @return DateTime
-     */
-    protected function constructDate(string $s): DateTime {
-        $format = DateTime::createFromFormat(self::DATE_FORMAT, $s);
-
-        if (!$format) {
-            $format = DateTime::createFromFormat('Y-m-d H:i:s', '0000-00-00 00:00:00');
+        // First check to see if the library is there
+        if (!file_exists($entity->getLibrary()->getLibraryPath())) {
+            return MetadataUpdateStatus::error('Library does not exist.');
         }
 
-        return $format;
+        // Now we count the number of gradeables by the configs we can see.
+        $configs = $this->fileSearchRecursive($entity->getLibrary()->getLibraryPath(), 'config.json');
+
+        $entity = MetadataEntity::copyWithGradeableCount($entity, count($configs));
+
+        $jsonFile = $this->getJsonFilePathFromLibrary($entity->getLibrary());
+        FileUtils::writeJsonFile(
+            $jsonFile,
+            [
+                'name'            => $entity->getName(),
+                'source_type'     => $entity->getSourceType(),
+                'gradeable_count' => $entity->getGradeableCount(),
+                'updated_at'      => $this->formatDate($entity->getLastUpdatedDate()),
+                'created_at'      => $this->formatDate($entity->getCreatedDate()),
+            ]
+        );
+
+        return MetadataUpdateStatus::success($entity);
     }
 
     /**
@@ -80,34 +84,30 @@ class FileSystemMetadataGateway implements MetadataGateway {
         return FileUtils::joinPaths($library->getLibraryPath(), 'library.json');
     }
 
-    /** @inheritDoc */
-    public function update(MetadataEntity $entity): MetadataUpdateStatus {
-        // We already have the name, base entity, source type, and dates set.
-        // We just need to go count the number of gradeables now.
+    /**
+     * Formats a date
+     *
+     * @param DateTime $d
+     * @return string
+     */
+    protected function formatDate(DateTime $d): string {
+        return $d->format('Y-m-d\TH:i:s.u');
+    }
 
-        // First check to see if the library is there
-        if (!file_exists($entity->getLibrary()->getLibraryPath())) {
-            return MetadataUpdateStatus::error('Library does not exist.');
+    /** @inheritDoc */
+    public function getAll(string $location): array {
+        $return = [];
+
+        /** @var LibraryEntity $library */
+        foreach ($this->libraryGateway->getAllLibraries($location) as $library) {
+            $response = $this->get($library);
+            // Skip it if it has an error
+            if (!$response->error) {
+                $return[] = $response->result;
+            }
         }
 
-        // Now we count the number of gradeables by the configs we can see.
-        $configs = $this->fileSearchRecursive($entity->getLibrary()->getLibraryPath(), 'config.json');
-
-        $entity = MetadataEntity::copyWithGradeableCount($entity, count($configs));
-
-        $jsonFile = $this->getJsonFilePathFromLibrary($entity->getLibrary());
-        FileUtils::writeJsonFile(
-            $jsonFile,
-            [
-                'name'            => $entity->getName(),
-                'source_type'      => $entity->getSourceType(),
-                'gradeable_count' => $entity->getGradeableCount(),
-                'updated_at'      => $this->formatDate($entity->getLastUpdatedDate()),
-                'created_at'      => $this->formatDate($entity->getCreatedDate()),
-            ]
-        );
-
-        return MetadataUpdateStatus::success($entity);
+        return $return;
     }
 
     /** @inheritDoc */
@@ -160,19 +160,19 @@ class FileSystemMetadataGateway implements MetadataGateway {
         );
     }
 
-    /** @inheritDoc */
-    public function getAll(string $location): array {
-        $return = [];
+    /**
+     * Pulls a date back in from a config file
+     *
+     * @param string $s
+     * @return DateTime
+     */
+    protected function constructDate(string $s): DateTime {
+        $format = DateTime::createFromFormat(self::DATE_FORMAT, $s);
 
-        /** @var LibraryEntity $library */
-        foreach ($this->libraryGateway->getAllLibraries($location) as $library) {
-            $response = $this->get($library);
-            // Skip it if it has an error
-            if (!$response->error) {
-                $return[] = $response->result;
-            }
+        if (!$format) {
+            $format = DateTime::createFromFormat('Y-m-d H:i:s', '0000-00-00 00:00:00');
         }
 
-        return $return;
+        return $format;
     }
 }
