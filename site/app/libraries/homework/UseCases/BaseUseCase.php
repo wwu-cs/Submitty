@@ -1,5 +1,6 @@
-<?php namespace app\libraries\homework\UseCases;
+<?php
 
+namespace app\libraries\homework\UseCases;
 
 use app\libraries\Core;
 
@@ -15,5 +16,4 @@ abstract class BaseUseCase {
 
         $this->location = $this->core->getConfig()->getHomeworkLibraryLocation();
     }
-
 }
