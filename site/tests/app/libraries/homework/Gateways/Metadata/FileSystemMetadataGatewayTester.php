@@ -10,6 +10,7 @@
 
 namespace tests\app\libraries\homework\Gateways\Metadata;
 
+use DateTime;
 use ZipArchive;
 use app\libraries\FileUtils;
 use app\libraries\homework\Entities\LibraryEntity;
@@ -219,6 +220,31 @@ class FileSystemMetadataGatewayTester extends BaseTestCase {
         $response = $this->metadataGateway->get($library);
 
         $this->assertEquals('Invalid library.json file', $response->error);
+    }
+
+    /** @test */
+    public function testItSetsDefaultDateWhenInvalidIsSupplied() {
+        $library = $this->addZipLibrary(
+            'almost done',
+            [
+                'file'         => 'sodihgashdgoah',
+                'library.json' => json_encode(
+                    [
+                        'name'            => 'name',
+                        'source_type'     => 'sauce',
+                        'gradeable_count' => 5,
+                        'created_at'      => 'broken date',
+                        'updated_at'      => 'really broken dateo',
+                    ]
+                ),
+            ]
+        );
+
+        $response = $this->metadataGateway->get($library);
+        $format = DateTime::createFromFormat('Y-m-d H:i:s', '0000-00-00 00:00:00');
+
+        $this->assertEquals($format, $response->result->getCreatedDate());
+        $this->assertEquals($format, $response->result->getLastUpdatedDate());
     }
 
     /** @test */
