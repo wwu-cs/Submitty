@@ -13,7 +13,7 @@ class LibraryAddStatus {
      * @param LibraryEntity|null $library
      * @param string             $message
      */
-    public function __construct($library, string $message) {
+    protected function __construct($library, string $message) {
         $this->library = $library;
         $this->message = $message;
     }

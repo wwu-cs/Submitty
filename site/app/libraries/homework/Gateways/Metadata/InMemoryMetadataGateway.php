@@ -1,10 +1,13 @@
-<?php namespace app\libraries\homework\Gateways\Metadata;
+<?php
 
+namespace app\libraries\homework\Gateways\Metadata;
 
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Entities\MetadataEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
 use app\libraries\homework\Gateways\MetadataGateway;
+use app\libraries\homework\Entities\MetadataGetStatus;
+use app\libraries\homework\Entities\MetadataUpdateStatus;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 
 class InMemoryMetadataGateway implements MetadataGateway {
@@ -31,26 +34,40 @@ class InMemoryMetadataGateway implements MetadataGateway {
     }
 
     /** @inheritDoc */
-    public function update(LibraryEntity $entity): MetadataEntity {
+    public function update(LibraryEntity $entity): MetadataUpdateStatus {
+        if (!$this->libraryGateway->libraryExists($entity)) {
+            return MetadataUpdateStatus::error('Library does not exist.');
+        }
+
+        if (empty($this->updateQueue)) {
+            return MetadataUpdateStatus::error('Could not update library.');
+        }
+
         $meta = array_pop($this->updateQueue);
+
+        $this->metadata = array_filter($this->metadata, function (MetadataEntity $mEntity) use ($entity) {
+            return $mEntity->getLibrary()->isNot($entity);
+        });
+
         $this->metadata[] = $meta;
-        return $meta;
+
+        return MetadataUpdateStatus::success($meta);
     }
 
     /** @inheritDoc */
-    public function get(LibraryEntity $entity) {
-
-
+    public function get(LibraryEntity $entity): MetadataGetStatus {
         foreach ($this->metadata as $meta) {
             if ($meta->getLibrary()->is($entity)) {
-                return $meta;
+                return MetadataGetStatus::success($meta);
             }
         }
-        return null;
+        return MetadataGetStatus::error('Could not find library');
     }
 
     /** @inheritDoc */
-    public function getAll(): array {
-        return $this->metadata;
+    public function getAll(string $location): array {
+        return array_filter($this->metadata, function (MetadataEntity $entity) use ($location) {
+            return $entity->getLibrary()->hasLocationOf($location);
+        });
     }
 }

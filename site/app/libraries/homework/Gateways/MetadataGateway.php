@@ -3,28 +3,31 @@
 
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Entities\MetadataEntity;
+use app\libraries\homework\Entities\MetadataGetStatus;
+use app\libraries\homework\Entities\MetadataUpdateStatus;
 
 interface MetadataGateway {
     /**
      * Update or set metadata for a library
      *
      * @param LibraryEntity $entity
-     * @return MetadataEntity
+     * @return MetadataUpdateStatus
      */
-    public function update(LibraryEntity $entity): MetadataEntity;
+    public function update(LibraryEntity $entity): MetadataUpdateStatus;
 
     /**
      * Get metadata for a library
      *
      * @param LibraryEntity $entity
-     * @return MetadataEntity|null
+     * @return MetadataGetStatus
      */
-    public function get(LibraryEntity $entity);
+    public function get(LibraryEntity $entity): MetadataGetStatus;
 
     /**
      * Get all libraries and their metadata.
      *
+     * @param string $location
      * @return MetadataEntity[]
      */
-    public function getAll(): array;
+    public function getAll(string $location): array;
 }
