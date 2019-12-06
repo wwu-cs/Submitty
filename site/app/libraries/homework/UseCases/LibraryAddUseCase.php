@@ -21,7 +21,7 @@ class LibraryAddUseCase extends BaseUseCase {
      * Takes a string representing the git url to clone, and adds it to the library
      *
      * @param null|string $repoUrl
-     * @return \app\libraries\homework\Responses\LibraryAddResponse
+     * @return LibraryAddResponse
      */
     public function addGitLibrary($repoUrl): LibraryAddResponse {
         if (!$repoUrl) {
@@ -67,7 +67,7 @@ class LibraryAddUseCase extends BaseUseCase {
      * Takes in a $_FILES file and adds it to the library
      *
      * @param array|null $zipFile
-     * @return \app\libraries\homework\Responses\LibraryAddResponse
+     * @return LibraryAddResponse
      */
     public function addZipLibrary($zipFile): LibraryAddResponse {
         if (!$zipFile || !isset($zipFile['name']) || !isset($zipFile['tmp_name'])) {

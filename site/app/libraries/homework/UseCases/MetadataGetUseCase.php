@@ -5,6 +5,7 @@ use app\libraries\Core;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
 use app\libraries\homework\Gateways\MetadataGateway;
+use app\libraries\homework\Responses\MetadataGetResponse;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\Metadata\MetadataGatewayFactory;
 
@@ -25,14 +26,14 @@ class MetadataGetUseCase extends BaseUseCase {
 
     /**
      * @param LibraryEntity $library
-     * @return \app\libraries\homework\Responses\MetadataGetResponse
+     * @return MetadataGetResponse
      */
-    public function getMetadataFor(LibraryEntity $library): \app\libraries\homework\Responses\MetadataGetResponse {
+    public function getMetadataFor(LibraryEntity $library): MetadataGetResponse {
         if (!$this->libraries->libraryExists($library)) {
-            return \app\libraries\homework\Responses\MetadataGetResponse::error('Library does not exist.');
+            return MetadataGetResponse::error('Library does not exist.');
         }
 
         $meta = $this->metadata->get($library);
-        return \app\libraries\homework\Responses\MetadataGetResponse::success($meta);
+        return MetadataGetResponse::success($meta);
     }
 }

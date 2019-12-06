@@ -17,8 +17,6 @@ class InMemoryMetadataGateway implements MetadataGateway {
     /** @var LibraryGateway */
     protected $libraryGateway;
 
-;
-
     public function __construct() {
         $this->libraryGateway = LibraryGatewayFactory::getInstance();
     }
@@ -41,6 +39,7 @@ class InMemoryMetadataGateway implements MetadataGateway {
 
     /** @inheritDoc */
     public function get(LibraryEntity $entity) {
+
 
         foreach ($this->metadata as $meta) {
             if ($meta->getLibrary()->is($entity)) {

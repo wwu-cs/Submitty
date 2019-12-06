@@ -3,6 +3,7 @@
 use app\libraries\Core;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
+use app\libraries\homework\Responses\LibraryUpdateResponse;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 
 
@@ -17,9 +18,9 @@ class LibraryUpdateUseCase extends BaseUseCase {
         $this->gateway = LibraryGatewayFactory::getInstance();
     }
 
-    public function updateLibrary($name): \app\libraries\homework\Responses\LibraryUpdateResponse {
+    public function updateLibrary($name): LibraryUpdateResponse {
         if (!$name) {
-            return \app\libraries\homework\Responses\LibraryUpdateResponse::error('You must specify the library to remove.');
+            return LibraryUpdateResponse::error('You must specify the library to remove.');
         }
 
         $library = new LibraryEntity($name, $this->location);
@@ -27,10 +28,10 @@ class LibraryUpdateUseCase extends BaseUseCase {
         $response = $this->gateway->updateLibrary($library);
 
         if ($response->success) {
-            return new \app\libraries\homework\Responses\LibraryUpdateResponse($response->message);
+            return new LibraryUpdateResponse($response->message);
         }
 
-        return \app\libraries\homework\Responses\LibraryUpdateResponse::error($response->message);
+        return LibraryUpdateResponse::error($response->message);
     }
 
 }
