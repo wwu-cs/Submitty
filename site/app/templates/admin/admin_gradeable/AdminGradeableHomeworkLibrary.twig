@@ -8,7 +8,8 @@
         <div class="option-title">Search for Autograding Configuration</div>
         <div class="option-alt">Input the Preset title or any related information</div>
     </label>
-    <input class="homework-library-search" type="text" name="homework_name" id="homework-name" placeholder="Search" value="{{ fields['course_name'] }}" />
+    <input class="homework-library-search" type="text" name="homework_name" id="homework-name" placeholder="Title" value="{{ fields['course_name'] }}" />
+    <input class="homework-library-search" type="text" name="homework_tags" id="homework-tags" placeholder="Tags" value="{{ fields['course_tags'] }}" />
 
     <div class="homework-library-results">
         <div class="homework-library-preview homework-library-border">
@@ -18,8 +19,8 @@
             <div class="homework-library-panel-container">
                 {% for key, value in results %}
                     <div
-                            class="homework-library-panel-card homework-library-border"
-                            data-index={{ key }}>
+                        class="homework-library-panel-card homework-library-border"
+                        data-index={{ key }}>
                         {{ value }}
                     </div>
                 {% endfor %}
@@ -32,9 +33,9 @@
             </div>
             <div class="homework-library-panel-container">
                 <div class="homework-library-panel-content homework-library-border"></div>
-                {#                        <div class="btn-wrapper">#}
-                {#                            <a class="btn btn-primary" href="/homework/library/manage">Manage Libraries</a>#}
-                {#                        </div>#}
+{#                        <div class="btn-wrapper">#}
+{#                            <a class="btn btn-primary" href="/homework/library/manage">Manage Libraries</a>#}
+{#                        </div>#}
             </div>
         </div>
     </div>
@@ -43,5 +44,5 @@
         <a class="btn btn-default" href="/homework">Back</a>
         <a class="btn btn-primary" href="/homework/library/manage">Assign</a>
     </div>
-
 </div>
+
