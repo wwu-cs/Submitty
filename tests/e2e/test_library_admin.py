@@ -9,7 +9,7 @@ class TestLibraryAdmin(BaseTestCase):
     Test cases around homework library admin page
     """
     def __init__(self, testname):
-        super().__init__(testname)
+        super().__init__(testname, user_id="superuser", user_password="superuser", user_name="Clark")
         # This is just a random repository picked because it wasn't as big as the main Submitty repo
         self.sourceUrl = "https://github.com/Submitty/Tutorial.git"
         self.sourceName = "Tutorial"
