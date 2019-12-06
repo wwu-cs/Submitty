@@ -12,11 +12,15 @@
                 {% endif %}
                 {% for source in libraries %}
                     <div class="homework-library-panel-card homework-library-border" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>{{ source['name'] }}</span>
-                        <span> Updated: 12.02.2019 12:23:48 </span>
+                        <span>{{ source.name }}</span>
+                        <span> Updated: {{ source.updated_at }} </span>
+                        <span> Gradeables: {{ source.number_of_gradeables }} </span>
+                        <span> Source: {{ source.source }} </span>
                         <span>
-                            <button class="btn" onclick="refreshLibrary('{{ source }}', this)">Refresh</button>
-                            <button class="btn" onclick="deleteLibrary('{{ source }}', this)">Delete</button>
+                            {% if source.source == 'git' %}
+                                <button class="btn" onclick="refreshLibrary('{{ source.key }}', this)">Refresh</button>
+                            {% endif %}
+                            <button class="btn" onclick="deleteLibrary('{{ source.key }}', this)">Delete</button>
                         </span>
                     </div>
                 {% endfor %}
