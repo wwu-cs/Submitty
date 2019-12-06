@@ -20,7 +20,7 @@ class MetadataUpdateResponse {
      * @param string              $message
      * @param MetadataEntity|null $meta
      */
-    public function __construct(string $message, $meta) {
+    protected function __construct(string $message, $meta) {
         $this->message = $message;
         $this->metadata = $meta;
     }

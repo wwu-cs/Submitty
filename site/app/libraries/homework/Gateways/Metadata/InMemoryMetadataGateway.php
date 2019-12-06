@@ -56,12 +56,16 @@ class InMemoryMetadataGateway implements MetadataGateway {
 
     /** @inheritDoc */
     public function get(LibraryEntity $entity): MetadataGetStatus {
+        if (!$this->libraryGateway->libraryExists($entity)) {
+            return MetadataGetStatus::error('Library does not exist.');
+        }
+
         foreach ($this->metadata as $meta) {
             if ($meta->getLibrary()->is($entity)) {
                 return MetadataGetStatus::success($meta);
             }
         }
-        return MetadataGetStatus::error('Could not find library');
+        return MetadataGetStatus::error('Could not find library metadata.');
     }
 
     /** @inheritDoc */

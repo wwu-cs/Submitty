@@ -14,7 +14,7 @@ class MetadataGetResponse {
     /**
      * @param MetadataEntity|null $meta
      */
-    public function __construct($meta) {
+    protected function __construct($meta) {
         $this->metadata = $meta;
     }
 
