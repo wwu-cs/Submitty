@@ -4,7 +4,7 @@
 use app\libraries\homework\Entities\LibraryEntity;
 use tests\app\libraries\homework\UseCases\BaseTestCase;
 use app\libraries\homework\UseCases\LibraryUpdateUseCase;
-use app\libraries\homework\UseCases\LibraryUpdateResponse;
+use app\libraries\homework\Responses\LibraryUpdateResponse;
 
 class LibraryUpdateTester extends BaseTestCase {
     /** @var LibraryUpdateUseCase */
