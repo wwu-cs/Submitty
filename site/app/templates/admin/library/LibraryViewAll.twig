@@ -11,17 +11,26 @@
                 </div>
                 {% endif %}
                 {% for source in libraries %}
-                    <div class="homework-library-panel-card homework-library-border" style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>{{ source.name }}</span>
-                        <span> Updated: {{ source.updated_at }} </span>
-                        <span> Gradeables: {{ source.number_of_gradeables }} </span>
-                        <span> Source: {{ source.source }} </span>
-                        <span>
-                            {% if source.source == 'git' %}
-                                <button class="btn" onclick="refreshLibrary('{{ source.key }}', this)">Refresh</button>
-                            {% endif %}
-                            <button class="btn" onclick="deleteLibrary('{{ source.key }}', this)">Delete</button>
-                        </span>
+                    <div class="homework-library-panel-card homework-library-border">
+                        <div class="row">
+                            <div class="col">
+                                {{ source.name }}
+                            </div>
+                            <div class="col">
+                                {{ source.source }} source 
+                                <br> {{ source.number_of_gradeables }} gradeables </br>
+                            </div>
+                            <div class="col"> 
+                                Last updated: 
+                                <br><i> {{ source.updated_at }} </i></br>
+                            </div>
+                            <div class="col" align = "right">
+                                    {% if source.source == 'git' %}
+                                        <button class="btn" onclick="refreshLibrary('{{ source.key }}', this)">Refresh</button>
+                                    {% endif %}
+                                    <button class="btn" width="100%" onclick="deleteLibrary('{{ source.key }}', this)">Delete</button>
+                            </div>
+                        </div>
                     </div>
                 {% endfor %}
 			</div>
