@@ -1,6 +1,8 @@
 <?php namespace app\libraries\homework\Gateways\Metadata;
 
 use app\libraries\homework\Gateways\MetadataGateway;
+use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
+use app\libraries\homework\Gateways\Library\FileSystemLibraryGateway;
 
 class MetadataGatewayFactory {
     /** @var MetadataGateway */
@@ -13,7 +15,9 @@ class MetadataGatewayFactory {
      */
     public static function getInstance(): MetadataGateway {
         if (!static::$instance) {
-            static::$instance = new FileSystemMetadataGateway();
+            $libraryGateway = new FileSystemLibraryGateway();
+            LibraryGatewayFactory::setInstance($libraryGateway);
+            static::$instance = new FileSystemMetadataGateway($libraryGateway);
         }
 
         return static::$instance;

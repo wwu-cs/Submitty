@@ -14,6 +14,7 @@ use app\libraries\FileUtils;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Entities\MetadataEntity;
 use tests\app\libraries\homework\Gateways\BaseTestCase;
+use app\libraries\homework\Gateways\Metadata\MetadataGatewayFactory;
 use app\libraries\homework\Gateways\Library\FileSystemLibraryGateway;
 use app\libraries\homework\Gateways\Metadata\FileSystemMetadataGateway;
 
@@ -249,5 +250,12 @@ class FileSystemMetadataGatewayTester extends BaseTestCase {
         $this->assertCount(1, $results);
         $this->assertEquals('name', $results[0]->getName());
         $this->assertTrue($results[0]->hasSourceTypeOf('source'));
+    }
+
+    /** @test */
+    public function testDefaultGatewayIsFileSystemGateway() {
+        MetadataGatewayFactory::clearInstance();
+        $instance = MetadataGatewayFactory::getInstance();
+        $this->assertInstanceOf(FileSystemMetadataGateway::class, $instance);
     }
 }

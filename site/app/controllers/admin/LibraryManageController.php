@@ -26,9 +26,9 @@ use app\libraries\homework\UseCases\LibraryUpdateUseCase;
  * @package app\controllers\admin
  */
 class LibraryManageController extends AbstractController {
+    const DATE_FORMAT = 'd M, Y H:i:s';
+
     /**
-     * LibraryManage constructor.
-     *
      * @param Core $core
      * @throws NotEnabledException
      * @throws AuthorizationException
@@ -57,12 +57,12 @@ class LibraryManageController extends AbstractController {
         /** @var MetadataEntity $meta */
         foreach ($libraryMetadata as $meta) {
             $response[] = [
-                'key'               => $meta->getLibrary()->getKey(),
-                'name'              => $meta->getName(),
-                'source'            => $meta->getSourceType(),
-                'num_of_gradeables' => $meta->getGradeableCount(),
-                'updated_at'        => $meta->getLastUpdatedDate(),
-                'created_at'        => $meta->getCreatedDate(),
+                'key'                  => $meta->getLibrary()->getKey(),
+                'name'                 => $meta->getName(),
+                'source'               => $meta->getSourceType(),
+                'number_of_gradeables' => $meta->getGradeableCount(),
+                'updated_at'           => $meta->getLastUpdatedDate()->format(self::DATE_FORMAT),
+                'created_at'           => $meta->getCreatedDate()->format(self::DATE_FORMAT),
             ];
         }
 
@@ -104,8 +104,10 @@ class LibraryManageController extends AbstractController {
     public function ajaxUploadLibraryFromZip(): Response {
         $useCase = new LibraryAddUseCase($this->core);
 
+        $fileInfo = $_FILES['zip'];
+
         $results = $useCase->addZipLibrary(
-            $_FILES['zip'] ?? null,
+            $fileInfo ?? null,
             $_POST['name'] ?? null
         );
 
