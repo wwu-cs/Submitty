@@ -104,9 +104,10 @@ class LibraryManageController extends AbstractController {
     public function ajaxUploadLibraryFromZip(): Response {
         $useCase = new LibraryAddUseCase($this->core);
 
-        $fileInfo = $_FILES['zip'] ?? null;
-
-        $results = $useCase->addZipLibrary($fileInfo);
+        $results = $useCase->addZipLibrary(
+            $_FILES['zip'] ?? null,
+            $_POST['name'] ?? null
+        );
 
         if ($fileInfo && isset($fileInfo['tmp_name'])) {
             FileUtils::rmFile($fileInfo['tmp_name']);
@@ -133,7 +134,10 @@ class LibraryManageController extends AbstractController {
     public function ajaxUploadLibraryFromGit(): Response {
         $useCase = new LibraryAddUseCase($this->core);
 
-        $results = $useCase->addGitLibrary($_POST['git_url'] ?? null);
+        $results = $useCase->addGitLibrary(
+            $_POST['git_url'] ?? null,
+            $_POST['name'] ?? null
+        );
 
         if ($results->error) {
             $response = JsonResponse::getFailResponse($results->error);

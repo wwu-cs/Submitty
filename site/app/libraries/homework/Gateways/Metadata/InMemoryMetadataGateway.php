@@ -14,9 +14,6 @@ class InMemoryMetadataGateway implements MetadataGateway {
     /** @var MetadataEntity[] */
     protected $metadata = [];
 
-    /** @var MetadataEntity[] */
-    protected $updateQueue = [];
-
     /** @var LibraryGateway */
     protected $libraryGateway;
 
@@ -34,27 +31,21 @@ class InMemoryMetadataGateway implements MetadataGateway {
     }
 
     /** @inheritDoc */
-    public function update(LibraryEntity $entity): MetadataUpdateStatus {
-        if (!$this->libraryGateway->libraryExists($entity)) {
+    public function update(MetadataEntity $entity): MetadataUpdateStatus {
+        if (!$this->libraryGateway->libraryExists($entity->getLibrary())) {
             return MetadataUpdateStatus::error('Library does not exist.');
         }
-
-        if (empty($this->updateQueue)) {
-            return MetadataUpdateStatus::error('Could not update library.');
-        }
-
-        $meta = array_pop($this->updateQueue);
 
         $this->metadata = array_filter(
             $this->metadata,
             function (MetadataEntity $mEntity) use ($entity) {
-                return $mEntity->getLibrary()->isNot($entity);
+                return $mEntity->getLibrary()->isNot($entity->getLibrary());
             }
         );
 
-        $this->metadata[] = $meta;
+        $this->metadata[] = $entity;
 
-        return MetadataUpdateStatus::success($meta);
+        return MetadataUpdateStatus::success($entity);
     }
 
     /** @inheritDoc */

@@ -10,10 +10,10 @@ interface MetadataGateway {
     /**
      * Update or set metadata for a library
      *
-     * @param LibraryEntity $entity
+     * @param MetadataEntity $entity
      * @return MetadataUpdateStatus
      */
-    public function update(LibraryEntity $entity): MetadataUpdateStatus;
+    public function update(MetadataEntity $entity): MetadataUpdateStatus;
 
     /**
      * Get metadata for a library

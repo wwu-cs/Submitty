@@ -2,9 +2,11 @@
 
 namespace app\libraries\homework\UseCases;
 
+use Exception;
 use app\libraries\Core;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
+use app\libraries\homework\Entities\MetadataEntity;
 use app\libraries\homework\Gateways\MetadataGateway;
 use app\libraries\homework\Responses\LibraryUpdateResponse;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
@@ -28,7 +30,7 @@ class LibraryUpdateUseCase extends BaseUseCase {
 
     public function updateLibrary($name): LibraryUpdateResponse {
         if (!$name) {
-            return LibraryUpdateResponse::error('You must specify the library to remove.');
+            return LibraryUpdateResponse::error('You must specify the library to update.');
         }
 
         // Construct library representation
@@ -42,7 +44,27 @@ class LibraryUpdateUseCase extends BaseUseCase {
         }
 
         // Update metadata
-        $metadataStatus = $this->metadata->update($library);
+        try {
+            $currentMetadata = $this->metadata->get($library);
+
+            if (!$currentMetadata->error) {
+                $metadataStatus = $this->metadata->update(
+                    $currentMetadata->result->touch()
+                );
+            }
+            else {
+                // If we get here, a library was probably somehow added without metadata
+                $metadataStatus = $this->metadata->update(
+                    MetadataEntity::createNewMetadata(
+                        $library,
+                        $library->getKey(),
+                        'unknown'
+                    )
+                );
+            }
+        } catch (Exception $e) {
+            return LibraryUpdateResponse::error('Could not set metadata timestamps');
+        }
 
         if ($metadataStatus->error) {
             return LibraryUpdateResponse::error($metadataStatus->error);

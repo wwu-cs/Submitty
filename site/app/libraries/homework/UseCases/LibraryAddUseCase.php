@@ -2,10 +2,12 @@
 
 namespace app\libraries\homework\UseCases;
 
+use Exception;
 use app\libraries\Core;
-use app\libraries\FileUtils;
+use app\libraries\Utils;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
+use app\libraries\homework\Entities\MetadataEntity;
 use app\libraries\homework\Gateways\MetadataGateway;
 use app\libraries\homework\Responses\LibraryAddResponse;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
@@ -28,14 +30,16 @@ class LibraryAddUseCase extends BaseUseCase {
     /**
      * Takes a string representing the git url to clone, and adds it to the library
      *
-     * @param null|string $repoUrl
+     * @param string|null $repoUrl
+     * @param string|null $metaName
      * @return LibraryAddResponse
      */
-    public function addGitLibrary($repoUrl): LibraryAddResponse {
+    public function addGitLibrary($repoUrl, $metaName): LibraryAddResponse {
         if (!$repoUrl) {
             return LibraryAddResponse::error('A repo url is required.');
         }
 
+        // Validate the url with regex
         // Regex can be viewed in detail here.
         // https://www.debuggex.com/r/H4kRw1G0YPyBFjfm
         // It validates .git repository urls.
@@ -50,6 +54,7 @@ class LibraryAddUseCase extends BaseUseCase {
             );
         }
 
+        // Parse the git url from capture groups in the regex
         /*
          * From the link above, one can easily see that group 7 is the wanted group.
          * We use index 7 because index 0 from preg match is the whole string.
@@ -58,11 +63,9 @@ class LibraryAddUseCase extends BaseUseCase {
          * that will probably want to be fixed later.
          */
         $parts = explode('/', $matches[7]);
-        $libName = array_pop($parts);
+        $gitName = array_pop($parts);
 
-        $library = new LibraryEntity($libName, $this->location);
-
-        $status = $this->gateway->addGitLibrary($library, $repoUrl);
+        $status = $this->gateway->addGitLibrary($this->generateNewLibrary(), $repoUrl);
 
         if (!$status->library) {
             return LibraryAddResponse::error(
@@ -71,9 +74,25 @@ class LibraryAddUseCase extends BaseUseCase {
             );
         }
 
-        // Create metadata for the library
-        $metadataStatus = $this->metadata->update($status->library);
+        // Default the library name to the git repository name
+        if (!$metaName) {
+            $metaName = $gitName;
+        }
 
+        // Create metadata for the library
+        try {
+            $metadataStatus = $this->metadata->update(
+                MetadataEntity::createNewMetadata(
+                    $status->library,
+                    $metaName,
+                    'git'
+                )
+            );
+        } catch (Exception $exception) {
+            return LibraryAddResponse::error('Unable to set timestamps on metadata.');
+        }
+
+        // Check for error when adding the metadata
         if ($metadataStatus->error) {
             return LibraryAddResponse::error(
                 'Library was cloned, however the metadata was not able to be created because: ' . $metadataStatus->error
@@ -84,36 +103,44 @@ class LibraryAddUseCase extends BaseUseCase {
     }
 
     /**
+     * Generates random folder names until it finds a random string that is not a folder name
+     *
+     * @return LibraryEntity
+     */
+    protected function generateNewLibrary(): LibraryEntity {
+        do {
+            $library = new LibraryEntity(Utils::generateRandomString(), $this->location);
+        } while ($this->gateway->libraryExists($library));
+        return $library;
+    }
+
+    /**
      * Takes in a $_FILES file and adds it to the library
      *
-     * @param array|null $zipFile
+     * @param array|null  $zipFile
+     * @param string|null $metaName
      * @return LibraryAddResponse
      */
-    public function addZipLibrary($zipFile): LibraryAddResponse {
+    public function addZipLibrary($zipFile, $metaName): LibraryAddResponse {
+        // Basic validation
         if (!$zipFile || !isset($zipFile['name']) || !isset($zipFile['tmp_name'])) {
             return LibraryAddResponse::error('A file must be provided.');
         }
 
-        $name = $zipFile['name'];
-        $tmpName = $zipFile['tmp_name'];
 
-        if (!FileUtils::isValidFileName($name) || strpos($name, '/') !== false) {
-            return LibraryAddResponse::error('Invalid file name.');
-        }
-
-        $parts = explode('.', $name);
-
+        // Parsing
+        $origName = $zipFile['name'];
+        // Separate extension from name
+        $parts = explode('.', $origName);
         $extension = array_pop($parts);
 
+        // Check for .zip
         if (strtolower($extension) != 'zip' || count($parts) < 1) {
             return LibraryAddResponse::error('A .zip file must be provided.');
         }
 
-        $libName = implode('.', $parts);
-
-        $library = new LibraryEntity($libName, $this->location);
-
-        $status = $this->gateway->addZipLibrary($library, $tmpName);
+        // Attempt to add the library
+        $status = $this->gateway->addZipLibrary($this->generateNewLibrary(), $zipFile['tmp_name']);
 
         if (!$status->library) {
             return LibraryAddResponse::error(
@@ -122,9 +149,25 @@ class LibraryAddUseCase extends BaseUseCase {
             );
         }
 
-        // Create metadata for the library
-        $metadataStatus = $this->metadata->update($status->library);
+        // Default the library name to the original zip file name
+        if (!$metaName) {
+            $metaName = implode('.', $parts);
+        }
 
+        // Update metadata
+        try {
+            $metadataStatus = $this->metadata->update(
+                MetadataEntity::createNewMetadata(
+                    $status->library,
+                    $metaName,
+                    'zip'
+                )
+            );
+        } catch (Exception $exception) {
+            return LibraryAddResponse::error('Unable to set timestamps on metadata.');
+        }
+
+        // Check for error when adding the metadata
         if ($metadataStatus->error) {
             return LibraryAddResponse::error(
                 'Library was created, however the metadata was not able to be created because: ' .
@@ -132,6 +175,6 @@ class LibraryAddUseCase extends BaseUseCase {
             );
         }
 
-        return LibraryAddResponse::success("Successfully installed new library: $libName");
+        return LibraryAddResponse::success("Successfully installed new library: $metaName");
     }
 }

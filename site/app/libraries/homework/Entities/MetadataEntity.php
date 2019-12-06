@@ -1,7 +1,9 @@
-<?php namespace app\libraries\homework\Entities;
+<?php
 
+namespace app\libraries\homework\Entities;
 
 use DateTime;
+use Exception;
 
 class MetadataEntity {
     /** @var LibraryEntity */
@@ -44,6 +46,30 @@ class MetadataEntity {
         $this->dateUpdated = $dateUpdated;
         $this->dateCreated = $dateCreated;
         $this->gradeableCount = $gradeableCount;
+    }
+
+    /**
+     * Creates and sets up basic entity with current timestamps
+     *
+     * @param LibraryEntity $entity
+     * @param string        $name
+     * @param string        $sourceType
+     * @return MetadataEntity
+     * @throws Exception
+     */
+    public static function createNewMetadata(
+        LibraryEntity $entity,
+        string $name,
+        string $sourceType
+    ): MetadataEntity {
+        return new static(
+            $entity,
+            $name,
+            $sourceType,
+            0,
+            new DateTime,
+            new DateTime
+        );
     }
 
     /**
@@ -98,5 +124,16 @@ class MetadataEntity {
      */
     public function getCreatedDate(): DateTime {
         return $this->dateCreated;
+    }
+
+    /**
+     * Update the updated date
+     *
+     * @return MetadataEntity
+     * @throws Exception
+     */
+    public function touch(): MetadataEntity {
+        $this->dateUpdated = new DateTime;
+        return $this;
     }
 }
