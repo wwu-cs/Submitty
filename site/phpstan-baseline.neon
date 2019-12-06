@@ -769,7 +769,7 @@ parameters:
 
 		-
 			message: "#^PHPDoc tag @property has invalid value \\(@var array\\)\\: Unexpected token \"@var\", expected TOKEN_IDENTIFIER at offset 14$#"
-			count: 5
+			count: 6
 			path: app/models/Config.php
 
 		-

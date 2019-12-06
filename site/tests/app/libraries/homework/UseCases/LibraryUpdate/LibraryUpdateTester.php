@@ -1,5 +1,6 @@
-<?php namespace tests\app\libraries\homework\UseCases\LibraryUpdate;
+<?php
 
+namespace tests\app\libraries\homework\UseCases\LibraryUpdate;
 
 use app\libraries\homework\Entities\LibraryEntity;
 use tests\app\libraries\homework\UseCases\BaseTestCase;

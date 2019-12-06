@@ -194,7 +194,8 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
         $this->assertFalse($response->success);
         $this->assertEquals(
             'Error updating repository. fatal: not a git repository (or any of the parent directories): .git',
-            $response->message);
+            $response->message
+        );
     }
 
     /** @test */

@@ -6,6 +6,7 @@ use app\libraries\Core;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\LibraryGateway;
 use app\libraries\homework\UseCases\LibraryRemoveResponse;
+use app\libraries\homework\Entities\LibraryEntity;
 
 class LibraryRemoveUseCase extends BaseUseCase {
     /** @var LibraryGateway */

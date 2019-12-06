@@ -29,7 +29,7 @@ class LibraryManageController extends AbstractController {
      * LibraryManage constructor.
      * @param Core $core
      * @throws NotEnabledException
-	 * @throws AuthorizationException
+     * @throws AuthorizationException
      */
     public function __construct(Core $core) {
         parent::__construct($core);
@@ -56,9 +56,11 @@ class LibraryManageController extends AbstractController {
         $response = $useCase->getLibraries();
 
         return Response::WebOnlyResponse(
-            new WebResponse([
+            new WebResponse(
+                [
                 'admin', 'LibraryManager'
-            ], 'showLibraryManager',
+                ],
+                'showLibraryManager',
                 'Do all your fancy homework library things here!',
                 $response->getResults()
             )
@@ -176,7 +178,8 @@ class LibraryManageController extends AbstractController {
 
         if ($result->error) {
             $response = JsonResponse::getFailResponse($result->error);
-        } else {
+        }
+        else {
             $response = JsonResponse::getSuccessResponse($result->getMessage());
         }
 
