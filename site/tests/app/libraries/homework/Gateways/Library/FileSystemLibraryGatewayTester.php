@@ -22,6 +22,14 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
         $this->gateway = new FileSystemLibraryGateway();
     }
 
+    protected function createLibraryWithName(string $name) {
+        FileUtils::createDir(FileUtils::joinPaths($this->location, $name));
+    }
+
+    protected function createLibrary(LibraryEntity $library) {
+        $this->createLibraryWithName($library->getName());
+    }
+
     protected function createTestZip(string $zipName): string {
         $zip = new ZipArchive();
 
@@ -87,9 +95,9 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
 
     /** @test */
     public function testItRetrievesAllLibraries() {
-        FileUtils::createDir(FileUtils::joinPaths($this->location, 'lib1'));
-        FileUtils::createDir(FileUtils::joinPaths($this->location, 'lib2'));
-        FileUtils::createDir(FileUtils::joinPaths($this->location, 'lib3'));
+        $this->createLibraryWithName('lib1');
+        $this->createLibraryWithName('lib2');
+        $this->createLibraryWithName('lib3');
 
         /** @var LibraryEntity[] $results */
         $results = $this->gateway->getAllLibraries($this->location);
@@ -102,8 +110,9 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
 
     /** @test */
     public function testItDoesNotOverwriteLibrariesZip() {
-        FileUtils::createDir(FileUtils::joinPaths($this->location, 'name'));
         $library = new LibraryEntity('name', $this->location);
+        $this->createLibrary($library);
+
         $status = $this->gateway->addZipLibrary($library, 'invalid zip');
 
         $this->assertLibraryAddStatusError($status, 'Library already exists.');
@@ -111,8 +120,8 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
 
     /** @test */
     public function testItDoesNotOverwriteLibrariesGit() {
-        FileUtils::createDir(FileUtils::joinPaths($this->location, 'name'));
         $library = new LibraryEntity('name', $this->location);
+        $this->createLibrary($library);
 
         $status = $this->gateway->addGitLibrary($library, 'url');
 
@@ -142,7 +151,7 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
     /** @test */
     public function testItRemovesLibraries() {
         $library = new LibraryEntity('name', $this->location);
-        FileUtils::createDir($library->getLibraryPath());
+        $this->createLibrary($library);
 
         $this->assertDirectoryExists($library->getLibraryPath());
         $this->assertTrue($this->gateway->removeLibrary($library));
@@ -162,5 +171,39 @@ class FileSystemLibraryGatewayTester extends BaseTestCase {
         LibraryGatewayFactory::clearInstance();
         $instance = LibraryGatewayFactory::getInstance();
         $this->assertInstanceOf(FileSystemLibraryGateway::class, $instance);
+    }
+
+    /** @test */
+    public function testItUpdatesGitLibraries() {
+        $library = new LibraryEntity('Submitty', $this->location);
+        $this->gateway->addGitLibrary($library, self::VALID_GIT_URL);
+
+        $response = $this->gateway->updateLibrary($library);
+
+        $this->assertTrue($response->success);
+        $this->assertEquals('Successfully updated Submitty', $response->message);
+    }
+
+    /** @test */
+    public function testItDoesntUpdateNonGitLibraries() {
+        $library = new LibraryEntity('test', $this->location);
+        $this->createLibrary($library);
+
+        $response = $this->gateway->updateLibrary($library);
+
+        $this->assertFalse($response->success);
+        $this->assertEquals(
+            'Error updating repository. fatal: not a git repository (or any of the parent directories): .git',
+            $response->message);
+    }
+
+    /** @test */
+    public function testItDoesntUpdateNonExistentLibraries() {
+        $library = new LibraryEntity('Thanos did nothing wrong.', $this->location);
+
+        $response = $this->gateway->updateLibrary($library);
+
+        $this->assertFalse($response->success);
+        $this->assertEquals('Library does not exist.', $response->message);
     }
 }

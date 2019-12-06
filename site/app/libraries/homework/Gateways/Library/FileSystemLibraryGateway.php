@@ -7,13 +7,37 @@ use app\libraries\FileUtils;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
 use app\libraries\homework\Entities\LibraryAddStatus;
+use app\libraries\homework\Entities\LibraryUpdateStatus;
 
 class FileSystemLibraryGateway implements LibraryGateway {
     const SUCCESS = 0;
+    const STDOUT = 1;
     const STDERR = 2;
 
     protected function createFolderIfNotExists(string $path): bool {
         return FileUtils::createDir($path);
+    }
+
+    protected function executeCommand(string $sanitizedCmd, &$stdout, &$stderr): bool {
+        $descriptors = [
+            ["pipe", "r"],  // stdin
+            ["pipe", "w"],  // stdout
+            ["pipe", "w"],  // stderr
+        ];
+
+        $handle = proc_open($sanitizedCmd, $descriptors, $pipes);
+
+        $stdout = trim(stream_get_contents($pipes[self::STDOUT]));
+        $stderr = trim(stream_get_contents($pipes[self::STDERR]));
+
+        // All pipes need to be closed before closing the process otherwise a deadlock occurs
+        foreach ($pipes as $pipe) {
+            fclose($pipe);
+        }
+
+        $status = proc_close($handle);
+
+        return $status == self::SUCCESS;
     }
 
     /** @inheritDoc */
@@ -31,23 +55,7 @@ class FileSystemLibraryGateway implements LibraryGateway {
 
         $cmd = "git clone $sanitizedRepoUrl $sanitizedLocation";
 
-        $descriptors = [
-            ["pipe", "r"],  // stdin
-            ["pipe", "w"],  // stdout
-            ["pipe", "w"],  // stderr
-        ];
-        $git = proc_open($cmd, $descriptors, $pipes);
-
-        $stderr = trim(stream_get_contents($pipes[self::STDERR]));
-
-        // All pipes need to be closed before closing the process otherwise a deadlock occurs
-        foreach ($pipes as $pipe) {
-            fclose($pipe);
-        }
-
-        $status = proc_close($git);
-
-        if ($status != self::SUCCESS) {
+        if (!$this->executeCommand($cmd, $stdout, $stderr)) {
             FileUtils::recursiveRmdir($library->getLibraryPath());
             return LibraryAddStatus::error("Error cloning repository. $stderr");
         }
@@ -103,5 +111,22 @@ class FileSystemLibraryGateway implements LibraryGateway {
     /** @inheritDoc */
     public function removeLibrary(LibraryEntity $library): bool {
         return FileUtils::recursiveRmdir($library->getLibraryPath());
+    }
+
+    /** @inheritDoc */
+    public function updateLibrary(LibraryEntity $library): LibraryUpdateStatus {
+        if (!$this->libraryExists($library)) {
+            return LibraryUpdateStatus::error('Library does not exist.');
+        }
+
+        $sanitizedLocation = escapeshellarg($library->getLibraryPath());
+
+        $cmd = "git -C $sanitizedLocation pull";
+
+        if (!$this->executeCommand($cmd, $stdout, $stderr)) {
+            return LibraryUpdateStatus::error("Error updating repository. $stderr");
+        }
+
+        return LibraryUpdateStatus::success("Successfully updated {$library->getName()}");
     }
 }

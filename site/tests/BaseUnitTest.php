@@ -58,6 +58,10 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             $config->method('getHomeworkLibraryLocation')->willReturn($config_values['homework_library_location']);
         }
 
+        if (isset($config_values['homework_library_access_level'])) {
+            $config->method('homeworkLibraryAccessLevel')->willReturn($config_values['homework_library_access_level']);
+        }
+
         $config->method('getTimezone')->willReturn(new \DateTimeZone("America/New_York"));
 
         if (isset($config_values['use_mock_time']) && $config_values['use_mock_time'] === true) {
@@ -105,6 +109,9 @@ class BaseUnitTest extends \PHPUnit\Framework\TestCase {
             /** @noinspection PhpUnhandledExceptionInspection */
             $user = $this->createMockModel(User::class);
             $user->method('getId')->willReturn("testUser");
+            if (isset($user_config['can_access'])) {
+                $user->method('canAccess')->willReturn($user_config['can_access'] == true);
+            }
             if (isset($user_config['access_grading'])) {
                 $user->method('accessGrading')->willReturn($user_config['access_grading'] == true);
             }

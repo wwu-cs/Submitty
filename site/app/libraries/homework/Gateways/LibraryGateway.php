@@ -4,6 +4,7 @@ namespace app\libraries\homework\Gateways;
 
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Entities\LibraryAddStatus;
+use app\libraries\homework\Entities\LibraryUpdateStatus;
 
 interface LibraryGateway {
     /**
@@ -50,4 +51,12 @@ interface LibraryGateway {
      * @return bool
      */
     public function removeLibrary(LibraryEntity $library): bool;
+
+    /**
+     * Updates a git library.
+     *
+     * @param LibraryEntity $library
+     * @return LibraryUpdateStatus
+     */
+    public function updateLibrary(LibraryEntity $library): LibraryUpdateStatus;
 }

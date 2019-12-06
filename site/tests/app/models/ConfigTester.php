@@ -7,6 +7,7 @@ use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\Utils;
 use app\models\Config;
+use app\models\User;
 
 class ConfigTester extends \PHPUnit\Framework\TestCase {
     private $core;
@@ -288,6 +289,11 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'latest_commit' => 'd150131c',
             'latest_tag' => 'v19.07.00',
             'queue_enabled' => true,
+            'homework_library_params' => [
+                'enabled' => false,
+                'location' => '~/library',
+                'access_level' => User::LEVEL_SUPERUSER,
+            ]
         );
         $actual = $config->toArray();
 
