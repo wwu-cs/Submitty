@@ -73,7 +73,7 @@ class LibraryManageController extends AbstractController {
     /**
      * Controller route to show the homework library page.
      *
-     * @Route("/homework/library/manage", methods={"GET"})
+     * @Route("/manage", methods={"GET"})
      * @return Response
      */
     public function showLibraryManagePage() {
@@ -89,7 +89,7 @@ class LibraryManageController extends AbstractController {
                     'admin',
                     'LibraryManager',
                 ], 'showLibraryManager',
-                'Do all your fancy homework library things here!',
+                'View, upload, refresh, & delete your homework libraries here! ',
                 $response
             )
         );
@@ -99,7 +99,7 @@ class LibraryManageController extends AbstractController {
      * Function for uploading a zipped up library to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, return a true or false on whether or not it succeeded.
      *
-     * @Route("/homework/library/manage/upload/zip", methods={"POST"})
+     * @Route("/manage/upload/zip", methods={"POST"})
      * @return Response
      */
     public function ajaxUploadLibraryFromZip(): Response {
@@ -131,7 +131,7 @@ class LibraryManageController extends AbstractController {
      * saving the result to the json_buffer of the Output object, returns a true or false on whether or not it
      * succeeded.
      *
-     * @Route("/homework/library/manage/upload/git", methods={"POST"})
+     * @Route("/manage/upload/git", methods={"POST"})
      * @return Response
      */
     public function ajaxUploadLibraryFromGit(): Response {
@@ -157,7 +157,7 @@ class LibraryManageController extends AbstractController {
      * saving the result to the json_buffer of the Output object, returns a true or false on
      * whether or not it succeeded.
      *
-     * @Route("/homework/library/manage/list", methods={"GET"})
+     * @Route("/manage/list", methods={"GET"})
      * @return Response
      */
     public function ajaxGetLibraryList(): Response {
@@ -177,7 +177,7 @@ class LibraryManageController extends AbstractController {
      * a DELETE AJAX request. It then returns json data to the caller about the request specifying
      * if it was successful or not and any error messages.
      *
-     * @Route("/homework/library/manage/remove/{name}", methods={"DELETE"})
+     * @Route("/manage/remove/{name}", methods={"DELETE"})
      * @param string $name
      * @return Response
      */
@@ -203,7 +203,7 @@ class LibraryManageController extends AbstractController {
      * the request failed if it failed, otherwise it will just return a success message to be displayed
      * to the user.
      *
-     * @Route("/homework/library/manage/update/{name}", methods={"PATCH"})
+     * @Route("/manage/update/{name}", methods={"PATCH"})
      * @param string $name
      * @return Response
      */

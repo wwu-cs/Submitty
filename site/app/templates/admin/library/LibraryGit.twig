@@ -2,8 +2,19 @@
     <div class="option row">
         <div class="option-desc col-md-6">
             <label for="instructions_url">
+                <div class="option-title">Git Source Name</div>
+                <div class="option-alt">What would you like to name your source? Leave it blank to use the name of the Git Repo.</div>
+            </label>
+        </div>
+        <div class="option-input col-md-6">
+            <input type='text' name='git_src_name' id='git_src_name' class="auto_save" placeholder="Name for source" />
+        </div>
+    </div>
+    <div class="option row">
+        <div class="option-desc col-md-6">
+            <label for="instructions_url">
                 <div class="option-title">Git URL</div>
-                <div class="option-alt">What is the url to the Git repo?</div>
+                <div class="option-alt">What is the url to the Git repo? (Note: Use HTTPS)</div>
             </label>
         </div>
         <div class="option-input col-md-6">
@@ -20,41 +31,8 @@
             e.preventDefault();
             var form = e.target;
             var submitButton = form.querySelector("input[type='submit']");
-            submitButton.disabled = true;
-            $.ajax({
-                url: '{{ git_submit_url }}',
-                data: {
-                    csrf_token: '{{ csrf_token }}',
-                    git_url: form.git_url.value
-                },
-                type: 'POST',
-                success: function(data) {
-                    try {
-                        var jsondata = JSON.parse(data);
-                        if (jsondata['status'] == "success") {
-                            displaySubmissionMessage(jsondata);
-                            location.reload(true);
-                        } else {
-                            displaySubmissionMessage(jsondata);
-                        }
-                    }
-                    catch (e) {
-                        displaySubmissionMessage({
-                            status: "fail",
-                            message: "Error parsing response from server."
-                        });
-                        console.log(data);
-                    }
-                    submitButton.disabled = false;
-                },
-                error: function(request, status, error) {
-                    displaySubmissionMessage({
-                        status: "fail",
-                        message: request.responseText
-                    });
-                    submitButton.disabled = false;
-                }
-            });
+            var data = { git_url: form.git_url.value, name: form.git_src_name.value };
+            managerSubmitAjax('{{ git_submit_url }}', 'POST', data, submitButton);
         });
     });
 </script>

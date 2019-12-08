@@ -82,13 +82,26 @@ function drop(e){
 }
 
 // add files dragged
-function dropWithMultipleZips(e){
+function dropWithMultipleZips(e, fileLimit=-1){
     draghandle(e);
-    var filestream= e.dataTransfer.files;
+    var filestream = e.dataTransfer.files;
     var part = get_part_number(e);
     for(var i=0; i<filestream.length; i++){
+        // check file limit
+        if (fileExists(filestream[i].name, part)[0] !== -1) {
+          // don't count file in the limit if it exists. It will replace the existing one
+          fileLimit++;
+        }
+        if (fileLimit > 0 && file_array[0].length >= fileLimit) {
+          alert("Error: Only " + fileLimit + " file(s) can be added at once.");
+          return;
+        }
         addFileWithCheck(filestream[i], part, false); // check for folders
     }
+}
+
+function dropWithSingleZip(e) {
+    dropWithMultipleZips(e, 1);
 }
 
 // show progressbar when uploading files
@@ -117,9 +130,18 @@ function get_part_number(e){
 }
 
 // copy files selected from the file browser
-function addFilesFromInput(part, check_duplicate_zip=true){
-    var filestream = document.getElementById("input-file" + part).files;
+function addFilesFromInput(part, check_duplicate_zip=true, fileLimit=-1){
+    var filestream = document.getElementById("input_file" + part).files;
     for(var i=0; i<filestream.length; i++){
+        // check file limit
+        if (fileExists(filestream[i].name, part)[0] !== -1) {
+            // don't count file in the limit if it exists. It will replace the existing one
+            fileLimit++;
+        }
+        if (fileLimit > 0 && file_array[0].length >= fileLimit) {
+            alert("Error: Only " + fileLimit + " file(s) can be added at once.");
+            return;
+        }
         addFile(filestream[i], part, check_duplicate_zip); // folders will not be selected in file browser, no need for check
     }
     $('#input-file' + part).val("");
@@ -1131,12 +1153,14 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, hide_from_students,
 /**
  * @param csrf_token
  * @param submit_url
+ * @param src_name
  * @return promise resolve on success, reject otherwise with success/failure message string
  */
-function uploadLibraryZip(csrf_token, submit_url) {
+function uploadLibraryZip(csrf_token, submit_url, src_name) {
   return new Promise(function (resolve, reject) {
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
+    formData.append('name', src_name);
 
     var filesToBeAdded = false;
     // Files selected

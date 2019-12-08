@@ -53,16 +53,6 @@ class GlobalController extends AbstractController {
                     "id" => "nav-sidebar-submitty",
                     "icon" => "fa-star"
                 ]);
-
-                if ($this->core->getUser()->accessFaculty()) {
-                    $sidebar_buttons[] = new Button($this->core, [
-                        "href" => $this->core->buildCourseUrl(['homework', 'library']),
-                        "title" => "Homework Library",
-                        "class" => "nav-row",
-                        "id" => "nav-sidebar-homework-library",
-                        "icon" => "fa-book-open"
-                    ]);
-                }
             }
             elseif ($this->core->getUser()->accessFaculty()) {
                 $sidebar_buttons[] = new Button($this->core, [
@@ -73,13 +63,15 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-plus-square"
                 ]);
 
-                $sidebar_buttons[] = new Button($this->core, [
-                    "href" => $this->core->buildUrl(['homework', 'library']),
-                    "title" => "Homework Library",
-                    "class" => "nav-row",
-                    "id" => "nav-sidebar-homework-library",
-                    "icon" => "fa-book-open"
-                ]);
+                if ($this->core->getUser()->canAccess($this->core->getConfig()->homeworkLibraryAccessLevel())) {
+                    $sidebar_buttons[] = new Button($this->core, [
+                        "href" => $this->core->buildUrl(['manage']),
+                        "title" => "Library Manager",
+                        "class" => "nav-row",
+                        "id" => "nav-sidebar-library-manager",
+                        "icon" => "fa-book-open"
+                    ]);
+                }
             }
 
             if ($unread_notifications_count !== null) {
