@@ -1077,12 +1077,14 @@ function handleUploadCourseMaterials(csrf_token, expand_zip, cmPath, requested_p
 /**
  * @param csrf_token
  * @param submit_url
+ * @param src_name
  * @return promise resolve on success, reject otherwise with success/failure message string
  */
-function uploadLibraryZip(csrf_token, submit_url) {
+function uploadLibraryZip(csrf_token, submit_url, src_name) {
   return new Promise(function (resolve, reject) {
     var formData = new FormData();
     formData.append('csrf_token', csrf_token);
+    formData.append('name', src_name);
 
     var filesToBeAdded = false;
     // Files selected

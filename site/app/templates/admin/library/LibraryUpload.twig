@@ -16,6 +16,17 @@
         gradeable3\
             config.json
     </pre>
+    <div class="option row">
+        <div class="option-desc col-md-6">
+            <label for="instructions_url">
+                <div class="option-title">Source Name</div>
+                <div class="option-alt">What would you like to name your source? Leave it blank to use the name of the zip file.</div>
+            </label>
+        </div>
+        <div class="option-input col-md-6">
+            <input type='text' name='zip_src_name' id='zip_src_name' class="auto_save" placeholder="Name for source" />
+        </div>
+    </div>
     <div id="upload-boxes">
         {# upload1 and input_file1 required for drag-and-drop.js #}
         <div id="upload1" class="file-input">
@@ -41,7 +52,8 @@
             e.stopPropagation();
             // disable button while uploading files
             e.target.disabled = true;
-            uploadLibraryZip('{{ csrf_token }}', '{{ zip_submit_url }}')
+            var srcName = document.getElementById("zip_src_name").value;
+            uploadLibraryZip('{{ csrf_token }}', '{{ zip_submit_url }}', srcName)
             .then(function(response){
                 displaySubmissionMessage(response);
                 // reload after showing message for a second

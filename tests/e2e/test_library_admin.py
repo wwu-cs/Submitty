@@ -43,9 +43,9 @@ class TestLibraryAdmin(BaseTestCase):
             sources = self.driver.find_elements(By.CSS_SELECTOR, "#library-source-list>div>div")
             # search for the submitty source
             for element in sources:
-                if (element.find_element(By.CSS_SELECTOR, "span:first-child").text == self.sourceName):
+                if (element.find_element(By.CSS_SELECTOR, "div:first-child>div").text == self.sourceName):
                     # Click delete button
-                    element.find_element(By.CSS_SELECTOR, "span>button:last-child").click()
+                    element.find_element(By.CSS_SELECTOR, "div>div>button:nth-child(2)").click()
                     # Click ok on the confirmation popup
                     self.driver.switch_to.alert.accept()
                     # Wait for deletion confirmation
@@ -78,7 +78,7 @@ class TestLibraryAdmin(BaseTestCase):
         self.driver.get(self.test_url + url)
 
         try:
-            self.driver.find_elements_by_xpath("//*[contains(text(), 'Feature is not enabled.')]")
+            self.driver.find_element_by_xpath("//*[contains(text(), 'Feature is not enabled.')]")
             return False
         except NoSuchElementException:
             # Frog robot
