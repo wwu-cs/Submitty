@@ -77,13 +77,12 @@ class TestLibraryAdmin(BaseTestCase):
             url = "/" + url
         self.driver.get(self.test_url + url)
 
-        try:
-            self.driver.find_element_by_xpath("//*[contains(text(), 'Feature is not enabled.')]")
+        if ('Feature is not enabled.' in self.driver.page_source):
             return False
-        except NoSuchElementException:
+        else:
             # Frog robot
             self.assertNotEqual(self.driver.title, "Submitty - Error", "Got Error Page")
-        return True
+            return True
 
 if __name__ == "__main__":
     import unittest
