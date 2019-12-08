@@ -77,7 +77,7 @@ class TestLibraryAdmin(BaseTestCase):
             url = "/" + url
         self.driver.get(self.test_url + url)
 
-        if ('Feature is not enabled.' in self.driver.page_source):
+        if ('Feature is not enabled.' in self.driver.page_source or 'Feature&nbsp;is&nbsp;not&nbsp;enabled.' in self.driver.page_source):
             return False
         else:
             # Frog robot
