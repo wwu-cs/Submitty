@@ -48,8 +48,8 @@ class LibraryManageController extends AbstractController {
     /**
      * Takes an array of metadata entities and translates them into presentable arrays
      *
-     * @param array $libraryMetadata
-     * @return MetadataEntity[]
+     * @param MetadataEntity[] $libraryMetadata
+     * @return array[int, array[string, string|int]]
      */
     protected function presentMetadata(array $libraryMetadata): array {
         $response = [];
