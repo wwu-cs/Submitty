@@ -3,30 +3,33 @@
 namespace app\libraries\homework\UseCases;
 
 use app\libraries\Core;
-use app\libraries\homework\Entities\LibraryEntity;
-use app\libraries\homework\Gateways\LibraryGateway;
-use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
-use app\libraries\homework\UseCases\LibraryGetResponse;
+use app\libraries\homework\Gateways\MetadataGateway;
+use app\libraries\homework\Responses\LibraryGetResponse;
+use app\libraries\homework\Gateways\Metadata\MetadataGatewayFactory;
+
 
 class LibraryGetUseCase extends BaseUseCase {
-
-    /** @var LibraryGateway */
-    protected $gateway;
+    /** @var MetadataGateway */
+    protected $metadata;
 
     public function __construct(Core $core) {
         parent::__construct($core);
 
-        $this->gateway = LibraryGatewayFactory::getInstance();
+        $this->metadata = MetadataGatewayFactory::getInstance();
     }
 
+    /**
+     * Gets all libraries and their metadata
+     *
+     * @return LibraryGetResponse
+     */
     public function getLibraries(): LibraryGetResponse {
         $response = new LibraryGetResponse();
 
-        $libraries = $this->gateway->getAllLibraries($this->location);
+        $libraries = $this->metadata->getAll($this->location);
 
-        /** @var LibraryEntity $library */
         foreach ($libraries as $library) {
-            $response->addLibrary($library->getName());
+            $response->addLibrary($library);
         }
 
         return $response;

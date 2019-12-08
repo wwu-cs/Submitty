@@ -11,7 +11,7 @@ class LibraryEntityTester extends TestCase {
     public function testItSetsAttributes() {
         $entity = new LibraryEntity('name', 'path');
 
-        $this->assertEquals('name', $entity->getName());
+        $this->assertEquals('name', $entity->getKey());
         $this->assertEquals('path', $entity->getLocation());
     }
 
@@ -44,7 +44,7 @@ class LibraryEntityTester extends TestCase {
 
         $this->assertTrue($entity->is($otherEntity));
         $this->assertFalse($entity->isNot($otherEntity));
-        $this->assertTrue($entity->hasNameOf($otherEntity->getName()));
+        $this->assertTrue($entity->hasNameOf($otherEntity->getKey()));
         $this->assertTrue($entity->hasLocationOf($otherEntity->getLocation()));
     }
 }

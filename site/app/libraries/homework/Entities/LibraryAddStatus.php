@@ -2,8 +2,6 @@
 
 namespace app\libraries\homework\Entities;
 
-use app\libraries\homework\Entities\LibraryEntity;
-
 class LibraryAddStatus {
     const SUCCESS = 'success';
 
@@ -12,6 +10,15 @@ class LibraryAddStatus {
 
     /** @var string */
     public $message;
+
+    /**
+     * @param LibraryEntity|null $library
+     * @param string             $message
+     */
+    protected function __construct($library, string $message) {
+        $this->library = $library;
+        $this->message = $message;
+    }
 
     /**
      * @param string $error
@@ -29,12 +36,7 @@ class LibraryAddStatus {
         return new static($library, self::SUCCESS);
     }
 
-    /**
-     * @param LibraryEntity|null $library
-     * @param string $message
-     */
-    public function __construct($library, string $message) {
-        $this->library = $library;
-        $this->message = $message;
+    public function failed() {
+        return $this->message != self::SUCCESS;
     }
 }

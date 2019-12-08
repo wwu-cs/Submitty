@@ -1,5 +1,13 @@
 <?php
 
+/*
+ * When running in vagrant, PHPStorm doesn't have access to composer.json and doesn't
+ * know about some requirements,
+ *thereby complaining.
+ */
+
+/** @noinspection PhpComposerExtensionStubsInspection */
+
 namespace app\libraries\homework\Gateways\Library;
 
 use ZipArchive;
@@ -13,6 +21,55 @@ class FileSystemLibraryGateway implements LibraryGateway {
     const SUCCESS = 0;
     const STDOUT = 1;
     const STDERR = 2;
+
+    /** @inheritDoc */
+    public function addGitLibrary(LibraryEntity $library, string $repoUrl): LibraryAddStatus {
+        if ($this->libraryExists($library)) {
+            return LibraryAddStatus::error('Library already exists.');
+        }
+
+        if (!$this->createFolderIfNotExists($library->getLibraryPath())) {
+            return LibraryAddStatus::error('Error when creating folder for the library.');
+        }
+
+        $sanitizedRepoUrl = escapeshellarg($repoUrl);
+        $sanitizedLocation = escapeshellarg($library->getLibraryPath());
+
+        $cmd = "git clone $sanitizedRepoUrl $sanitizedLocation";
+
+        if (!$this->executeCommand($cmd, $stdout, $stderr)) {
+            FileUtils::recursiveRmdir($library->getLibraryPath());
+            return LibraryAddStatus::error("Error cloning repository. $stderr");
+        }
+
+        return LibraryAddStatus::success($library);
+    }
+
+    /** @inheritDoc */
+    public function libraryExists(LibraryEntity $library): bool {
+        $libraries = $this->getAllLibraries($library->getLocation());
+
+        return count(
+                   array_filter(
+                       $libraries,
+                       function (LibraryEntity $item) use ($library) {
+                           return $item->is($library);
+                       }
+                   )
+               ) > 0;
+    }
+
+    /** @inheritDoc */
+    public function getAllLibraries(string $location): array {
+        $libs = FileUtils::getAllDirs($location);
+
+        return array_map(
+            function (string $lib) use ($location) {
+                return new LibraryEntity(basename($lib), $location);
+            },
+            $libs
+        );
+    }
 
     protected function createFolderIfNotExists(string $path): bool {
         return FileUtils::createDir($path);
@@ -38,29 +95,6 @@ class FileSystemLibraryGateway implements LibraryGateway {
         $status = proc_close($handle);
 
         return $status == self::SUCCESS;
-    }
-
-    /** @inheritDoc */
-    public function addGitLibrary(LibraryEntity $library, string $repoUrl): LibraryAddStatus {
-        if ($this->libraryExists($library)) {
-            return LibraryAddStatus::error('Library already exists.');
-        }
-
-        if (!$this->createFolderIfNotExists($library->getLibraryPath())) {
-            return LibraryAddStatus::error('Error when creating folder for the library.');
-        }
-
-        $sanitizedRepoUrl = escapeshellarg($repoUrl);
-        $sanitizedLocation = escapeshellarg($library->getLibraryPath());
-
-        $cmd = "git clone $sanitizedRepoUrl $sanitizedLocation";
-
-        if (!$this->executeCommand($cmd, $stdout, $stderr)) {
-            FileUtils::recursiveRmdir($library->getLibraryPath());
-            return LibraryAddStatus::error("Error cloning repository. $stderr");
-        }
-
-        return LibraryAddStatus::success($library);
     }
 
     /** @inheritDoc */
@@ -91,24 +125,6 @@ class FileSystemLibraryGateway implements LibraryGateway {
     }
 
     /** @inheritDoc */
-    public function getAllLibraries(string $location): array {
-        $libs = FileUtils::getAllDirs($location);
-
-        return array_map(function (string $lib) use ($location) {
-            return new LibraryEntity(basename($lib), $location);
-        }, $libs);
-    }
-
-    /** @inheritDoc */
-    public function libraryExists(LibraryEntity $library): bool {
-        $libraries = $this->getAllLibraries($library->getLocation());
-
-        return count(array_filter($libraries, function (LibraryEntity $item) use ($library) {
-            return $item->is($library);
-        })) > 0;
-    }
-
-    /** @inheritDoc */
     public function removeLibrary(LibraryEntity $library): bool {
         return FileUtils::recursiveRmdir($library->getLibraryPath());
     }
@@ -127,6 +143,6 @@ class FileSystemLibraryGateway implements LibraryGateway {
             return LibraryUpdateStatus::error("Error updating repository. $stderr");
         }
 
-        return LibraryUpdateStatus::success("Successfully updated {$library->getName()}");
+        return LibraryUpdateStatus::success("Successfully updated {$library->getKey()}");
     }
 }

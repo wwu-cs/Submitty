@@ -10,6 +10,15 @@ class LibraryUpdateStatus {
     public $success;
 
     /**
+     * @param bool   $success
+     * @param string $message
+     */
+    public function __construct(bool $success, string $message) {
+        $this->success = $success;
+        $this->message = $message;
+    }
+
+    /**
      * @param string $error
      * @return LibraryUpdateStatus
      */
@@ -23,14 +32,5 @@ class LibraryUpdateStatus {
      */
     public static function success(string $message): LibraryUpdateStatus {
         return new static(true, $message);
-    }
-
-    /**
-     * @param bool $success
-     * @param string $message
-     */
-    public function __construct(bool $success, string $message) {
-        $this->success = $success;
-        $this->message = $message;
     }
 }
