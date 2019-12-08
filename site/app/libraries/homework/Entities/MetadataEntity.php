@@ -73,8 +73,8 @@ class MetadataEntity {
             $name,
             $sourceType,
             0,
-            new DateTime,
-            new DateTime
+            new DateTime(),
+            new DateTime()
         );
     }
 
@@ -149,7 +149,7 @@ class MetadataEntity {
      * @return MetadataEntity
      */
     public function touch(): MetadataEntity {
-        $this->dateUpdated = new DateTime;
+        $this->dateUpdated = new DateTime();
         return $this;
     }
 

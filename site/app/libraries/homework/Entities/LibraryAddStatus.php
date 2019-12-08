@@ -37,6 +37,6 @@ class LibraryAddStatus {
     }
 
     public function failed() {
-        return $this->message != self::SUCCESS;
+        return $this->message !== self::SUCCESS;
     }
 }

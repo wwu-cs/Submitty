@@ -3,10 +3,8 @@
 namespace app\libraries\homework\UseCases;
 
 use app\libraries\Core;
-use app\libraries\homework\Gateways\MetadataGateway;
 use app\libraries\homework\Responses\LibraryGetResponse;
 use app\libraries\homework\Gateways\Metadata\MetadataGatewayFactory;
-
 
 class LibraryGetUseCase extends BaseUseCase {
     /** @var MetadataGateway */

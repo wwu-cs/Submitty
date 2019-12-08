@@ -4,7 +4,6 @@ namespace tests\app\controllers\admin;
 
 use DateTime;
 use tests\BaseUnitTest;
-use app\libraries\Core;
 use app\libraries\Utils;
 use app\libraries\FileUtils;
 use app\exceptions\NotEnabledException;
@@ -36,9 +35,11 @@ class LibraryManageControllerTester extends BaseUnitTest {
     /** @var LibraryManageController */
     protected $controller;
 
-    protected function createConfigWithLibrary(bool $enabled = true,
-                                               string $location = 'library location',
-                                               bool $allow_access = true) {
+    protected function createConfigWithLibrary(
+        bool $enabled = true,
+        string $location = 'library location',
+        bool $allow_access = true
+    ) {
         $this->location = $location;
         $this->core = $this->createMockCore(
             [

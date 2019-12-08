@@ -128,23 +128,27 @@ class FileSystemMetadataGateway implements MetadataGateway {
         $json = FileUtils::readJsonFile($jsonFile);
 
         // Validate JSON
-        if (!(array_key_exists('name', $json) &&
+        if (
+            !(array_key_exists('name', $json) &&
               array_key_exists('source_type', $json) &&
               array_key_exists('gradeable_count', $json) &&
               array_key_exists('updated_at', $json) &&
               array_key_exists('created_at', $json)
-        )) {
+            )
+        ) {
             return MetadataGetStatus::error('Incomplete library.json file');
         }
 
         // Validate JSON
-        if (!(
+        if (
+            !(
             is_string($json['name']) &&
             is_string($json['source_type']) &&
             is_int($json['gradeable_count']) &&
             is_string($json['updated_at']) &&
             is_string($json['created_at'])
-        )) {
+            )
+        ) {
             return MetadataGetStatus::error('Invalid library.json file');
         }
 

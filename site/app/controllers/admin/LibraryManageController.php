@@ -10,8 +10,6 @@ use app\exceptions\NotEnabledException;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\exceptions\AuthorizationException;
-use Symfony\Component\Routing\Annotation\Route;
-use app\libraries\homework\Entities\MetadataEntity;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
 use app\libraries\homework\UseCases\LibraryGetUseCase;
 use app\libraries\homework\UseCases\LibraryRemoveUseCase;
@@ -88,7 +86,8 @@ class LibraryManageController extends AbstractController {
                 [
                     'admin',
                     'LibraryManager',
-                ], 'showLibraryManager',
+                ],
+                'showLibraryManager',
                 'View, upload, refresh, & delete your homework libraries here! ',
                 $response
             )

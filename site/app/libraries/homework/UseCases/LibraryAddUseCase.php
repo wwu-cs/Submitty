@@ -5,9 +5,7 @@ namespace app\libraries\homework\UseCases;
 use app\libraries\Core;
 use app\libraries\Utils;
 use app\libraries\homework\Entities\LibraryEntity;
-use app\libraries\homework\Gateways\LibraryGateway;
 use app\libraries\homework\Entities\MetadataEntity;
-use app\libraries\homework\Gateways\MetadataGateway;
 use app\libraries\homework\Responses\LibraryAddResponse;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\Metadata\MetadataGatewayFactory;
@@ -131,7 +129,7 @@ class LibraryAddUseCase extends BaseUseCase {
         $extension = array_pop($parts);
 
         // Check for .zip
-        if (strtolower($extension) != 'zip' || count($parts) < 1) {
+        if (strtolower($extension) !== 'zip' || count($parts) < 1) {
             return LibraryAddResponse::error('A .zip file must be provided.');
         }
 

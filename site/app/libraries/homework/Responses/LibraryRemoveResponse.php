@@ -14,7 +14,7 @@ class LibraryRemoveResponse {
     }
 
     public static function error(string $message): LibraryRemoveResponse {
-        $response = new static;
+        $response = new static();
         $response->error = $message;
         return $response;
     }

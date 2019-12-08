@@ -4,7 +4,6 @@ namespace app\libraries\homework\UseCases;
 
 use app\libraries\Core;
 use app\libraries\homework\Entities\LibraryEntity;
-use app\libraries\homework\Gateways\LibraryGateway;
 use app\libraries\homework\Responses\LibraryRemoveResponse;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 

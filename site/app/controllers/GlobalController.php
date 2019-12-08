@@ -36,7 +36,7 @@ class GlobalController extends AbstractController {
         $sidebar_buttons = [];
         if ($this->core->userLoaded()) {
             if ($this->core->getConfig()->isCourseLoaded()) {
-                if ($this->core->getConfig()->getCourseHomeUrl() != "") {
+                if ($this->core->getConfig()->getCourseHomeUrl() !== "") {
                     $sidebar_buttons[] = new Button($this->core, [
                         "href" => $this->core->getConfig()->getCourseHomeUrl(),
                         "title" => "Course Home",
@@ -63,8 +63,10 @@ class GlobalController extends AbstractController {
                     "icon" => "fa-plus-square"
                 ]);
 
-                if ($this->core->getConfig()->useHomeworkLibrary()
-                    && $this->core->getUser()->canAccess($this->core->getConfig()->homeworkLibraryAccessLevel())) {
+                if (
+                    $this->core->getConfig()->useHomeworkLibrary()
+                    && $this->core->getUser()->canAccess($this->core->getConfig()->homeworkLibraryAccessLevel())
+                ) {
                     $sidebar_buttons[] = new Button($this->core, [
                         "href" => $this->core->buildUrl(['manage']),
                         "title" => "Library Manager",
@@ -215,7 +217,7 @@ class GlobalController extends AbstractController {
             if ($this->core->getUser()->accessGrading()) {
                 $images_course_path = $this->core->getConfig()->getCoursePath();
                 $images_path = Fileutils::joinPaths($images_course_path, "uploads/student_images");
-                $any_images_files = FileUtils::getAllFiles($images_path, array(), true);
+                $any_images_files = FileUtils::getAllFiles($images_path, [], true);
                 if ($this->core->getUser()->accessAdmin() && count($any_images_files) === 0) {
                     $at_least_one_grader_link = true;
                     $sidebar_buttons[] = new Button($this->core, [
@@ -445,10 +447,7 @@ class GlobalController extends AbstractController {
         if (count($diff) > 0) {
             //Wacky checking because the navigation page is the default when there
             // is no route in the query
-            if (count($diff) === 1 && $diff[0] === "component=navigation") {
-                return true;
-            }
-            return false;
+            return count($diff) === 1 && $diff[0] === "component=navigation";
         }
 
         return true;
