@@ -19,6 +19,9 @@ use Symfony\Component\Routing\Annotation\Route;
  * selected which course they want to access, they are forwarded to the home page.
  */
 class HomePageController extends AbstractController {
+
+    protected $homework_path;
+    
     /**
      * HomePageController constructor.
      *
@@ -41,7 +44,7 @@ class HomePageController extends AbstractController {
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($gradeable_ids)
         );
-	}
+    }
 
     /**
      * @Route("/homework/library/search/{query}", methods={"GET"})
@@ -55,7 +58,7 @@ class HomePageController extends AbstractController {
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($gradeable_ids)
         );
-	}
+    }
 
     /**
      * @Route("/homework/library/search_gradeable/{query}", methods={"GET"})
@@ -69,20 +72,19 @@ class HomePageController extends AbstractController {
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($config)
         );
-	}
+    }
 
     public static function getDetails($path, $query) {
         $config_path = FileUtils::getPathWithQueryAndTip($path, $query, 'config.json');
         $readme_path = FileUtils::getPathWithQueryAndTip($path, $query, 'README.md');
         if ($config_path) {
             $contents = FileUtils::json_decode_commented(file_get_contents($config_path), true);
-            $parsed_contents = array(
+            return array(
                 'path' => $config_path,
                 'title' => $contents['testcases'][0]['title'] ?? 'Title not Specified',
                 'tags' => $contents['tags'] ?? [],
                 'readme' => $readme_path,
             );
-            return $parsed_contents;
         }
         return false;
     }

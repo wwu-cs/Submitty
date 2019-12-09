@@ -79,8 +79,8 @@ class FileUtils {
     public static function getPathWithQueryAndTip($path, $query, $tip) {
         // https://stackoverflow.com/questions/17160696/php-glob-scan-in-subfolders-for-a-file
         $iter = new \RecursiveDirectoryIterator($path);
-        foreach (new \RecursiveIteratorIterator($iter) as $file){
-            if (strpos($file->getFilename() , $tip) !== false) {
+        foreach (new \RecursiveIteratorIterator($iter) as $file) {
+            if (strpos($file->getFilename(), $tip) !== false) {
                 if (preg_match("/.*" . $query . ".*" . $tip . "$/i", $file->getPathname()) > 0) {
                     return $file->getPathname();
                 }
@@ -108,7 +108,7 @@ class FileUtils {
         ~xs', '$1', $json);
       
         return json_decode($json, $assoc, $maxDepth, $opts);
-      }
+    }
 
     /**
      * Recursively goes through a directory deleting everything in it before deleting the folder itself. Returns
