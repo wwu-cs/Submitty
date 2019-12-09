@@ -55,7 +55,7 @@ class HomePageControllerTester extends BaseUnitTest {
         $useCase = new LibraryAddUseCase($this->core);
 
         $testRepoUrl = 'https://github.com/Submitty/Tutorial.git';
-        $useCase->addGitLibrary($testRepoUrl);
+        $useCase->addGitLibrary($testRepoUrl, null);
 
         $response = $this->controller->searchLibraryGradeableWithQuery('16_docker_network_python', $this->library_path);
 
@@ -67,7 +67,7 @@ class HomePageControllerTester extends BaseUnitTest {
         $useCase = new LibraryAddUseCase($this->core);
 
         $testRepoUrl = 'https://github.com/Submitty/Tutorial.git';
-        $useCase->addGitLibrary($testRepoUrl);
+        $useCase->addGitLibrary($testRepoUrl, null);
         
         $response = $this->controller->searchLibrary($this->library_path);
         
