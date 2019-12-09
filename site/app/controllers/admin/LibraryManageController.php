@@ -1,6 +1,8 @@
-<?php namespace app\controllers\admin;
+<?php
 
+namespace app\controllers\admin;
 
+use Symfony\Component\Routing\Annotation\Route;
 use app\libraries\Core;
 use app\libraries\FileUtils;
 use app\libraries\response\Response;
@@ -9,7 +11,7 @@ use app\exceptions\NotEnabledException;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
 use app\exceptions\AuthorizationException;
-use Symfony\Component\Routing\Annotation\Route;
+use app\libraries\homework\Entities\MetadataEntity;
 use app\libraries\homework\UseCases\LibraryAddUseCase;
 use app\libraries\homework\UseCases\LibraryGetUseCase;
 use app\libraries\homework\UseCases\LibraryRemoveUseCase;
@@ -24,11 +26,12 @@ use app\libraries\homework\UseCases\LibraryUpdateUseCase;
  * @package app\controllers\admin
  */
 class LibraryManageController extends AbstractController {
+    const DATE_FORMAT = 'd M, Y H:i:s';
+
     /**
-     * LibraryManage constructor.
      * @param Core $core
      * @throws NotEnabledException
-	 * @throws AuthorizationException
+     * @throws AuthorizationException
      */
     public function __construct(Core $core) {
         parent::__construct($core);
@@ -44,22 +47,51 @@ class LibraryManageController extends AbstractController {
     }
 
     /**
+     * Takes an array of metadata entities and translates them into presentable arrays
+     *
+     * @param MetadataEntity[] $libraryMetadata
+     * @return array[int, array[string, string|int]]
+     */
+    protected function presentMetadata(array $libraryMetadata): array {
+        $response = [];
+
+        /** @var MetadataEntity $meta */
+        foreach ($libraryMetadata as $meta) {
+            $response[] = [
+                'key'                  => $meta->getLibrary()->getKey(),
+                'name'                 => $meta->getName(),
+                'source'               => $meta->getSourceType(),
+                'number_of_gradeables' => $meta->getGradeableCount(),
+                'updated_at'           => $meta->getLastUpdatedDate()->format(self::DATE_FORMAT),
+                'created_at'           => $meta->getCreatedDate()->format(self::DATE_FORMAT),
+            ];
+        }
+
+        return $response;
+    }
+
+    /**
      * Controller route to show the homework library page.
      *
-     * @Route("/homework/library/manage", methods={"GET"})
+     * @Route("/manage", methods={"GET"})
      * @return Response
      */
     public function showLibraryManagePage() {
         $useCase = new LibraryGetUseCase($this->core);
 
-        $response = $useCase->getLibraries();
+        $results = $useCase->getLibraries()->getResults();
+
+        $response = $this->presentMetadata($results);
 
         return Response::WebOnlyResponse(
-            new WebResponse([
-                'admin', 'LibraryManager'
-            ], 'showLibraryManager',
-                'Do all your fancy homework library things here!',
-                $response->getResults()
+            new WebResponse(
+                [
+                    'admin',
+                    'LibraryManager',
+                ],
+                'showLibraryManager',
+                'View, upload, refresh, & delete your homework libraries here! ',
+                $response
             )
         );
     }
@@ -68,15 +100,18 @@ class LibraryManageController extends AbstractController {
      * Function for uploading a zipped up library to the server. This should be called via AJAX, saving the result
      * to the json_buffer of the Output object, return a true or false on whether or not it succeeded.
      *
-     * @Route("/homework/library/manage/upload/zip", methods={"POST"})
+     * @Route("/manage/upload/zip", methods={"POST"})
      * @return Response
      */
     public function ajaxUploadLibraryFromZip(): Response {
         $useCase = new LibraryAddUseCase($this->core);
 
-        $fileInfo = $_FILES['zip'] ?? null;
+        $fileInfo = $_FILES['zip'];
 
-        $results = $useCase->addZipLibrary($fileInfo);
+        $results = $useCase->addZipLibrary(
+            $fileInfo ?? null,
+            $_POST['name'] ?? null
+        );
 
         if ($fileInfo && isset($fileInfo['tmp_name'])) {
             FileUtils::rmFile($fileInfo['tmp_name']);
@@ -84,7 +119,8 @@ class LibraryManageController extends AbstractController {
 
         if ($results->error) {
             $response = JsonResponse::getFailResponse($results->error);
-        } else {
+        }
+        else {
             $response = JsonResponse::getSuccessResponse($results->getMessage());
         }
 
@@ -96,17 +132,21 @@ class LibraryManageController extends AbstractController {
      * saving the result to the json_buffer of the Output object, returns a true or false on whether or not it
      * succeeded.
      *
-     * @Route("/homework/library/manage/upload/git", methods={"POST"})
+     * @Route("/manage/upload/git", methods={"POST"})
      * @return Response
      */
     public function ajaxUploadLibraryFromGit(): Response {
         $useCase = new LibraryAddUseCase($this->core);
 
-        $results = $useCase->addGitLibrary($_POST['git_url'] ?? null);
+        $results = $useCase->addGitLibrary(
+            $_POST['git_url'] ?? null,
+            $_POST['name'] ?? null
+        );
 
         if ($results->error) {
             $response = JsonResponse::getFailResponse($results->error);
-        } else {
+        }
+        else {
             $response = JsonResponse::getSuccessResponse($results->getMessage());
         }
 
@@ -118,16 +158,18 @@ class LibraryManageController extends AbstractController {
      * saving the result to the json_buffer of the Output object, returns a true or false on
      * whether or not it succeeded.
      *
-     * @Route("/homework/library/manage/list", methods={"GET"})
+     * @Route("/manage/list", methods={"GET"})
      * @return Response
      */
     public function ajaxGetLibraryList(): Response {
         $useCase = new LibraryGetUseCase($this->core);
 
-        $results = $useCase->getLibraries();
+        $results = $useCase->getLibraries()->getResults();
+
+        $response = $this->presentMetadata($results);
 
         return Response::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse($results->getResults())
+            JsonResponse::getSuccessResponse($response)
         );
     }
 
@@ -136,7 +178,7 @@ class LibraryManageController extends AbstractController {
      * a DELETE AJAX request. It then returns json data to the caller about the request specifying
      * if it was successful or not and any error messages.
      *
-     * @Route("/homework/library/manage/remove/{name}", methods={"DELETE"})
+     * @Route("/manage/remove/{name}", methods={"DELETE"})
      * @param string $name
      * @return Response
      */
@@ -147,7 +189,8 @@ class LibraryManageController extends AbstractController {
 
         if ($results->error) {
             $response = JsonResponse::getFailResponse($results->error);
-        } else {
+        }
+        else {
             $response = JsonResponse::getSuccessResponse($results->getMessage());
         }
 
@@ -161,7 +204,7 @@ class LibraryManageController extends AbstractController {
      * the request failed if it failed, otherwise it will just return a success message to be displayed
      * to the user.
      *
-     * @Route("/homework/library/manage/update/{name}", methods={"PATCH"})
+     * @Route("/manage/update/{name}", methods={"PATCH"})
      * @param string $name
      * @return Response
      */
@@ -170,9 +213,10 @@ class LibraryManageController extends AbstractController {
 
         $result = $useCase->updateLibrary($name);
 
-        if ($result->error) {
-            $response = JsonResponse::getFailResponse($result->error);
-        } else {
+        if (!$result->success) {
+            $response = JsonResponse::getFailResponse($result->getMessage());
+        }
+        else {
             $response = JsonResponse::getSuccessResponse($result->getMessage());
         }
 

@@ -1,9 +1,11 @@
-<?php namespace app\libraries\homework\Gateways\Library;
+<?php
+
+namespace app\libraries\homework\Gateways\Library;
 
 use app\libraries\homework\Gateways\LibraryGateway;
 
 class LibraryGatewayFactory {
-    /** @var LibraryGateway */
+    /** @var LibraryGateway | null */
     protected static $instance;
 
     /**
@@ -11,9 +13,9 @@ class LibraryGatewayFactory {
      *
      * @return LibraryGateway
      */
-    public static function getInstance() {
+    public static function getInstance(): LibraryGateway {
         if (!static::$instance) {
-            static::$instance = new FileSystemLibraryGateway;
+            static::$instance = new FileSystemLibraryGateway();
         }
 
         return static::$instance;
@@ -34,5 +36,4 @@ class LibraryGatewayFactory {
     public static function clearInstance() {
         static::$instance = null;
     }
-
 }
