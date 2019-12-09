@@ -33,6 +33,4 @@ class MetadataUpdateStatus {
     public static function success(MetadataEntity $entity): MetadataUpdateStatus {
         return new static('', $entity);
     }
-
-
 }

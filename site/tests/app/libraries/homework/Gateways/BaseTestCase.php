@@ -1,4 +1,6 @@
-<?php namespace tests\app\libraries\homework\Gateways;
+<?php
+
+namespace tests\app\libraries\homework\Gateways;
 
 use app\libraries\Core;
 use tests\BaseUnitTest;

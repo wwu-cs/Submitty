@@ -50,13 +50,13 @@ class FileSystemLibraryGateway implements LibraryGateway {
         $libraries = $this->getAllLibraries($library->getLocation());
 
         return count(
-                   array_filter(
-                       $libraries,
-                       function (LibraryEntity $item) use ($library) {
-                           return $item->is($library);
-                       }
-                   )
-               ) > 0;
+            array_filter(
+                $libraries,
+                function (LibraryEntity $item) use ($library) {
+                            return $item->is($library);
+                }
+            )
+        ) > 0;
     }
 
     /** @inheritDoc */
@@ -94,7 +94,7 @@ class FileSystemLibraryGateway implements LibraryGateway {
 
         $status = proc_close($handle);
 
-        return $status == self::SUCCESS;
+        return $status === self::SUCCESS;
     }
 
     /** @inheritDoc */

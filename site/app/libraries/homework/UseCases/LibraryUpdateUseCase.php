@@ -11,7 +11,6 @@ use app\libraries\homework\Responses\LibraryUpdateResponse;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\Metadata\MetadataGatewayFactory;
 
-
 class LibraryUpdateUseCase extends BaseUseCase {
 
     /** @var LibraryGateway */

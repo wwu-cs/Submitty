@@ -1,11 +1,13 @@
-<?php namespace app\libraries\homework\Gateways\Metadata;
+<?php
+
+namespace app\libraries\homework\Gateways\Metadata;
 
 use app\libraries\homework\Gateways\MetadataGateway;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
 use app\libraries\homework\Gateways\Library\FileSystemLibraryGateway;
 
 class MetadataGatewayFactory {
-    /** @var MetadataGateway */
+    /** @var MetadataGateway | null */
     protected static $instance;
 
     /**

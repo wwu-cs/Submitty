@@ -131,7 +131,7 @@ class LibraryAddUseCase extends BaseUseCase {
         $extension = array_pop($parts);
 
         // Check for .zip
-        if (strtolower($extension) != 'zip' || count($parts) < 1) {
+        if (strtolower($extension) !== 'zip' || count($parts) < 1) {
             return LibraryAddResponse::error('A .zip file must be provided.');
         }
 
