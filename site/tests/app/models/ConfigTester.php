@@ -291,7 +291,7 @@ class ConfigTester extends \PHPUnit\Framework\TestCase {
             'queue_enabled' => true,
             'homework_library_params' => [
                 'enabled' => false,
-                'location' => '~/library',
+                'location' => '/usr/local/submitty/library',
                 'access_level' => User::LEVEL_SUPERUSER,
             ]
         );
