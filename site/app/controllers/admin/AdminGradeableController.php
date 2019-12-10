@@ -28,6 +28,9 @@ use app\libraries\response\JsonResponse;
  */
 class AdminGradeableController extends AbstractController {
 
+    /** @var string  **/
+    protected $homework_path;
+
     /**
      * HomePageController constructor.
      *
@@ -42,28 +45,17 @@ class AdminGradeableController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/homework_library", methods={"GET"})
      */
     public function selectFromHomeworkLibrary($gradeable_id) {
-        $gradeable_ids = $this->searchLibrary();
+        $gradeable_ids = FileUtils::getDirWithText($this->homework_path, "config.json");
         var_dump($gradeable_ids);
         die();
-        $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableHomeworkLibrary.twig', [
-            'homework_list' => $gradeable_ids,
-            'homework_library_url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'homework_library']),
-        ]);
-    }
-
-    // function taken from HomePageController.php
-     /**
-     * @Route("/homework/library/search", methods={"GET"})
-     * @return Response
-     */
-    public function searchLibrary($path = null) {
-        $this->homework_path = $this->core->getConfig()->getHomeworkLibraryLocation();
-        if ($path === null) {
-            $path = $this->homework_path;
-        }
-        $gradeable_ids = FileUtils::getDirWithText($path, "config.json");
-        return Response::JsonOnlyResponse(
-            JsonResponse::getSuccessResponse($gradeable_ids)
+        return Response::WebOnlyResponse(
+            new WebResponse(
+            [
+                'admin',
+                'SearchHomeworks',
+            ], 'showSearch',
+            $gradeable_ids, $gradeable_id
+            )
         );
     }
     
