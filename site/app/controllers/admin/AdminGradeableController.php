@@ -12,6 +12,13 @@ use app\models\gradeable\Mark;
 use app\libraries\FileUtils;
 use app\libraries\routers\AccessControl;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Request;
+use app\libraries\Core;
+use app\libraries\response\Response;
+use app\libraries\response\WebResponse;
+use app\libraries\response\JsonResponse;
 
 
 /**
@@ -20,12 +27,63 @@ use Symfony\Component\Routing\Annotation\Route;
  * @AccessControl(role="INSTRUCTOR")
  */
 class AdminGradeableController extends AbstractController {
+
+    /**
+     * HomePageController constructor.
+     *
+     * @param Core $core
+     */
+    public function __construct(Core $core) {
+        parent::__construct($core);
+        $this->homework_path = $this->core->getConfig()->getHomeworkLibraryLocation();
+    }
+    
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/homework_library", methods={"GET"})
      */
-    public function selectFromHomeworkLibrary($gradeable_id, $semester, $course) {
-        $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableHomeworkLibrary.twig', []);
+    public function selectFromHomeworkLibrary($gradeable_id) {
+        $gradeable_ids = $this->searchLibrary();
+        var_dump($gradeable_ids);
+        die();
+        $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableHomeworkLibrary.twig', [
+            'homework_list' => $gradeable_ids,
+            'homework_library_url' => $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'homework_library']),
+        ]);
     }
+
+    // function taken from HomePageController.php
+     /**
+     * @Route("/homework/library/search", methods={"GET"})
+     * @return Response
+     */
+    public function searchLibrary($path = null) {
+        $this->homework_path = $this->core->getConfig()->getHomeworkLibraryLocation();
+        if ($path === null) {
+            $path = $this->homework_path;
+        }
+        $gradeable_ids = FileUtils::getDirWithText($path, "config.json");
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($gradeable_ids)
+        );
+    }
+    
+    // function taken from HomePageController.php
+    public static function getDetails($path, $query) {
+        $config_path = FileUtils::getPathWithQueryAndTip($path, $query, 'config.json');
+        $readme_path = FileUtils::getPathWithQueryAndTip($path, $query, 'README.md');
+        if ($config_path) {
+            $contents = FileUtils::json_decode_commented(file_get_contents($config_path), true);
+            $parsed_contents = array(
+                'path' => $config_path,
+                'title' => $contents['testcases'][0]['title'] ?? 'Title not Specified',
+                'tags' => $contents['tags'] ?? [],
+                'readme' => $readme_path,
+            );
+            return $parsed_contents;
+        }
+        return false;
+    }
+
     /**
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/update", methods={"GET"})
      */
@@ -244,6 +302,7 @@ class AdminGradeableController extends AbstractController {
 
             'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']),
             'homework_library_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'homework_library']),
+            'search-library' => $this->core->buildCourseUrl(['search']),
             'rebuild_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'rebuild']),
             'csrf_token' => $this->core->getCsrfToken()
         ]);

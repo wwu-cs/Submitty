@@ -3,6 +3,7 @@
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
 use app\libraries\homework\Entities\LibraryAddStatus;
+use app\libraries\homework\Entities\LibraryUpdateStatus;
 
 class InMemoryLibraryGateway implements LibraryGateway {
     /** @var LibraryEntity[] */
@@ -60,5 +61,14 @@ class InMemoryLibraryGateway implements LibraryGateway {
         });
 
         return true;
+    }
+
+    /** @inheritDoc */
+    public function updateLibrary(LibraryEntity $library): LibraryUpdateStatus {
+        if (!$this->libraryExists($library)) {
+            return LibraryUpdateStatus::error('Library does not exist.');
+        }
+
+        return LibraryUpdateStatus::success("Successfully updated '{$library->getName()}'");
     }
 }
