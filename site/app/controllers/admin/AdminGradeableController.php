@@ -2,26 +2,27 @@
 
 namespace app\controllers\admin;
 
-use app\controllers\AbstractController;
-use app\exceptions\ValidationException;
+use app\libraries\Core;
 use app\libraries\DateUtils;
+use app\libraries\FileUtils;
+use app\models\gradeable\Mark;
 use app\libraries\GradeableType;
 use app\models\gradeable\Gradeable;
 use app\models\gradeable\Component;
-use app\models\gradeable\Mark;
-use app\libraries\FileUtils;
-use app\libraries\routers\AccessControl;
-use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
-use Symfony\Component\HttpFoundation\Request;
-use app\libraries\Core;
 use app\libraries\response\Response;
+use app\controllers\AbstractController;
+use app\exceptions\ValidationException;
 use app\libraries\response\WebResponse;
+use app\libraries\routers\AccessControl;
 use app\libraries\response\JsonResponse;
+use app\models\gradeable\AutogradingConfig;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 
 /**
  * Class AdminGradeableController
+ *
  * @package app\controllers\admin
  * @AccessControl(role="INSTRUCTOR")
  */
@@ -39,7 +40,46 @@ class AdminGradeableController extends AbstractController {
         parent::__construct($core);
         $this->homework_path = $this->core->getConfig()->getHomeworkLibraryLocation();
     }
-    
+
+
+    /**
+     * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/homework_library", methods={"GET"})
+     */
+    public function selectFromHomeworkLibrary($gradeable_id) {
+        /** @var string[] $gradeable_ids */
+        $gradeable_ids = FileUtils::getDirWithText($path, "config.json");
+        $core = $this->core;
+
+        $gradeables = array_map(
+            function (string $gradeablePath) use ($core) {
+                $contents = FileUtils::readJsonFile($gradeablePath);
+                return new AutogradingConfig($core, $contents);
+            },
+            $gradeable_ids
+        );
+
+        return Response::WebOnlyResponse(
+            new WebResponse(
+                [
+                    'admin',
+                    'SearchHomeworks',
+                ], 'showSearch',
+                $gradeables, $gradeable_id
+            )
+        );
+    }
+
+    /**
+     * @Route("/homework/library/search", methods={"GET"})
+     * @return Response
+     */
+    public function searchLibrary() {
+        $gradeable_ids = FileUtils::getDirWithText($path, "config.json");
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($gradeable_ids)
+        );
+    }
+
     /**
      * WIP [instructor]
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/homework_library", methods={"GET"})
@@ -50,35 +90,6 @@ class AdminGradeableController extends AbstractController {
      *
      * TODO: This function needs to be reworked so that $gradeable_ids get's assigned a list
      * of json objects which are the contents of the config files not the path to the config files.
-     *
-     */
-    public function selectFromHomeworkLibrary($gradeable_id) {
-        $gradeable_ids = FileUtils::getDirWithText($this->homework_path, "config.json");
-        return Response::WebOnlyResponse(
-            new WebResponse(
-                [
-                'admin',
-                'SearchHomeworks',
-                ],
-                'showSearch',
-                $gradeable_ids,
-                $gradeable_id
-            )
-        );
-    }
-    
-    /**
-     * WIP [instructor]
-     * function taken from HomePageController.php
-     *
-     * This functions purpose is to decode the json passed in
-     * and parse it to find tags that relate to information about
-     * the gradeable. Previous devs were unable to test this becuase
-     * json was not able to be retrieved to start with.
-     *
-     * TODO: Test function after selectFromHomeworkLibrary function has
-     * successfully retrieved a json object. Function should be able to parse
-     * json object and return information based on tags listed below.
      *
      */
     public static function getDetails($path, $query) {
@@ -111,24 +122,36 @@ class AdminGradeableController extends AbstractController {
     }
 
     const syllabus_buckets = [
-        'homework', 'assignment', 'problem-set',
-        'quiz', 'test', 'exam',
-        'exercise', 'lecture-exercise', 'reading', 'lab', 'recitation', 'worksheet',
+        'homework',
+        'assignment',
+        'problem-set',
+        'quiz',
+        'test',
+        'exam',
+        'exercise',
+        'lecture-exercise',
+        'reading',
+        'lab',
+        'recitation',
+        'worksheet',
         'project',
-        'participation', 'note',
-        'none (for practice only)'];
+        'participation',
+        'note',
+        'none (for practice only)',
+    ];
 
     const gradeable_type_strings = [
-        'checkpoint' => 'Checkpoints (simple data entry: full/half/no credit)',
-        'numeric' => 'Numeric/Text (simple data entry: integer or floating point and/or short strings)',
-        'electronic_hw' => 'Students will submit one or more files by direct upload to the Submitty website',
+        'checkpoint'        => 'Checkpoints (simple data entry: full/half/no credit)',
+        'numeric'           => 'Numeric/Text (simple data entry: integer or floating point and/or short strings)',
+        'electronic_hw'     => 'Students will submit one or more files by direct upload to the Submitty website',
         'electronic_hw_vcs' => 'Students will submit by committing files to a version control system (VCS) repository',
-        'electronic_exam' => 'TA/Instructor will (bulk) upload scanned .pdf for online manual grading'
+        'electronic_exam'   => 'TA/Instructor will (bulk) upload scanned .pdf for online manual grading',
     ];
 
     /**
      * Displays the 'new' page, populating the first-page properties with the
      *  provided gradeable's data
+     *
      * @param Gradeable $gradeable
      * @Route("/{_semester}/{_course}/gradeable", methods={"GET"})
      */
@@ -141,25 +164,32 @@ class AdminGradeableController extends AbstractController {
         $submit_url = $this->core->buildCourseUrl(['gradeable']);
         $vcs_base_url = $this->core->getConfig()->getVcsBaseUrl();
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
+        $this->core->getOutput()->addVendorJs(
+            FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js')
+        );
         $this->core->getOutput()->addVendorJs(
             FileUtils::joinPaths('jquery-ui-timepicker-addon', 'jquery-ui-timepicker-addon.min.js')
         );
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
-        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+        $this->core->getOutput()->addVendorCss(
+            FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css')
+        );
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-        $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
-            'submit_url' => $submit_url,
-            'gradeable' => $gradeable,
-            'action' => $gradeable !== null ? 'template' : 'new',
-            'template_list' => $template_list,
-            'syllabus_buckets' => self::syllabus_buckets,
-            'vcs_base_url' => $vcs_base_url,
-            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
-            'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
-            'gradeable_type_strings' => self::gradeable_type_strings,
-            'csrf_token' => $this->core->getCsrfToken()
-        ]);
+        $this->core->getOutput()->renderTwigOutput(
+            'admin/admin_gradeable/AdminGradeableBase.twig',
+            [
+                'submit_url'             => $submit_url,
+                'gradeable'              => $gradeable,
+                'action'                 => $gradeable !== null ? 'template' : 'new',
+                'template_list'          => $template_list,
+                'syllabus_buckets'       => self::syllabus_buckets,
+                'vcs_base_url'           => $vcs_base_url,
+                'regrade_enabled'        => $this->core->getConfig()->isRegradeEnabled(),
+                'forum_enabled'          => $this->core->getConfig()->isForumEnabled(),
+                'gradeable_type_strings' => self::gradeable_type_strings,
+                'csrf_token'             => $this->core->getCsrfToken(),
+            ]
+        );
     }
 
     //view the page with pulled data from the gradeable to be edited
@@ -206,12 +236,32 @@ class AdminGradeableController extends AbstractController {
         $saved_config_path = $gradeable->getAutogradingConfigPath();
 
         // These are hard coded default config options.
-        $default_config_paths = [ ['PROVIDED: upload_only (1 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/upload_only/config'],
-                                  ['PROVIDED: pdf_exam (100 mb maximum total student file submission)', '/usr/local/submitty/more_autograding_examples/pdf_exam/config'],
-                                  ['PROVIDED: iclicker_upload (for collecting student iclicker IDs)', '/usr/local/submitty/more_autograding_examples/iclicker_upload/config'],
-                                  ['PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment)', '/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config'],
-                                  ['PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload/config'],
-                                  ['PROVIDED: test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)', '/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config'] ];
+        $default_config_paths = [
+            [
+                'PROVIDED: upload_only (1 mb maximum total student file submission)',
+                '/usr/local/submitty/more_autograding_examples/upload_only/config',
+            ],
+            [
+                'PROVIDED: pdf_exam (100 mb maximum total student file submission)',
+                '/usr/local/submitty/more_autograding_examples/pdf_exam/config',
+            ],
+            [
+                'PROVIDED: iclicker_upload (for collecting student iclicker IDs)',
+                '/usr/local/submitty/more_autograding_examples/iclicker_upload/config',
+            ],
+            [
+                'PROVIDED: left_right_exam_seating (for collecting student handedness for exam seating assignment)',
+                '/usr/local/submitty/more_autograding_examples/left_right_exam_seating/config',
+            ],
+            [
+                'PROVIDED: test_notes_upload (expects single file, 2 mb maximum, 2-page pdf student submission)',
+                '/usr/local/submitty/more_autograding_examples/test_notes_upload/config',
+            ],
+            [
+                'PROVIDED: test_notes_upload_3page (expects single file, 3 mb maximum, 3-page pdf student submission)',
+                '/usr/local/submitty/more_autograding_examples/test_notes_upload_3page/config',
+            ],
+        ];
 
         // Configs uploaded to the 'Upload Gradeable Config' page
         $uploaded_configs_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'config_upload');
@@ -281,45 +331,51 @@ class AdminGradeableController extends AbstractController {
         }
         $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'flatpickr.min.js'));
         $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'flatpickr.min.css'));
-        $this->core->getOutput()->addVendorJs(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js'));
-        $this->core->getOutput()->addVendorCss(FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css'));
+        $this->core->getOutput()->addVendorJs(
+            FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'shortcut-buttons-flatpickr.min.js')
+        );
+        $this->core->getOutput()->addVendorCss(
+            FileUtils::joinPaths('flatpickr', 'plugins', 'shortcutButtons', 'themes', 'light.min.css')
+        );
         $this->core->getOutput()->addInternalJs('admin-gradeable-updates.js');
         $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-        $this->core->getOutput()->renderTwigOutput('admin/admin_gradeable/AdminGradeableBase.twig', [
-            'gradeable' => $gradeable,
-            'action' => 'edit',
-            'nav_tab' => $nav_tab,
-            'semester' => $semester,
-            'course' => $course,
-            'date_format' => 'Y-m-d H:i:s',
-            'syllabus_buckets' => self::syllabus_buckets,
-            'gradeable_components_enc' => json_encode($gradeable_components_enc),
-            'regrade_allowed' => $gradeable->isRegradeAllowed(),
-            'regrade_enabled' => $this->core->getConfig()->isRegradeEnabled(),
-            'forum_enabled' => $this->core->getConfig()->isForumEnabled(),
-            // Non-Gradeable-model data
-            'gradeable_section_history' => $gradeable_section_history,
-            'num_rotating_sections' => $num_rotating_sections,
-            'no_rotating_sections' => $no_rotating_sections,
-            'rotating_gradeables' => $rotating_gradeables,
-            'graders_from_usertypes' => $graders_from_usertypes,
-            //'inherit_teams_list' => $inherit_teams_list
-            'default_late_days' => $default_late_days,
-            'vcs_base_url' => $vcs_base_url,
-            'is_pdf_page' => $gradeable->isPdfUpload(),
-            'is_pdf_page_student' => $gradeable->isStudentPdfUpload(),
-            'num_numeric' => $gradeable->getNumNumeric(),
-            'num_text' => $gradeable->getNumText(),
-            'type_string' => $type_string,
-            'gradeable_type_strings' => self::gradeable_type_strings,
-            'show_edit_warning' => $gradeable->anyManualGrades(),
+        $this->core->getOutput()->renderTwigOutput(
+            'admin/admin_gradeable/AdminGradeableBase.twig',
+            [
+                'gradeable'                  => $gradeable,
+                'action'                     => 'edit',
+                'nav_tab'                    => $nav_tab,
+                'semester'                   => $semester,
+                'course'                     => $course,
+                'date_format'                => 'Y-m-d H:i:s',
+                'syllabus_buckets'           => self::syllabus_buckets,
+                'gradeable_components_enc'   => json_encode($gradeable_components_enc),
+                'regrade_allowed'            => $gradeable->isRegradeAllowed(),
+                'regrade_enabled'            => $this->core->getConfig()->isRegradeEnabled(),
+                'forum_enabled'              => $this->core->getConfig()->isForumEnabled(),
+                // Non-Gradeable-model data
+                'gradeable_section_history'  => $gradeable_section_history,
+                'num_rotating_sections'      => $num_rotating_sections,
+                'no_rotating_sections'       => $no_rotating_sections,
+                'rotating_gradeables'        => $rotating_gradeables,
+                'graders_from_usertypes'     => $graders_from_usertypes,
+                //'inherit_teams_list' => $inherit_teams_list
+                'default_late_days'          => $default_late_days,
+                'vcs_base_url'               => $vcs_base_url,
+                'is_pdf_page'                => $gradeable->isPdfUpload(),
+                'is_pdf_page_student'        => $gradeable->isStudentPdfUpload(),
+                'num_numeric'                => $gradeable->getNumNumeric(),
+                'num_text'                   => $gradeable->getNumText(),
+                'type_string'                => $type_string,
+                'gradeable_type_strings'     => self::gradeable_type_strings,
+                'show_edit_warning'          => $gradeable->anyManualGrades(),
 
             // Config selection data
             'all_config_paths' => array_merge($default_config_paths, $all_uploaded_config_paths, $all_repository_config_paths),
             'repository_error_messages' => $repository_error_messages,
             'currently_valid_repository' => $this->checkPathToConfigFile($gradeable->getAutogradingConfigPath()),
 
-            'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
+                'timezone_string' => $this->core->getConfig()->getTimezone()->getName(),
 
             'upload_config_url' => $this->core->buildCourseUrl(['autograding_config']),
             'homework_library_url' => $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'homework_library']),
@@ -375,30 +431,34 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function newComponent(Gradeable $gradeable) {
-        return new Component($this->core, $gradeable, [
-            'id' => 0,
-            'title' => '',
-            'ta_comment' => '',
-            'student_comment' => '',
-            'lower_clamp' => 0,
-            'default' => 0,
-            'max_value' => 0,
-            'upper_clamp' => 0,
-            'text' => false,
-            'peer' => false,
-            'order' => -1,
-            'page' => Component::PDF_PAGE_NONE
-        ]);
+        return new Component(
+            $this->core, $gradeable, [
+                           'id'              => 0,
+                           'title'           => '',
+                           'ta_comment'      => '',
+                           'student_comment' => '',
+                           'lower_clamp'     => 0,
+                           'default'         => 0,
+                           'max_value'       => 0,
+                           'upper_clamp'     => 0,
+                           'text'            => false,
+                           'peer'            => false,
+                           'order'           => -1,
+                           'page'            => Component::PDF_PAGE_NONE,
+                       ]
+        );
     }
 
     private function newMark(Component $component) {
-        return new Mark($this->core, $component, [
-            'id' => 0,
-            'points' => 0,
-            'title' => '',
-            'order' => 0,
-            'publish' => false
-        ]);
+        return new Mark(
+            $this->core, $component, [
+                           'id'      => 0,
+                           'points'  => 0,
+                           'title'   => '',
+                           'order'   => 0,
+                           'publish' => false,
+                       ]
+        );
     }
 
     // Generates a blank first component for a gradeable
@@ -460,13 +520,15 @@ class AdminGradeableController extends AbstractController {
         $component->setTitle($details['label']);
         $component->setTaComment("");
         $component->setStudentComment("");
-        $component->setPoints([
-            'lower_clamp' => 0,
-            'default' => 0,
-            // if it is extra credit then it would be out of 0 points otherwise 1
-            'max_value' => $details['extra_credit'] === 'true' ? 0 : 1,
-            'upper_clamp' => 1
-        ]);
+        $component->setPoints(
+            [
+                'lower_clamp' => 0,
+                'default'     => 0,
+                // if it is extra credit then it would be out of 0 points otherwise 1
+                'max_value'   => $details['extra_credit'] === 'true' ? 0 : 1,
+                'upper_clamp' => 1,
+            ]
+        );
         $component->setText(false);
         $component->setPeer(false);
         $component->setPage(Component::PDF_PAGE_NONE);
@@ -485,12 +547,14 @@ class AdminGradeableController extends AbstractController {
         $component->setTitle($details['label']);
         $component->setTaComment("");
         $component->setStudentComment("");
-        $component->setPoints([
-            'lower_clamp' => 0,
-            'default' => 0,
-            'max_value' => $details['extra_credit'] === 'true' ? 0 : $details['max_score'],
-            'upper_clamp' => $details['max_score']
-        ]);
+        $component->setPoints(
+            [
+                'lower_clamp' => 0,
+                'default'     => 0,
+                'max_value'   => $details['extra_credit'] === 'true' ? 0 : $details['max_score'],
+                'upper_clamp' => $details['max_score'],
+            ]
+        );
         $component->setText(false);
         $component->setPeer(false);
         $component->setPage(Component::PDF_PAGE_NONE);
@@ -503,12 +567,14 @@ class AdminGradeableController extends AbstractController {
         $component->setTitle($details['label']);
         $component->setTaComment("");
         $component->setStudentComment("");
-        $component->setPoints([
-            'lower_clamp' => 0,
-            'default' => 0,
-            'max_value' => 0,
-            'upper_clamp' => 0
-        ]);
+        $component->setPoints(
+            [
+                'lower_clamp' => 0,
+                'default'     => 0,
+                'max_value'   => 0,
+                'upper_clamp' => 0,
+            ]
+        );
         $component->setText(true);
         $component->setPeer(false);
         $component->setPage(Component::PDF_PAGE_NONE);
@@ -516,6 +582,7 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * Returns true if given path has a file named config.json in it, false otherwise
+     *
      * @param string $folder_path
      * @return boolean
      */
@@ -544,8 +611,9 @@ class AdminGradeableController extends AbstractController {
      * does not look at files deeper than the config.json file
      * pushes new errors to $error_messages if something goes wrong
      * returns array of valid paths arrays of form [path_name,full_path]
-     * @param array $dir_queue
-     * @param array $error_messages
+     *
+     * @param array   $dir_queue
+     * @param array   $error_messages
      * @param integer $repo_id_number
      * @return array
      */
@@ -612,26 +680,27 @@ class AdminGradeableController extends AbstractController {
                 $details['checkpoints'] = [];
             }
 
-            $num_checkpoints = count($details['checkpoints']);
+                $num_checkpoints = count($details['checkpoints']);
 
-            // Iterate through each existing component and update them in the database,
-            //  removing any extras
-            $x = 0;
-            foreach ($old_components as $old_component) {
-                if ($x < $num_checkpoints && $x < $num_old_components) {
-                    self::parseCheckpoint($old_component, $details['checkpoints'][$x]);
-                    $old_component->setOrder($x);
-                    $new_components[] = $old_component;
+                // Iterate through each existing component and update them in the database,
+                //  removing any extras
+                $x = 0;
+                foreach ($old_components as $old_component) {
+                    if ($x < $num_checkpoints && $x < $num_old_components) {
+                        self::parseCheckpoint($old_component, $details['checkpoints'][$x]);
+                        $old_component->setOrder($x);
+                        $new_components[] = $old_component;
+                    }
+                    $x++;
                 }
-                $x++;
-            }
 
-            // iterate through each new checkpoint, adding them to the database
-            for ($x = $start_index; $x < $num_checkpoints; $x++) {
-                $component = $this->newComponent($gradeable);
-                self::parseCheckpoint($component, $details['checkpoints'][$x]);
-                $component->setOrder($x);
-                $new_components[] = $component;
+                // iterate through each new checkpoint, adding them to the database
+                for ($x = $start_index; $x < $num_checkpoints; $x++) {
+                    $component = $this->newComponent($gradeable);
+                    self::parseCheckpoint($component, $details['checkpoints'][$x]);
+                    $component->setOrder($x);
+                    $new_components[] = $component;
+                }
             }
         }
         elseif ($gradeable->getType() === GradeableType::NUMERIC_TEXT) {
@@ -642,11 +711,11 @@ class AdminGradeableController extends AbstractController {
                 $details['text'] = [];
             }
 
-            $num_numeric = count($details['numeric']);
-            $num_text = count($details['text']);
+                    $num_numeric = count($details['numeric']);
+                    $num_text = count($details['text']);
 
-            $start_index_numeric = 0;
-            $start_index_text = 0;
+                    $start_index_numeric = 0;
+                    $start_index_text = 0;
 
             // Load all of the old numeric/text elements into two arrays
             $old_numerics = [];
@@ -664,39 +733,39 @@ class AdminGradeableController extends AbstractController {
                 }
             }
 
-            $x = 0;
-            // Iterate through each existing numeric component and update them in the database,
-            //  removing any extras
-            foreach ($old_numerics as $old_numeric) {
-                if ($x < $num_numeric && $x < $num_old_numerics) {
-                    self::parseNumeric($old_numeric, $details['numeric'][$x]);
-                    $old_numeric->setOrder($x);
-                    $new_components[] = $old_numeric;
-                    $start_index_numeric++;
-                }
-                $x++;
-            }
+                    $x = 0;
+                    // Iterate through each existing numeric component and update them in the database,
+                    //  removing any extras
+                    foreach ($old_numerics as $old_numeric) {
+                        if ($x < $num_numeric && $x < $num_old_numerics) {
+                            self::parseNumeric($old_numeric, $details['numeric'][$x]);
+                            $old_numeric->setOrder($x);
+                            $new_components[] = $old_numeric;
+                            $start_index_numeric++;
+                        }
+                        $x++;
+                    }
 
-            for ($x = $start_index_numeric; $x < $num_numeric; $x++) {
-                $component = $this->newComponent($gradeable);
-                self::parseNumeric($component, $details['numeric'][$x]);
-                $component->setOrder($x);
-                $new_components[] = $component;
-            }
+                    for ($x = $start_index_numeric; $x < $num_numeric; $x++) {
+                        $component = $this->newComponent($gradeable);
+                        self::parseNumeric($component, $details['numeric'][$x]);
+                        $component->setOrder($x);
+                        $new_components[] = $component;
+                    }
 
-            $z = $x;
-            $x = 0;
-            // Iterate through each existing text component and update them in the database,
-            //  removing any extras
-            foreach ($old_texts as $old_text) {
-                if ($x < $num_text && $x < $num_old_texts) {
-                    self::parseText($old_text, $details['text'][$x]);
-                    $old_text->setOrder($z + $x);
-                    $new_components[] = $old_text;
-                    $start_index_text++;
-                }
-                $x++;
-            }
+                    $z = $x;
+                    $x = 0;
+                    // Iterate through each existing text component and update them in the database,
+                    //  removing any extras
+                    foreach ($old_texts as $old_text) {
+                        if ($x < $num_text && $x < $num_old_texts) {
+                            self::parseText($old_text, $details['text'][$x]);
+                            $old_text->setOrder($z + $x);
+                            $new_components[] = $old_text;
+                            $start_index_text++;
+                        }
+                        $x++;
+                    }
 
             for ($y = $start_index_text; $y < $num_text; $y++) {
                 $component = $this->newComponent($gradeable);
@@ -780,9 +849,9 @@ class AdminGradeableController extends AbstractController {
         //
         $gradeable_type = GradeableType::stringToType($details['type']);
         $gradeable_create_data = [
-            'type' => $gradeable_type,
+            'type'                     => $gradeable_type,
             'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
-            'min_grading_group' => 1,
+            'min_grading_group'        => 1,
         ];
 
         $template_property_names = [
@@ -794,7 +863,7 @@ class AdminGradeableController extends AbstractController {
             'student_view_after_grades',
             'student_submit',
             'late_days',
-            'precision'
+            'precision',
         ];
         // Make sure the template exists if we're using one
         $template_gradeable = null;
@@ -813,15 +882,15 @@ class AdminGradeableController extends AbstractController {
         }
         else {
             $non_template_property_values = [
-                'min_grading_group' => 1,
-                'grader_assignment_method' => Gradeable::REGISTRATION_SECTION,
-                'ta_instructions' => '',
-                'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
-                'student_view' => true,
+                'min_grading_group'         => 1,
+                'grader_assignment_method'  => Gradeable::REGISTRATION_SECTION,
+                'ta_instructions'           => '',
+                'autograding_config_path'   => '/usr/local/submitty/more_autograding_examples/upload_only/config',
+                'student_view'              => true,
                 'student_view_after_grades' => false,
-                'student_submit' => true,
-                'late_days' => $default_late_days,
-                'precision' => 0.5
+                'student_submit'            => true,
+                'late_days'                 => $default_late_days,
+                'precision'                 => 0.5,
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_template_property_values);
         }
@@ -831,7 +900,7 @@ class AdminGradeableController extends AbstractController {
             'id',
             'title',
             'instructions_url',
-            'syllabus_bucket'
+            'syllabus_bucket',
         ];
         foreach ($front_page_property_names as $prop) {
             $gradeable_create_data[$prop] = $details[$prop] ?? '';
@@ -866,17 +935,17 @@ class AdminGradeableController extends AbstractController {
                 $subdir = $details['vcs_url'] . "/{\$user_id}";
             }
             $vcs_property_values = [
-                'vcs' => true,
+                'vcs'              => true,
                 'vcs_subdirectory' => $subdir,
-                'vcs_host_type' => $host_type
+                'vcs_host_type'    => $host_type,
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $vcs_property_values);
         }
         else {
             $non_vcs_property_values = [
-                'vcs' => false,
+                'vcs'              => false,
                 'vcs_subdirectory' => '',
-                'vcs_host_type' => -1
+                'vcs_host_type'    => -1,
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_vcs_property_values);
         }
@@ -899,18 +968,20 @@ class AdminGradeableController extends AbstractController {
 
             $regrade_allowed = isset($details['regrade_allowed']) && ($details['regrade_allowed'] === 'true');
 
-            $gradeable_create_data = array_merge($gradeable_create_data, [
-                'team_assignment' => $details['team_assignment'] === 'true',
-                'ta_grading' => $details['ta_grading'] === 'true',
-                'team_size_max' => $details['team_size_max'],
-                'regrade_allowed' => $regrade_allowed,
-                'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
-                'scanned_exam' => $details['scanned_exam'] === 'true',
-                'has_due_date' => true,
+            $gradeable_create_data = array_merge(
+                $gradeable_create_data,
+                [
+                    'team_assignment'         => $details['team_assignment'] === 'true',
+                    'ta_grading'              => $details['ta_grading'] === 'true',
+                    'team_size_max'           => $details['team_size_max'],
+                    'regrade_allowed'         => $regrade_allowed,
+                    'autograding_config_path' => '/usr/local/submitty/more_autograding_examples/upload_only/config',
+                    'scanned_exam'            => $details['scanned_exam'] === 'true',
+                    'has_due_date'            => true,
 
-                //For discussion component
-                'discussion_based' => $discussion_clicked,
-                'discussion_thread_ids' => $jsonThreads,
+                    //For discussion component
+                    'discussion_based'        => $discussion_clicked,
+                    'discussion_thread_ids'   => $jsonThreads,
 
                 // TODO: properties that aren't supported yet
                 'peer_grading' => false,
@@ -920,33 +991,39 @@ class AdminGradeableController extends AbstractController {
         }
         else {
             // Values for these electronic-only properties
-            $gradeable_create_data = array_merge($gradeable_create_data, [
-                'team_assignment' => false,
-                'vcs' => false,
-                'team_size_max' => 0,
-                'vcs_subdirectory' => '',
-                'vcs_host_type' => -1,
-                'autograding_config_path' => '',
-                'peer_grading' => false,
-                'peer_grade_set' => 0,
-                'late_submission_allowed' => true,
-                'has_due_date' => false,
-            ]);
+            $gradeable_create_data = array_merge(
+                $gradeable_create_data,
+                [
+                    'team_assignment'         => false,
+                    'vcs'                     => false,
+                    'team_size_max'           => 0,
+                    'vcs_subdirectory'        => '',
+                    'vcs_host_type'           => -1,
+                    'autograding_config_path' => '',
+                    'peer_grading'            => false,
+                    'peer_grade_set'          => 0,
+                    'late_submission_allowed' => true,
+                    'has_due_date'            => false,
+                ]
+            );
         }
 
         // Setup good default dates
         $tonight = $this->core->getDateTimeNow();
         $tonight->setTime(23, 59, 59);
-        $gradeable_create_data = array_merge($gradeable_create_data, [
-            'ta_view_start_date' => (clone $tonight),
-            'grade_start_date' => (clone $tonight)->add(new \DateInterval('P10D')),
-            'grade_due_date' => (clone $tonight)->add(new \DateInterval('P14D')),
-            'grade_released_date' => (clone $tonight)->add(new \DateInterval('P14D')),
-            'team_lock_date' => (clone $tonight)->add(new \DateInterval('P7D')),
-            'submission_open_date' => (clone $tonight),
-            'submission_due_date' => (clone $tonight)->add(new \DateInterval('P7D')),
-            'regrade_request_date' => (clone $tonight)->add(new \DateInterval('P21D'))
-        ]);
+        $gradeable_create_data = array_merge(
+            $gradeable_create_data,
+            [
+                'ta_view_start_date'   => (clone $tonight),
+                'grade_start_date'     => (clone $tonight)->add(new \DateInterval('P10D')),
+                'grade_due_date'       => (clone $tonight)->add(new \DateInterval('P14D')),
+                'grade_released_date'  => (clone $tonight)->add(new \DateInterval('P14D')),
+                'team_lock_date'       => (clone $tonight)->add(new \DateInterval('P7D')),
+                'submission_open_date' => (clone $tonight),
+                'submission_due_date'  => (clone $tonight)->add(new \DateInterval('P7D')),
+                'regrade_request_date' => (clone $tonight)->add(new \DateInterval('P21D')),
+            ]
+        );
 
         // Finally, construct the gradeable
         $gradeable = new Gradeable($this->core, $gradeable_create_data);
@@ -1026,14 +1103,14 @@ class AdminGradeableController extends AbstractController {
             'grade_inquiry_per_component_allowed',
             'discussion_based',
             'vcs',
-            'has_due_date'
+            'has_due_date',
         ];
 
         $discussion_ids = 'discussion_thread_id';
 
         $numeric_properties = [
             'precision',
-            'grader_assignment_method'
+            'grader_assignment_method',
         ];
 
         // Date properties all need to be set at once
@@ -1044,7 +1121,11 @@ class AdminGradeableController extends AbstractController {
                 $dates[$date_property] = $details[$date_property];
 
                 if ($dates[$date_property] > DateUtils::MAX_TIME) {
-                    $errors[$date_property] = Gradeable::date_display_names[$date_property] . ' Date is higher than the max allowed date! (' . DateUtils::MAX_TIME . ')';
+                    $errors[$date_property] =
+                        Gradeable::date_display_names[$date_property] .
+                        ' Date is higher than the max allowed date! (' .
+                        DateUtils::MAX_TIME .
+                        ')';
                 }
 
                 // Unset dates so we don't try and use it in the other loop
@@ -1171,9 +1252,9 @@ class AdminGradeableController extends AbstractController {
         // Note: These property names must match the 'setup_sample_courses.py' names
         $jsonProperties = [
             'gradeable_id' => $gradeable->getId(),
-            'config_path' => $gradeable->getAutogradingConfigPath(),
-            'date_due' => DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
-            'upload_type' => $gradeable->isVcs() ? "repository" : "upload file",
+            'config_path'  => $gradeable->getAutogradingConfigPath(),
+            'date_due'     => DateUtils::dateTimeToString($gradeable->getSubmissionDueDate()),
+            'upload_type'  => $gradeable->isVcs() ? "repository" : "upload file",
             'subdirectory' => $gradeable->getVcsSubdirectory(),
         ];
 
@@ -1192,13 +1273,14 @@ class AdminGradeableController extends AbstractController {
         $course = $this->core->getConfig()->getCourse();
 
         // FIXME:  should use a variable intead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/daemon_job_queue/" . $semester . "__" . $course . "__" . $g_id . ".json";
+        $config_build_file =
+            "/var/local/submitty/daemon_job_queue/" . $semester . "__" . $course . "__" . $g_id . ".json";
 
         $config_build_data = [
-            "job" => "BuildConfig",
-            "semester" => $semester,
-            "course" => $course,
-            "gradeable" => $g_id
+            "job"       => "BuildConfig",
+            "semester"  => $semester,
+            "course"    => $course,
+            "gradeable" => $g_id,
         ];
 
         if (
@@ -1212,13 +1294,20 @@ class AdminGradeableController extends AbstractController {
 
     public static function enqueueGenerateRepos($semester, $course, $g_id) {
         // FIXME:  should use a variable intead of hardcoded top level path
-        $config_build_file = "/var/local/submitty/daemon_job_queue/generate_repos__" . $semester . "__" . $course . "__" . $g_id . ".json";
+        $config_build_file =
+            "/var/local/submitty/daemon_job_queue/generate_repos__" .
+            $semester .
+            "__" .
+            $course .
+            "__" .
+            $g_id .
+            ".json";
 
         $config_build_data = [
-            "job" => "RunGenerateRepos",
-            "semester" => $semester,
-            "course" => $course,
-            "gradeable" => $g_id
+            "job"       => "RunGenerateRepos",
+            "semester"  => $semester,
+            "course"    => $course,
+            "gradeable" => $g_id,
         ];
 
         if (
@@ -1252,14 +1341,28 @@ class AdminGradeableController extends AbstractController {
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/build_log", methods={"GET"})
      */
     public function ajaxGetBuildLogs($gradeable_id) {
-        $build_script_output_file = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
-        $build_script_output = is_file($build_script_output_file) ? htmlentities(file_get_contents($build_script_output_file)) : null;
-        $cmake_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_cmake_output.txt');
+        $build_script_output_file =
+            FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build_script_output.txt');
+        $build_script_output =
+            is_file($build_script_output_file) ? htmlentities(file_get_contents($build_script_output_file)) : null;
+        $cmake_out_dir =
+            FileUtils::joinPaths(
+                $this->core->getConfig()->getCoursePath(),
+                'build',
+                $gradeable_id,
+                'log_cmake_output.txt'
+            );
         $cmake_output = is_file($cmake_out_dir) ? htmlentities(file_get_contents($cmake_out_dir)) : null;
-        $make_out_dir = FileUtils::joinPaths($this->core->getConfig()->getCoursePath(), 'build', $gradeable_id, 'log_make_output.txt');
+        $make_out_dir =
+            FileUtils::joinPaths(
+                $this->core->getConfig()->getCoursePath(),
+                'build',
+                $gradeable_id,
+                'log_make_output.txt'
+            );
         $make_output = is_file($make_out_dir) ? htmlentities(file_get_contents($make_out_dir)) : null;
 
-        $this->core->getOutput()->renderJsonSuccess([$build_script_output,$cmake_output,$make_output]);
+        $this->core->getOutput()->renderJsonSuccess([$build_script_output, $cmake_output, $make_output]);
     }
 
     /**
@@ -1287,8 +1390,9 @@ class AdminGradeableController extends AbstractController {
 
     /**
      * Shifts all dates in the array up to and including $date_prop to be no later than $time
-     * @param array $dates
-     * @param string $date_prop
+     *
+     * @param array     $dates
+     * @param string    $date_prop
      * @param \DateTime $time
      */
     private function shiftDates(array &$dates, string $date_prop, \DateTime $time) {
@@ -1383,7 +1487,10 @@ class AdminGradeableController extends AbstractController {
     }
 
     private function redirectToEdit($gradeable_id) {
-        $url = $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'update']) . '?' . http_build_query(['nav_tab' => '-1']);
+        $url =
+            $this->core->buildCourseUrl(['gradeable', $gradeable_id, 'update']) .
+            '?' .
+            http_build_query(['nav_tab' => '-1']);
         header('Location: ' . $url);
     }
 

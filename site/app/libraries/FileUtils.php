@@ -307,7 +307,7 @@ class FileUtils {
      * @param string $path
      * @param string $text
      *
-     * @return array
+     * @return string[]
      */
     public static function getDirWithText($path, $text) {
         $dirs = FileUtils::getPathsWithQuery($path, $text);
