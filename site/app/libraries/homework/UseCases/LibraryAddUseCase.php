@@ -1,66 +1,59 @@
-<?php namespace app\libraries\homework\UseCases;
+<?php
+
+namespace app\libraries\homework\UseCases;
 
 use app\libraries\Core;
-use app\libraries\FileUtils;
+use app\libraries\Utils;
 use app\libraries\homework\Entities\LibraryEntity;
 use app\libraries\homework\Gateways\LibraryGateway;
+use app\libraries\homework\Entities\MetadataEntity;
+use app\libraries\homework\Gateways\MetadataGateway;
+use app\libraries\homework\Responses\LibraryAddResponse;
 use app\libraries\homework\Gateways\Library\LibraryGatewayFactory;
-
-class LibraryAddResponse {
-    /** @var string */
-    protected $message;
-
-    /** @var string */
-    public $error;
-
-    public function __construct(string $message = '') {
-        $this->message = $message;
-    }
-
-    public function getMessage(): string {
-        return $this->message;
-    }
-
-    public static function error(string $message): LibraryAddResponse {
-        $response = new static;
-        $response->error = $message;
-        return $response;
-    }
-
-}
+use app\libraries\homework\Gateways\Metadata\MetadataGatewayFactory;
 
 class LibraryAddUseCase extends BaseUseCase {
     /** @var LibraryGateway */
     protected $gateway;
 
+    /** @var MetadataGateway */
+    protected $metadata;
+
     public function __construct(Core $core) {
         parent::__construct($core);
 
         $this->gateway = LibraryGatewayFactory::getInstance();
+        $this->metadata = MetadataGatewayFactory::getInstance();
     }
 
     /**
      * Takes a string representing the git url to clone, and adds it to the library
      *
-     * @param null|string $repoUrl
+     * @param string|null $repoUrl
+     * @param string|null $metaName
      * @return LibraryAddResponse
      */
-    public function addGitLibrary($repoUrl): LibraryAddResponse {
+    public function addGitLibrary($repoUrl, $metaName): LibraryAddResponse {
         if (!$repoUrl) {
             return LibraryAddResponse::error('A repo url is required.');
         }
 
+        // Validate the url with regex
         // Regex can be viewed in detail here.
         // https://www.debuggex.com/r/H4kRw1G0YPyBFjfm
         // It validates .git repository urls.
-        if (!preg_match(
-            '/((git|ssh|http(s)?)|(git@[\w\.]+))(:(\/\/)?)([\w\.@\:\/\-~]+)(\.git)(\/)?/',
+        $match = preg_match(
+            '/((git|ssh|http(s)?)|(git@[\w.]+))(:(\/\/)?)([\w.@:\/\-~]+)(\.git)(\/)?/',
             $repoUrl,
             $matches
-        )) {
-            return LibraryAddResponse::error('The git url is not of the right format.');
+        );
+        if (!$match) {
+            return LibraryAddResponse::error(
+                'The git url is not of the right format.'
+            );
         }
 
+        // Parse the git url from capture groups in the regex
         /*
          * From the link above, one can easily see that group 7 is the wanted group.
          * We use index 7 because index 0 from preg match is the whole string.
@@ -69,55 +62,113 @@ class LibraryAddUseCase extends BaseUseCase {
          * that will probably want to be fixed later.
          */
         $parts = explode('/', $matches[7]);
-        $libName = array_pop($parts);
+        $gitName = array_pop($parts);
 
-        $library = new LibraryEntity($libName, $this->location);
+        $status = $this->gateway->addGitLibrary($this->generateNewLibrary(), $repoUrl);
 
-        $status = $this->gateway->addGitLibrary($library, $repoUrl);
-
-        if (!$status->library) {
-            return LibraryAddResponse::error('Error adding the library. ' . $status->message);
+        if ($status->failed()) {
+            return LibraryAddResponse::error(
+                'Error adding the library. ' .
+                $status->message
+            );
         }
 
-        return new LibraryAddResponse("Successfully cloned $repoUrl.");
+        // Default the library name to the git repository name
+        if (!$metaName) {
+            $metaName = $gitName;
+        }
+
+        // Create metadata for the library
+        $metadataStatus = $this->metadata->update(
+            MetadataEntity::createNewMetadata(
+                $status->library,
+                $metaName,
+                'git'
+            )
+        );
+
+        // Check for error when adding the metadata
+        if ($metadataStatus->error) {
+            // Cleanup
+            $this->gateway->removeLibrary($status->library);
+            return LibraryAddResponse::error(
+                'Library was cloned, however the metadata was not able to be created because: ' . $metadataStatus->error
+            );
+        }
+
+        return LibraryAddResponse::success("Successfully cloned $repoUrl.");
+    }
+
+    /**
+     * Generates random folder names until it finds a random string that is not a folder name
+     *
+     * @return LibraryEntity
+     */
+    protected function generateNewLibrary(): LibraryEntity {
+        do {
+            $library = new LibraryEntity(Utils::generateRandomString(), $this->location);
+        } while ($this->gateway->libraryExists($library));
+        return $library;
     }
 
     /**
      * Takes in a $_FILES file and adds it to the library
      *
-     * @param array|null $zipFile
+     * @param array|null  $zipFile
+     * @param string|null $metaName
      * @return LibraryAddResponse
      */
-    public function addZipLibrary($zipFile): LibraryAddResponse {
+    public function addZipLibrary($zipFile, $metaName): LibraryAddResponse {
+        // Basic validation
         if (!$zipFile || !isset($zipFile['name']) || !isset($zipFile['tmp_name'])) {
             return LibraryAddResponse::error('A file must be provided.');
         }
 
-        $name = $zipFile['name'];
-        $tmpName = $zipFile['tmp_name'];
-
-        if (!FileUtils::isValidFileName($name) || strpos($name, '/') !== FALSE) {
-            return LibraryAddResponse::error('Invalid file name.');
-        }
-
-        $parts = explode('.', $name);
-
+        // Parsing
+        $origName = $zipFile['name'];
+        // Separate extension from name
+        $parts = explode('.', $origName);
         $extension = array_pop($parts);
 
-        if (strtolower($extension) != 'zip' || count($parts) < 1) {
+        // Check for .zip
+        if (strtolower($extension) !== 'zip' || count($parts) < 1) {
             return LibraryAddResponse::error('A .zip file must be provided.');
         }
 
-        $libName = implode('.', $parts);
+        // Attempt to add the library
+        $status = $this->gateway->addZipLibrary($this->generateNewLibrary(), $zipFile['tmp_name']);
 
-        $library = new LibraryEntity($libName, $this->location);
-
-        $status = $this->gateway->addZipLibrary($library, $tmpName);
-
-        if (!$status->library) {
-            return LibraryAddResponse::error('Error adding the library. ' . $status->message);
+        if ($status->failed()) {
+            return LibraryAddResponse::error(
+                'Error adding the library. ' .
+                $status->message
+            );
         }
 
-        return new LibraryAddResponse("Successfully installed new library: $libName");
+        // Default the library name to the original zip file name
+        if (!$metaName) {
+            $metaName = implode('.', $parts);
+        }
+
+        // Update metadata
+        $metadataStatus = $this->metadata->update(
+            MetadataEntity::createNewMetadata(
+                $status->library,
+                $metaName,
+                'zip'
+            )
+        );
+
+        // Check for error when adding the metadata
+        if ($metadataStatus->error) {
+            // Cleanup
+            $this->gateway->removeLibrary($status->library);
+            return LibraryAddResponse::error(
+                'Library was created, however the metadata was not able to be created because: ' .
+                $metadataStatus->error
+            );
+        }
+
+        return LibraryAddResponse::success("Successfully installed new library: $metaName");
     }
 }

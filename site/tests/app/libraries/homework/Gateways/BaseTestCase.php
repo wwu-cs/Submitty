@@ -1,9 +1,11 @@
-<?php namespace tests\app\libraries\homework\Gateways;
+<?php
+
+namespace tests\app\libraries\homework\Gateways;
 
 use app\libraries\Core;
-use app\libraries\FileUtils;
-use app\libraries\Utils;
 use tests\BaseUnitTest;
+use app\libraries\Utils;
+use app\libraries\FileUtils;
 
 class BaseTestCase extends BaseUnitTest {
     /** @var Core */
@@ -17,10 +19,12 @@ class BaseTestCase extends BaseUnitTest {
         $this->location = FileUtils::joinPaths(sys_get_temp_dir(), Utils::generateRandomString());
         FileUtils::createDir($this->location);
 
-        $this->core = $this->createMockCore([
-            'homework_library_enable' => true,
-            'homework_library_location' => $this->location
-        ]);
+        $this->core = $this->createMockCore(
+            [
+                'homework_library_enable'   => true,
+                'homework_library_location' => $this->location,
+            ]
+        );
     }
 
     /**

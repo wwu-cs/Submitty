@@ -3,17 +3,39 @@
 </div>
 <div class="flex-col flex-col-space">
     <p>
-        Upload gradeables by zipping up a single or multiple gradeable folders.
+        Upload gradeables by zipping up a single or multiple gradeable folders. <br>
+        When uploading multiple gradeables in a single zip file, each gradeable should be in its own folder, <br>
+        with its own config file. For example:
     </p>
+    <pre>
+    zipped_folder\
+        gradeable1\
+            config.json
+        gradeable2\
+            config.json
+        gradeable3\
+            config.json
+    </pre>
+    <div class="option row">
+        <div class="option-desc col-md-6">
+            <label for="instructions_url">
+                <div class="option-title">Source Name</div>
+                <div class="option-alt">What would you like to name your source? Leave it blank to use the name of the zip file.</div>
+            </label>
+        </div>
+        <div class="option-input col-md-6">
+            <input type='text' name='zip_src_name' id='zip_src_name' class="auto_save" placeholder="Name for source" />
+        </div>
+    </div>
     <div id="upload-boxes">
         {# upload1 and input_file1 required for drag-and-drop.js #}
         <div id="upload1" class="file-input">
-            <label class="label" for="input-file">"Drag your file(s) here or click to open file browser"</label>
-            <input type="file" name="files" id="input_file1" onchange="addFilesFromInput(1,false)" multiple />
+            <label class="label" for="input-file">Drag zip file here or click to open file browser</label>
+            <input type="file" name="files" id="input_file1" accept=".zip" onchange="addFilesFromInput(1,false,1)" />
         </div>
     </div>
     <p>
-        Total files cannot exceed 10MB.
+        File size cannot exceed 10MB.
     </p>
 </div>
 
@@ -26,18 +48,22 @@
     // Add form submit listener
     $(function() {
         $("#libraryZipSubmit").click(function(e){ // Submit button
+            document.body.style.cursor='wait';
             e.stopPropagation();
             // disable button while uploading files
             e.target.disabled = true;
-            uploadLibraryZip('{{ csrf_token }}', '{{ zip_submit_url }}')
+            var srcName = document.getElementById("zip_src_name").value;
+            uploadLibraryZip('{{ csrf_token }}', '{{ zip_submit_url }}', srcName)
             .then(function(response){
-                e.target.disabled = false;
                 displaySubmissionMessage(response);
-                location.reload(true);
+                // reload after showing message for a second
+                setTimeout(function(){ location.reload(true); }, 1000);
+                document.body.style.cursor='default';
             })
             .catch(function(response){
                 e.target.disabled = false;
                 displaySubmissionMessage(response);
+                document.body.style.cursor='default';
             });
         });
     });
@@ -49,5 +75,5 @@
     dropzone.addEventListener("dragenter", draghandle, false);
     dropzone.addEventListener("dragover", draghandle, false);
     dropzone.addEventListener("dragleave", draghandle, false);
-    dropzone.addEventListener("drop", dropWithMultipleZips, false);
+    dropzone.addEventListener("drop", dropWithSingleZip, false);
 </script>
