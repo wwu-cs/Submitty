@@ -19,6 +19,9 @@ use Symfony\Component\Routing\Annotation\Route;
  * selected which course they want to access, they are forwarded to the home page.
  */
 class HomePageController extends AbstractController {
+
+    protected $homework_path;
+    
     /**
      * HomePageController constructor.
      *
@@ -41,7 +44,7 @@ class HomePageController extends AbstractController {
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($gradeable_ids)
         );
-	}
+    }
 
     /**
      * @Route("/homework/library/search/{query}", methods={"GET"})
@@ -55,7 +58,7 @@ class HomePageController extends AbstractController {
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($gradeable_ids)
         );
-	}
+    }
 
     /**
      * @Route("/homework/library/search_gradeable/{query}", methods={"GET"})
@@ -69,37 +72,21 @@ class HomePageController extends AbstractController {
         return Response::JsonOnlyResponse(
             JsonResponse::getSuccessResponse($config)
         );
-	}
+    }
 
     public static function getDetails($path, $query) {
         $config_path = FileUtils::getPathWithQueryAndTip($path, $query, 'config.json');
         $readme_path = FileUtils::getPathWithQueryAndTip($path, $query, 'README.md');
         if ($config_path) {
             $contents = FileUtils::json_decode_commented(file_get_contents($config_path), true);
-            $parsed_contents = array(
+            return array(
                 'path' => $config_path,
                 'title' => $contents['testcases'][0]['title'] ?? 'Title not Specified',
                 'tags' => $contents['tags'] ?? [],
                 'readme' => $readme_path,
             );
-            return $parsed_contents;
         }
         return false;
-    }
-    
-    /**
-     * Display the LibraryManagerView to the instructor/admin.
-     *
-     * @Route("/homework/library/manage", methods={"GET"})
-     * @return Response
-     */
-    public function showLibraryManager() {
-        $this->core->getOutput()->addBreadcrumb("Manage");
-        $this->core->getOutput()->addInternalCss('admin-gradeable.css');
-        $text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ";
-        return Response::WebOnlyResponse(
-            new WebResponse(['admin','LibraryManager'], 'showLibraryManager', $text)
-        );
     }
 
     /**
