@@ -76,6 +76,40 @@ class FileUtils {
         return $return;
     }
 
+    public static function getPathWithQueryAndTip($path, $query, $tip) {
+        // https://stackoverflow.com/questions/17160696/php-glob-scan-in-subfolders-for-a-file
+        $iter = new \RecursiveDirectoryIterator($path);
+        foreach (new \RecursiveIteratorIterator($iter) as $file) {
+            if (strpos($file->getFilename(), $tip) !== false) {
+                if (preg_match("/.*" . $query . ".*" . $tip . "$/i", $file->getPathname()) > 0) {
+                    return $file->getPathname();
+                }
+            }
+        }
+        return false;
+    }
+
+    public static function getPathsWithQuery($path, $query) {
+        $iter = new \RecursiveDirectoryIterator($path);
+        $paths = [];
+        foreach (new \RecursiveIteratorIterator($iter) as $file) {
+            $url = "/.*" . $query . ".*$/i";
+            if (preg_match($url, $file->getPathname())) {
+                $paths[] = $file->getPathname();
+            }
+        }
+        return $paths;
+    }
+
+    // Credit to Alexander Shostak at https://stackoverflow.com/questions/8148797/a-json-parser-for-php-that-supports-comments
+    public static function json_decode_commented($json, $assoc = false, $maxDepth = 512, $opts = 0) {
+        $json = preg_replace('~
+          (" (?:[^"\\\\] | \\\\\\\\ | \\\\")*+ ") | \# [^\v]*+ | // [^\v]*+ | /\* .*? \*/
+        ~xs', '$1', $json);
+      
+        return json_decode($json, $assoc, $maxDepth, $opts);
+    }
+
     /**
      * Recursively goes through a directory deleting everything in it before deleting the folder itself. Returns
      * true if successful, false otherwise.
@@ -265,6 +299,27 @@ class FileUtils {
         }
         sort($return);
         return $return;
+    }
+
+    /**
+     * Given a path and a text string, return all directories in the path that have names containing the text argument.
+     *
+     * @param string $path
+     * @param string $text
+     *
+     * @return string[]
+     */
+    public static function getDirWithText($path, $text) {
+        $dirs = FileUtils::getPathsWithQuery($path, $text);
+        $dirs_with_text = [];
+        foreach ($dirs as $entry) {
+            // https://www.php.net/manual/en/function.strpos.php
+            // PHP y u such headache -_-
+            if (strpos($entry, $text) !== false) {
+                $dirs_with_text[] = $entry;
+            }
+        }
+        return $dirs_with_text;
     }
 
     /**

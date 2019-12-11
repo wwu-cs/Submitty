@@ -6,6 +6,7 @@ use app\libraries\response\RedirectResponse;
 use app\models\Course;
 use app\models\User;
 use app\libraries\Core;
+use app\libraries\FileUtils;
 use app\libraries\response\Response;
 use app\libraries\response\WebResponse;
 use app\libraries\response\JsonResponse;
@@ -18,6 +19,9 @@ use Symfony\Component\Routing\Annotation\Route;
  * selected which course they want to access, they are forwarded to the home page.
  */
 class HomePageController extends AbstractController {
+
+    protected $homework_path;
+    
     /**
      * HomePageController constructor.
      *
@@ -25,8 +29,66 @@ class HomePageController extends AbstractController {
      */
     public function __construct(Core $core) {
         parent::__construct($core);
+        $this->homework_path = $this->core->getConfig()->getHomeworkLibraryLocation();
     }
     
+    /**
+     * @Route("/homework/library/search", methods={"GET"})
+     * @return Response
+     */
+    public function searchLibrary($path = null) {
+        if ($path === null) {
+            $path = $this->homework_path;
+        }
+        $gradeable_ids = FileUtils::getDirWithText($path, "config.json");
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($gradeable_ids)
+        );
+    }
+
+    /**
+     * @Route("/homework/library/search/{query}", methods={"GET"})
+     * @return Response
+     */
+    public function searchLibraryWithQuery($query, $path = null) {
+        if ($path === null) {
+            $path = $this->homework_path;
+        }
+        $gradeable_ids = FileUtils::getPathsWithQuery($path, $query);
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($gradeable_ids)
+        );
+    }
+
+    /**
+     * @Route("/homework/library/search_gradeable/{query}", methods={"GET"})
+     * @return Response
+     */
+    public function searchLibraryGradeableWithQuery($query, $path = null) {
+        if ($path === null) {
+            $path = $this->homework_path;
+        }
+        $config = $this->getDetails($path, $query);
+        return Response::JsonOnlyResponse(
+            JsonResponse::getSuccessResponse($config)
+        );
+    }
+
+    public static function getDetails($path, $query) {
+        $config_path = FileUtils::getPathWithQueryAndTip($path, $query, 'config.json');
+        $readme_path = FileUtils::getPathWithQueryAndTip($path, $query, 'README.md');
+        if ($config_path) {
+            $contents = FileUtils::json_decode_commented(file_get_contents($config_path), true);
+            return array(
+                'path' => $config_path,
+                'title' => $contents['testcases'][0]['title'] ?? 'Title not Specified',
+                'tags' => $contents['tags'] ?? [],
+                'readme' => $readme_path,
+            );
+        }
+        return false;
+    }
+
     /**
      * @Route("/current_user/change_password", methods={"POST"})
      * @return Response

@@ -260,12 +260,12 @@ class Config extends AbstractModel {
         $homework_library_json = FileUtils::readJsonFile(FileUtils::joinPaths($this->config_path, 'homework_library.json'));
 
         $homework_library_enabled = false;
-        $homework_library_location = '~/library';
+        $homework_library_location = '/usr/local/submitty/library';
         $homework_library_access_level = User::LEVEL_SUPERUSER;
         if ($homework_library_json) {
             $homework_library_enabled = $homework_library_json['homework_library_enabled'];
             $homework_library_location = $homework_library_json['homework_library_location'];
-            $homework_library_access_level = $homework_library_json['homework_library_access_level'];
+            $homework_library_access_level = $homework_library_json['homework_library_access_level'] ?? User::LEVEL_SUPERUSER;
         }
 
         $this->homework_library_params = [
