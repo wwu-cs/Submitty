@@ -42,7 +42,7 @@ class AdminGradeableController extends AbstractController {
     }
     
     /**
-     * WIP
+     * WIP [instructor]
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/homework_library", methods={"GET"})
      * 
      * This function's intention is to pull data from the api and assign it to $gradeable_ids.
@@ -67,6 +67,7 @@ class AdminGradeableController extends AbstractController {
     }
     
     /**
+     * WIP [instructor]
      * function taken from HomePageController.php
      * 
      * This functions purpose is to decode the json passed in
