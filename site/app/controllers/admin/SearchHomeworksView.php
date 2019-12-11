@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * Purpose of this file was to allow the data being pulled from the API
+ * to be viewed in a neat format in the details section of AdminGradeableHomeworkLibrary.twg
+ */
+
 namespace app\view\admin;
 
 use app\views\AbstractView;

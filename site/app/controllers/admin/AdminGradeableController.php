@@ -32,7 +32,7 @@ class AdminGradeableController extends AbstractController {
     protected $homework_path;
 
     /**
-     * HomePageController constructor.
+     * AdminGradeableController constructor. Taken from HomePageController.php
      *
      * @param Core $core
      */
@@ -42,12 +42,19 @@ class AdminGradeableController extends AbstractController {
     }
     
     /**
+     * WIP
      * @Route("/{_semester}/{_course}/gradeable/{gradeable_id}/homework_library", methods={"GET"})
+     * 
+     * This function's intention is to pull data from the api and assign it to $gradeable_ids.
+     * Then allow that data to be displayed in the twig via the variables. $gradeable_ids however
+     * gets assigned strings that are paths to the config files in the Tutorial repository. 
+     * 
+     * TODO: This function needs to be reworked so that $gradeable_ids get's assigned a list
+     * of json objects which are the contents of the config files not the path to the config files.
+     * 
      */
     public function selectFromHomeworkLibrary($gradeable_id) {
         $gradeable_ids = FileUtils::getDirWithText($this->homework_path, "config.json");
-        var_dump($gradeable_ids);
-        die();
         return Response::WebOnlyResponse(
             new WebResponse(
             [
@@ -59,7 +66,19 @@ class AdminGradeableController extends AbstractController {
         );
     }
     
-    // function taken from HomePageController.php
+    /**
+     * function taken from HomePageController.php
+     * 
+     * This functions purpose is to decode the json passed in
+     * and parse it to find tags that relate to information about
+     * the gradeable. Previous devs were unable to test this becuase
+     * json was not able to be retrieved to start with. 
+     * 
+     * TODO: Test function after selectFromHomeworkLibrary function has
+     * successfully retrieved a json object. Function should be able to parse
+     * json object and return information based on tags listed below.
+     * 
+     */
     public static function getDetails($path, $query) {
         $config_path = FileUtils::getPathWithQueryAndTip($path, $query, 'config.json');
         $readme_path = FileUtils::getPathWithQueryAndTip($path, $query, 'README.md');
