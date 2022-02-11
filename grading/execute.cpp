@@ -94,6 +94,7 @@ bool system_program(const std::string &program, std::string &full_path_executabl
     // for Data Structures
     { "g++",                     "/usr/bin/g++" },
     { "clang++",                 "/usr/bin/clang++" },
+    { "clang-format",            "/usr/bin/clang-format" },
     { "drmemory",                SUBMITTY_INSTALL_DIRECTORY+"/drmemory/bin64/drmemory" },
     { "valgrind",                "/usr/bin/valgrind" },
 
