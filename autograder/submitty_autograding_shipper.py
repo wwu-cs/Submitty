@@ -23,6 +23,7 @@ import random
 import urllib
 import re
 
+from errno import ENOENT
 from enum import Enum
 from math import floor
 from os import PathLike
@@ -834,6 +835,7 @@ def checkout_vcs_repo(config, my_file):
     os.makedirs(checkout_path, exist_ok=True)
 
     job_id = "~VCS~"
+    tmp_checkout = ""
 
     try:
         # If we are public or private github, we will have an empty vcs_subdirectory
@@ -968,7 +970,7 @@ def checkout_vcs_repo(config, my_file):
                                                      f),
                                         tmp_checkout)
                     else:
-                        subprocess.check_call('not_a_commadn')
+                        raise IOError(ENOENT, 'git submission subdirectory is empty', vcs_subdirectory)
                     shutil.rmtree(checkout_path, ignore_errors=True)
                     checkout_path = tmp_checkout
 
@@ -980,6 +982,39 @@ def checkout_vcs_repo(config, my_file):
                 subprocess.call(['du', '-skh', checkout_path], stdout=open(checkout_log_file, 'a'))
                 obj['revision'] = what_version
 
+            # exception due to subdirectory being empty
+            except FileNotFoundError as error:
+                config.logger.log_message(f"ERROR: failed to clone repository {error}", job_id=job_id)
+                os.chdir(tmp_checkout)
+                error_path = os.path.join(tmp_checkout, "failed_to_clone_repository.txt")
+                with open(error_path, 'w') as f:
+                    print(str(error), file=f)
+                    print("\n", file=f)
+                    print("Check to be sure the repository exists.\n", file=f)
+                    print(
+                        "And check to be sure the submitty_daemon user has appropriate access "
+                        "credentials.\n",
+                        file=f
+                    )
+            # exception due to subdirectory being empty
+            except IOError as error:
+                config.logger.log_message(
+                    f"ERROR: failed checkout '{vcs_subdirectory}' subdirectory",
+                    job_id=job_id
+                )
+                os.chdir(tmp_checkout)
+                error_path = os.path.join(
+                    tmp_checkout, "failed_to_checkout_subfolder_in_repository.txt"
+                )
+                with open(error_path, 'w') as f:
+                    print(str(error), file=f)
+                    print("\n", file=f)
+                    print("Check to be sure the repository has a " + which_branch + " folder.\n", file=f)
+                    print(
+                        "And check to be sure the timestamps on the " + which_branch +
+                        " branch are reasonable.\n",
+                        file=f
+                    )
             # exception on git rev-list
             except subprocess.CalledProcessError as error:
                 config.logger.log_message(

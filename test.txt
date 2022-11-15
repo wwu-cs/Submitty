@@ -1,0 +1,2 @@
+SHIPPER CHECKOUT VCS REPO  /home/carmpr/Documents/github/Submitty/autograder/tests/data/shipper_config.json
+/home/carmpr/test_suite/unitTests/autograder/test_environment/autograding/courses/test_term/test_course/results/hw01/test_student/11/logs/vcs_checkout.txt
