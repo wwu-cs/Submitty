@@ -226,20 +226,20 @@
 
             <div id="subdirectory-settings-container">
                 {% if action == 'new' or action == 'template' %}
-                    {# (VPAT) fieldset/legend needed for team assignment radio group #}
+                    {# (VPAT) fieldset/legend needed for subdirectory radio group #}
                     <fieldset><legend>Is this gradeable inside of a subdirectory?</legend>
                 {% else %}
-                    <fieldset><legend>Team Settings:
+                    <fieldset><legend>Subdirectory Settings:
                     {{ gradeable.isInSubdirectory() ? '' : ' This is an individual assignment' }}</legend>
                 {% endif %}
                 <div style="{{ action == 'edit' ? 'display:none' : '' }}">
                     <input type="radio" id = "subdir_yes_radio" name="subdirectory_gradeable" value="true"
                             {{ action != 'new' and gradeable.isInSubdirectory() ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
 
-                    <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
+                    <input type="radio" id = "subdir_no_radio" name="subdirectory_gradeable" value ="false"
                             {{ not (action != 'new' and gradeable.isInSubdirectory()) ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
                 </div>
-                {# (VPAT) Closes fieldset for team assignment radio group #}
+                {# (VPAT) Closes fieldset for subdirectory radio group #}
                 </fieldset>
             </div>
 
@@ -285,7 +285,7 @@
                     <div class="team_no">
                         <input type='radio' id="vcs_radio_self_hosted_set_url" name="vcs_radio_buttons" value="self-hosted"
                             {{ action != 'new' and gradeable.getVcsHostType() == 4 ? 'checked' : '' }}
-                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_self_hosted_set_url">Externally hosted - single repository per user per course, assignments in subdirectories</label>
+                            {{ action != 'new' and action != 'template' ? 'disabled' : '' }}> <label for="vcs_radio_self_hosted_set_url">Externally hosted - instructor set url</label>
 
                         <div id="vcs_self_set_url_content" style="margin-left: 5%">
                             {% if action == 'new' or action == 'template' %}

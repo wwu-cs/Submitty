@@ -862,13 +862,16 @@ class AdminGradeableController extends AbstractController {
         }
 
         $repo_name = '';
+        $subdir = 'none';
+        if($details['subdir_yes_radio'] === 'true';){
+
+        } 
 
         // VCS specific values
         if ($details['vcs'] === 'true') {
             $host_button = $details['vcs_radio_buttons'];
-            $subdir = '';
             $host_type = -1;
-            $vcs_path = '';
+            $vcs_path = ''
             // Find which radio button is pressed and what host type to use
             if ($host_button === 'submitty-hosted') {
                 $host_type = 0;
@@ -878,7 +881,7 @@ class AdminGradeableController extends AbstractController {
             elseif ($host_button === 'submitty-hosted-url') {
                 $host_type = 1;
                 $repo_name = $details['vcs_url'];
-                $subdir = $details['vcs_url'];
+                $vcs_path = $details['vcs_url'] . "/{\$user_id}";
             }
             elseif ($host_button === 'public-github') {
                 $host_type = 2;
@@ -905,9 +908,9 @@ class AdminGradeableController extends AbstractController {
         else {
             $non_vcs_property_values = [
                 'vcs' => false,
-                'vcs_subdirectory' => '',
+                'vcs_subdirectory' => $subdir,
                 'vcs_host_type' => -1,
-                'vcs_path' => ''
+                'vcs_path' => $vcs_path,
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_vcs_property_values);
         }
