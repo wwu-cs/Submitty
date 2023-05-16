@@ -224,6 +224,25 @@
                 #}
             </div>
 
+            <div id="subdirectory-settings-container">
+                {% if action == 'new' or action == 'template' %}
+                    {# (VPAT) fieldset/legend needed for team assignment radio group #}
+                    <fieldset><legend>Is this gradeable inside of a subdirectory?</legend>
+                {% else %}
+                    <fieldset><legend>Team Settings:
+                    {{ gradeable.isInSubdirectory() ? '' : ' This is an individual assignment' }}</legend>
+                {% endif %}
+                <div style="{{ action == 'edit' ? 'display:none' : '' }}">
+                    <input type="radio" id = "subdir_yes_radio" name="subdirectory_gradeable" value="true"
+                            {{ action != 'new' and gradeable.isInSubdirectory() ? 'checked' : '' }}> <label for="team_yes_radio">Yes</label>
+
+                    <input type="radio" id = "team_no_radio" name="team_assignment" value ="false"
+                            {{ not (action != 'new' and gradeable.isInSubdirectory()) ? 'checked' :  '' }}> <label for="team_no_radio">No</label>
+                </div>
+                {# (VPAT) Closes fieldset for team assignment radio group #}
+                </fieldset>
+            </div>
+
             <div id="repository">
                 <fieldset>
                     <legend>VCS Repository Details (select one)</legend>

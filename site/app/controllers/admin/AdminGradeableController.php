@@ -868,16 +868,17 @@ class AdminGradeableController extends AbstractController {
             $host_button = $details['vcs_radio_buttons'];
             $subdir = '';
             $host_type = -1;
+            $vcs_path = '';
             // Find which radio button is pressed and what host type to use
             if ($host_button === 'submitty-hosted') {
                 $host_type = 0;
                 $repo_name = $details['id'];
-                $subdir = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
+                $vcs_path = $details['id'] . ($details['team_assignment'] === 'true' ? "/{\$team_id}" : "/{\$user_id}");
             }
             elseif ($host_button === 'submitty-hosted-url') {
                 $host_type = 1;
                 $repo_name = $details['vcs_url'];
-                $subdir = $details['vcs_url'] . "/{\$user_id}";
+                $subdir = $details['vcs_url'];
             }
             elseif ($host_button === 'public-github') {
                 $host_type = 2;
@@ -896,7 +897,8 @@ class AdminGradeableController extends AbstractController {
             $vcs_property_values = [
                 'vcs' => true,
                 'vcs_subdirectory' => $subdir,
-                'vcs_host_type' => $host_type
+                'vcs_host_type' => $host_type,
+                'vcs_path' => $vcs_path
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $vcs_property_values);
         }
@@ -904,7 +906,8 @@ class AdminGradeableController extends AbstractController {
             $non_vcs_property_values = [
                 'vcs' => false,
                 'vcs_subdirectory' => '',
-                'vcs_host_type' => -1
+                'vcs_host_type' => -1,
+                'vcs_path' => ''
             ];
             $gradeable_create_data = array_merge($gradeable_create_data, $non_vcs_property_values);
         }
