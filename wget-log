@@ -1,0 +1,16 @@
+--2023-05-17 23:12:40--  https://github.com/nlohmann/json/releases/download/v3.9.1/json.hpp
+Resolving github.com (github.com)... 192.30.255.112
+Connecting to github.com (github.com)|192.30.255.112|:443... connected.
+HTTP request sent, awaiting response... 302 Found
+Location: https://objects.githubusercontent.com/github-production-release-asset-2e65be/11171548/1a7e6980-d7eb-11ea-9ade-817eda1ece69?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20230518%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230518T031242Z&X-Amz-Expires=300&X-Amz-Signature=2ce4c250fb32a723078d1246ce2c7ba8b4fc342b95009ca547f7e564aeed1e7c&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=11171548&response-content-disposition=attachment%3B%20filename%3Djson.hpp&response-content-type=application%2Foctet-stream [following]
+--2023-05-17 23:12:41--  https://objects.githubusercontent.com/github-production-release-asset-2e65be/11171548/1a7e6980-d7eb-11ea-9ade-817eda1ece69?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAIWNJYAX4CSVEH53A%2F20230518%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20230518T031242Z&X-Amz-Expires=300&X-Amz-Signature=2ce4c250fb32a723078d1246ce2c7ba8b4fc342b95009ca547f7e564aeed1e7c&X-Amz-SignedHeaders=host&actor_id=0&key_id=0&repo_id=11171548&response-content-disposition=attachment%3B%20filename%3Djson.hpp&response-content-type=application%2Foctet-stream
+Resolving objects.githubusercontent.com (objects.githubusercontent.com)... 185.199.111.133, 185.199.109.133, 185.199.110.133, ...
+Connecting to objects.githubusercontent.com (objects.githubusercontent.com)|185.199.111.133|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 926233 (905K) [application/octet-stream]
+Saving to: ‘/usr/local/submitty/Lichen/vendor/nlohmann/json.hpp’
+
+/usr/local/submitty/Lichen/vendor/nlohmann/json.hpp     0%[                                                                                                                          ]       0  --.-KB/s               /usr/local/submitty/Lichen/vendor/nlohmann/json.hpp   100%[=========================================================================================================================>] 904.52K  --.-KB/s    in 0.08s   
+
+2023-05-17 23:12:41 (10.9 MB/s) - ‘/usr/local/submitty/Lichen/vendor/nlohmann/json.hpp’ saved [926233/926233]
+
