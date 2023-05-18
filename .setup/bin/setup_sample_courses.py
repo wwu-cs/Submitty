@@ -2023,6 +2023,11 @@ class Gradeable(object):
         form_json['gradeable_id'] = self.id
         if self.type == 0:
             form_json['config_path'] = self.config_path
+        if self.is_repository:
+            form_json['date_due'] = dateutils.write_submitty_date(self.submission_due_date)
+            form_json['upload_type'] = 'repository'
+            form_json['subdirectory'] = '/{$gradeable_id}/{$user_id}'
+            return form_json
         form_json['gradeable_title'] = self.title
         form_json['gradeable_type'] = self.get_gradeable_type_text()
         form_json['instructions_url'] = self.instructions_url
@@ -2085,6 +2090,7 @@ class Gradeable(object):
                     form_json['upper_clamp'].append(component.upper_clamp)
         form_json['minimum_grading_group'] = self.min_grading_group
         form_json['gradeable_buckets'] = self.syllabus_bucket
+
 
         return form_json
 
