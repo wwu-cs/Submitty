@@ -586,7 +586,6 @@ def create_pdf_annotations(file_name, file_path, src, dst, grader_id):
 
 def commit_submission_to_repo(user_id, src_file, repo_path):
     # a function to commit and push a file to a user's submitty-hosted repository
-    print(src_file, "*********************************************************************************")
     my_cwd = os.getcwd()
     with TemporaryDirectory() as temp_dir:
         os.chdir(temp_dir)
@@ -599,9 +598,8 @@ def commit_submission_to_repo(user_id, src_file, repo_path):
         os.system('git add --all')
         os.system(f"git config user.email '{user_id}@example.com'")
         os.system(f"git config user.name '{user_id}'")
-        os.system(f"git commit -m 'adding submission files' --author='{user_id} <{user_id}@example.com>'")
+        os.system(f"git commit -a --allow-empty -m 'adding submission files' --author='{user_id} <{user_id}@example.com>'")
         os.system('git push')
-        os.system(f'echo {SUBMITTY_DATA_DIR}/vcs/git/{repo_path}')
     os.chdir(my_cwd)
 
 class User(object):
@@ -1082,8 +1080,8 @@ class Course(object):
                                                     active_version=active_version)
                                 json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
 
-                                with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
-                                    open_file.write(current_time_string + "\n")
+                                # with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
+                                #     open_file.write(current_time_string + "\n")
 
                                 if user.id in gradeable.plagiarized_user:
                                     # If the user is in the plagirized folder, then only add those submissions
@@ -1144,6 +1142,7 @@ class Course(object):
                                             src = os.path.join(gradeable.sample_path, submission)
                                             # files submitted to vcs gradeables are not moved into the "submissions folder",
                                             # the user's repo gets checked out automatically by the job into "checkout"
+                                            
                                             if gradeable.is_repository:
                                                 repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
                                                 commit_submission_to_repo(user.id, src, repo_path)
@@ -1172,7 +1171,9 @@ class Course(object):
                                 json.dump(json_history, open_file)
                             # submissions to vcs greadeable also have a ".submit.VCS_CHECKOUT"
                             if gradeable.is_repository:
-                                with open(os.path.join(submission_path, ".submit.VCS_CHECKOUT"), "w") as open_file:
+                                with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
+                                    print(dateutils.write_submitty_date(), file=open_file)
+                                with open(os.path.join(submission_path, str(version), ".submit.VCS_CHECKOUT"), "w") as open_file:
                                     # the file contains info only if the git repos are non-submitty hosted
                                     pass
 
