@@ -36,6 +36,8 @@ import docker
 from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
+# from autograder import submitty_autograding_shipper as shipper
+# from autograder import config
 
 from ruamel.yaml import YAML
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join, func
@@ -600,6 +602,9 @@ def commit_submission_to_repo(user_id, src_file, repo_path):
         os.system(f"git config user.name '{user_id}'")
         os.system(f"git commit -a --allow-empty -m 'adding submission files' --author='{user_id} <{user_id}@example.com>'")
         os.system('git push')
+        # if not NO_GRADING:
+        # # queue up all of the newly created submissions to grade!
+        #     os.system(f"{SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/")
     os.chdir(my_cwd)
 
 class User(object):
@@ -1080,8 +1085,8 @@ class Course(object):
                                                     active_version=active_version)
                                 json_history["history"].append({"version": version, "time": current_time_string, "who": user.id, "type": "upload"})
 
-                                # with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
-                                #     open_file.write(current_time_string + "\n")
+                                with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
+                                    open_file.write(current_time_string + "\n")
 
                                 if user.id in gradeable.plagiarized_user:
                                     # If the user is in the plagirized folder, then only add those submissions
@@ -1167,10 +1172,12 @@ class Course(object):
                                                 create_gradeable_submission(src, dst)
                                 random_days -= 0.5
 
-                            with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
+                            with open(os.path.join(submission_path, str(version), "user_assignment_settings.json"), "w") as open_file:
                                 json.dump(json_history, open_file)
                             # submissions to vcs greadeable also have a ".submit.VCS_CHECKOUT"
                             if gradeable.is_repository:
+                                checkout_log_file = os.path.join(self.course_path,gradeable.id, user.id, str(version), "logs", "vcs_checkout.txt")
+                                os.makedirs(checkout_log_file)
                                 with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
                                     print(dateutils.write_submitty_date(), file=open_file)
                                 with open(os.path.join(submission_path, str(version), ".submit.VCS_CHECKOUT"), "w") as open_file:
