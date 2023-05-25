@@ -1180,7 +1180,7 @@ class Course(object):
                                     # the file contains info only if the git repos are non-submitty hosted
                                     pass
                                 with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
-                                    open_file.write(dateutils.write_submitty_date(time.now()))
+                                    open_file.write(dateutils.write_submitty_date(dateutils.get_current_time()))
                                    
 
                     if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
