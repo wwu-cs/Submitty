@@ -1171,9 +1171,6 @@ class Course(object):
                                                 dst = os.path.join(submission_path, str(version))
                                                 create_gradeable_submission(src, dst)
                                 random_days -= 0.5
-
-                            with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
-                                json.dump(json_history, open_file)
                             # submissions to vcs greadeable also have a ".submit.VCS_CHECKOUT"
                             if gradeable.is_repository:
                                 with open(os.path.join(submission_path, str(version), ".submit.VCS_CHECKOUT"), "w") as open_file:
@@ -1181,6 +1178,13 @@ class Course(object):
                                     pass
                                 with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
                                     open_file.write(dateutils.write_submitty_date(dateutils.get_current_time()))
+                                json_history["history"].append({"version": version, "time": dateutils.write_submitty_date(dateutils.get_current_time()), "who": user.id, "type": "repository"})
+                                with open(os.path.join(submission_path, str(version), ".user_assignment_settings.json"), "w") as open_file:
+                                    json.dump(json_history, open_file)
+                            else:
+
+                                with open(os.path.join(submission_path, ".user_assignment_settings.json"), "w") as open_file:
+                                    json.dump(json_history, open_file)
                                    
 
                     if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
