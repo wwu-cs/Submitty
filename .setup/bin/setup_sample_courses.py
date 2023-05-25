@@ -1179,6 +1179,9 @@ class Course(object):
                                 with open(os.path.join(submission_path, str(version), ".submit.VCS_CHECKOUT"), "w") as open_file:
                                     # the file contains info only if the git repos are non-submitty hosted
                                     pass
+                                with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
+                                    open_file.write(dateutils.write_submitty_date(time.now()))
+                                   
 
                     if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
                         if (gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
