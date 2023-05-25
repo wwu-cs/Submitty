@@ -11,7 +11,7 @@ Usage: ./setup_sample_courses.py
 
 The first will create all courses in courses.yml while the second will only create the courses
 specified (which is useful for something like Travis where we don't need the "demo classes", and
-just the ones used for testing.
+just the ones used for testing.)
 """
 from __future__ import print_function, division
 import argparse
@@ -36,8 +36,6 @@ import docker
 from tempfile import TemporaryDirectory
 
 from submitty_utils import dateutils
-# from autograder import submitty_autograding_shipper as shipper
-# from autograder import config
 
 from ruamel.yaml import YAML
 from sqlalchemy import create_engine, Table, MetaData, bindparam, select, join, func
@@ -602,10 +600,12 @@ def commit_submission_to_repo(user_id, src_file, repo_path):
         os.system(f"git config user.name '{user_id}'")
         os.system(f"git commit -a --allow-empty -m 'adding submission files' --author='{user_id} <{user_id}@example.com>'")
         os.system('git push')
-        # if not NO_GRADING:
-        # # queue up all of the newly created submissions to grade!
-        #     os.system(f"{SUBMITTY_INSTALL_DIR}/bin/regrade.py --no_input {SUBMITTY_DATA_DIR}/courses/")
     os.chdir(my_cwd)
+
+def mimic_checkout(repo_path, submission_path, current_time_string):
+    os.system(f'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path} {submission_path} -b main')
+    # with open(os.path.join(submission_path, ".submit.timestamp"), "w") as open_file:
+    #                                 open_file.write(current_time_string + "\n")
 
 class User(object):
     """
@@ -1145,14 +1145,13 @@ class Course(object):
                                             os.system("mkdir -p " + os.path.join(submission_path, str(version), key))
                                             submission = random.choice(gradeable.submissions[key])
                                             src = os.path.join(gradeable.sample_path, submission)
-                                            # files submitted to vcs gradeables are not moved into the "submissions folder",
-                                            # the user's repo gets checked out automatically by the job into "checkout"
-                                            
+                                            # To mimic a 'checkout', the VCS gradeable files are moved to the submissions folder
+                                            # They are also committed to the repository, so clicking regrade works. 
                                             if gradeable.is_repository:
                                                 repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
                                                 commit_submission_to_repo(user.id, src, repo_path)
+                                                mimic_checkout(repo_path, os.path.join(user_checkout_path, str(version)), current_time_string)
                                             else:
-                                                dst = os.path.join(submission_path, str(version), key)
                                                 create_gradeable_submission(src, dst)
                                     else:
                                         submission = random.choice(gradeable.submissions)
@@ -1162,24 +1161,21 @@ class Course(object):
                                             submissions = [submission]
                                         for submission in submissions:
                                             src = os.path.join(gradeable.sample_path, submission)
-                                            # files submitted to vcs gradeables are not moved into the "submissions folder",
-                                            # the user's repo gets checked out automatically by the job into "checkout"
+                                            # To mimic a 'checkout', the VCS gradeable files are moved to the submissions folder
+                                            # They are also committed to the repository, so clicking regrade works. 
                                             if gradeable.is_repository:
                                                 repo_path = f"{self.semester}/{self.code}/{gradeable.id}/{user.id}"
                                                 commit_submission_to_repo(user.id, src, repo_path)
+                                                mimic_checkout(repo_path, os.path.join(user_checkout_path, str(version)), current_time_string)
                                             else:
                                                 dst = os.path.join(submission_path, str(version))
                                                 create_gradeable_submission(src, dst)
                                 random_days -= 0.5
 
-                            with open(os.path.join(submission_path, str(version), "user_assignment_settings.json"), "w") as open_file:
+                            with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
                                 json.dump(json_history, open_file)
                             # submissions to vcs greadeable also have a ".submit.VCS_CHECKOUT"
                             if gradeable.is_repository:
-                                checkout_log_file = os.path.join(self.course_path,gradeable.id, user.id, str(version), "logs", "vcs_checkout.txt")
-                                os.makedirs(checkout_log_file)
-                                with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
-                                    print(dateutils.write_submitty_date(), file=open_file)
                                 with open(os.path.join(submission_path, str(version), ".submit.VCS_CHECKOUT"), "w") as open_file:
                                     # the file contains info only if the git repos are non-submitty hosted
                                     pass
@@ -2040,7 +2036,8 @@ class Gradeable(object):
         if self.is_repository:
             form_json['date_due'] = dateutils.write_submitty_date(self.submission_due_date)
             form_json['upload_type'] = 'repository'
-            form_json['subdirectory'] = '{$gradeable_id}/{$user_id}'
+           # form_json['vcs_partial_path'] = '{$gradeable_id}/{$user_id}' #UNCOMMENT WHEN #9317 IS MERGED
+            form_json['subdirectory'] = '{$gradeable_id}/{$user_id}' ## CHANGE TO '' WHEN #9317 IS MERGED
             return form_json
         form_json['gradeable_title'] = self.title
         form_json['gradeable_type'] = self.get_gradeable_type_text()
@@ -2104,7 +2101,6 @@ class Gradeable(object):
                     form_json['upper_clamp'].append(component.upper_clamp)
         form_json['minimum_grading_group'] = self.min_grading_group
         form_json['gradeable_buckets'] = self.syllabus_bucket
-
 
         return form_json
 
