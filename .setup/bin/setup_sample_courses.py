@@ -58,10 +58,10 @@ DB_USER = "submitty_dbuser"
 DB_PASS = "submitty_dbuser"
 
 # used for constructing the url to clone repos for vcs gradeables
-with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "submitty.json")) as submitty_config:
-    submitty_config_json = json.load(submitty_config)
-    SUBMISSION_URL = submitty_config_json["submission_url"]
-    VCS_FOLDER = os.path.join(submitty_config_json['submitty_data_dir'], 'vcs', 'git')
+# with open(os.path.join(SUBMITTY_INSTALL_DIR, "config", "submitty.json")) as submitty_config:
+#     submitty_config_json = json.load(submitty_config)
+SUBMISSION_URL = 'submitty_config_json["submission_url"]'
+VCS_FOLDER = os.path.join(SUBMITTY_DATA_DIR, 'vcs', 'git')
 
 DB_ONLY = False
 NO_SUBMISSIONS = False
@@ -604,8 +604,6 @@ def commit_submission_to_repo(user_id, src_file, repo_path):
 
 def mimic_checkout(repo_path, submission_path, current_time_string):
     os.system(f'git clone {SUBMITTY_DATA_DIR}/vcs/git/{repo_path} {submission_path} -b main')
-    # with open(os.path.join(submission_path, ".submit.timestamp"), "w") as open_file:
-    #                                 open_file.write(current_time_string + "\n")
 
 class User(object):
     """
@@ -1177,15 +1175,11 @@ class Course(object):
                                     # the file contains info only if the git repos are non-submitty hosted
                                     pass
                                 with open(os.path.join(submission_path, str(version), ".submit.timestamp"), "w") as open_file:
-                                    open_file.write(dateutils.write_submitty_date(dateutils.get_current_time()))
-                                json_history["history"].append({"version": version, "time": dateutils.write_submitty_date(dateutils.get_current_time()), "who": user.id, "type": "repository"})
-                                with open(os.path.join(submission_path, str(version), ".user_assignment_settings.json"), "w") as open_file:
-                                    json.dump(json_history, open_file)
-                            else:
+                                    open_file.write(dateutils.write_submitty_date(NOW))
 
-                                with open(os.path.join(submission_path, ".user_assignment_settings.json"), "w") as open_file:
+                            else:  
+                                with open(os.path.join(submission_path, "user_assignment_settings.json"), "w") as open_file:
                                     json.dump(json_history, open_file)
-                                   
 
                     if gradeable.grade_start_date < NOW and os.path.exists(os.path.join(submission_path, str(versions_to_submit))):
                         if (gradeable.has_release_date is True and gradeable.grade_released_date < NOW) or (random.random() < 0.5 and (submitted or gradeable.type !=0)):
