@@ -807,7 +807,6 @@ def checkout_vcs_repo(config, my_file):
         obj["semester"],
         obj["course"]
     )
-    submission_path = os.path.join(course_dir, "submissions", partial_path)
     checkout_path = os.path.join(course_dir, "checkout", partial_path)
     results_path = os.path.join(course_dir, "results", partial_path)
 
@@ -827,48 +826,27 @@ def checkout_vcs_repo(config, my_file):
         config.submitty['submitty_data_dir'],
         obj["semester"], obj["course"], obj["gradeable"], obj["who"], obj["team"]
     )
-    is_vcs, vcs_type, vcs_base_url, vcs_subdirectory = vcs_info
+    (is_vcs, vcs_type, vcs_base_url, vcs_partial_path,
+     using_subdirectory, vcs_subdirectory) = vcs_info
 
     # cleanup the previous checkout (if it exists)
     shutil.rmtree(checkout_path, ignore_errors=True)
-    os.makedirs(checkout_path, exist_ok=True)
 
     job_id = "~VCS~"
 
     try:
-        # If we are public or private github, we will have an empty vcs_subdirectory
-        sub_checkout_path = ''
-        subdirectory_grading = False
-        if vcs_subdirectory == '':
-            with open(
-                os.path.join(submission_path, ".submit.VCS_CHECKOUT")
-            ) as submission_vcs_file:
-                VCS_JSON = json.load(submission_vcs_file)
-                git_user_id = VCS_JSON["git_user_id"]
-                git_repo_id = VCS_JSON["git_repo_id"]
-                if not valid_github_user_id(git_user_id):
-                    raise Exception("Invalid GitHub user/organization name: '"+git_user_id+"'")
-                if not valid_github_repo_id(git_repo_id):
-                    raise Exception("Invalid GitHub repository name: '"+git_repo_id+"'")
-                # construct path for GitHub
-                vcs_path = "https://www.github.com/"+git_user_id+"/"+git_repo_id
-
-        # is vcs_subdirectory standalone or should it be combined with base_url?
-        elif vcs_subdirectory[0] == '/' or '://' in vcs_subdirectory:
-            # If there are multiple forward slashes,
-            # This indicates subdirectories. E.G. /week1/homework1
-            if len(vcs_subdirectory.split('/')) > 2 and ':' not in vcs_subdirectory:
-                vcs_path = vcs_base_url
-                sub_checkout_path = os.path.join(checkout_path, "tmp")
-                subdirectory_grading = True
-            else:
-                vcs_path = vcs_subdirectory
-        else:
+        # This is for external, instructor specified repositories
+        if '://' not in vcs_partial_path and '@' not in vcs_partial_path:
             if '://' in vcs_base_url:
-                vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_subdirectory)
+                vcs_path = urllib.parse.urljoin(vcs_base_url, vcs_partial_path)
             else:
-                vcs_path = os.path.join(vcs_base_url, vcs_subdirectory)
+                vcs_path = os.path.join(vcs_base_url, vcs_partial_path)
+        else:
+            vcs_path = vcs_partial_path
 
+        sub_checkout_path = os.path.join(checkout_path, "tmp")
+        os.makedirs(sub_checkout_path, exist_ok=True)
+# _________________________________________________________________________________________________________
         # warning: --depth is ignored in local clones; use file:// instead.
         if '://' not in vcs_path and '@' not in vcs_path:
             vcs_path = 'file:///' + vcs_path
@@ -917,11 +895,12 @@ def checkout_vcs_repo(config, my_file):
         #
         #  NOTE: If the server is busy, it might take seconds or
         #     minutes for an available shipper to process the git
-        #     clone, and thethe timestamp might be slightly late)
+        #     clone, and the timestamp might be slightly late)
         #
         #  So we choose this option!  (for now)
         #
 
+<<<<<<< HEAD
         if subdirectory_grading:
             clone_command = [
                 '/usr/bin/git', 'clone', vcs_path,
@@ -931,6 +910,12 @@ def checkout_vcs_repo(config, my_file):
             clone_command = [
                 '/usr/bin/git', 'clone', vcs_path, checkout_path, '--depth', '1', '-b', which_branch
             ]
+=======
+        clone_command = [
+                '/usr/bin/git', 'clone', vcs_path,
+                sub_checkout_path, '--depth', '1', '-b', which_branch
+            ]
+>>>>>>> Submitty/main
 
         with open(checkout_log_file, 'a') as f:
             print("VCS CHECKOUT", file=f)
@@ -944,11 +929,15 @@ def checkout_vcs_repo(config, my_file):
         # or because we don't have appropriate access credentials
         try:
             subprocess.check_call(clone_command)
+<<<<<<< HEAD
 
             if subdirectory_grading:
                 os.chdir(sub_checkout_path)
             else:
                 os.chdir(checkout_path)
+=======
+            os.chdir(sub_checkout_path)
+>>>>>>> Submitty/main
 
             # determine which version we need to checkout
             # if the repo is empty or the specified branch does not exist, this command will fail
@@ -970,6 +959,7 @@ def checkout_vcs_repo(config, my_file):
 
                 # copy the subdirectory we want to the
                 # original checkout path and remove the extra files
+<<<<<<< HEAD
                 if subdirectory_grading:
                     try:
                         vcs_subdirectory = vcs_subdirectory[1:]
@@ -1000,6 +990,36 @@ def checkout_vcs_repo(config, my_file):
                             print("Check to be sure the subdirectory is not empty.\n", file=f)
                             print("Check to be sure the repository has been committed with the " +
                                   "subdirectory and relevant files present.\n", file=f)
+=======
+                try:
+                    if using_subdirectory:
+                        if vcs_subdirectory[0] == '/':
+                            vcs_subdirectory = vcs_subdirectory[1:]
+                        file_path = os.path.join(sub_checkout_path, vcs_subdirectory)
+                    else:
+                        file_path = sub_checkout_path
+
+                    shutil.copytree(file_path, checkout_path, dirs_exist_ok=True)
+                    shutil.rmtree(sub_checkout_path)
+
+                except Exception as error:
+                    shutil.rmtree(sub_checkout_path)
+                    config.logger.log_message(
+                        f'ERROR: failed to find files in the {vcs_subdirectory} subdirectory',
+                        job_id=job_id
+                    )
+                    os.chdir(checkout_path)
+                    error_path = os.path.join(
+                        checkout_path, 'failed_subdirectory_invalid_or_empty.txt'
+                    )
+                    with open(error_path, 'w') as f:
+                        print(str(error), file=f)
+                        print("\n", file=f)
+                        print(f"Check to be sure the subdirectory '{vcs_subdirectory}'" +
+                              " exists and all relevant files are present.", file=f)
+                        print("If you have made changes, " +
+                              "make sure you commit and push them.", file=f)
+>>>>>>> Submitty/main
 
                 with open(checkout_log_file, 'a') as log_file:
                     subprocess.call(['ls', '-lR', checkout_path], stdout=log_file)
@@ -1020,14 +1040,11 @@ def checkout_vcs_repo(config, my_file):
                 with open(error_path, 'w') as f:
                     print(str(error), file=f)
                     print("\n", file=f)
-                    print("Check to be sure the repository is not empty.\n", file=f)
+                    print("Check to be sure the repository is not empty.", file=f)
                     print("Check to be sure the repository has a " + which_branch +
-                          " branch.\n", file=f)
-                    print(
-                        "And check to be sure the timestamps on the " + which_branch +
-                        " branch are reasonable.\n",
-                        file=f
-                    )
+                          " branch.", file=f)
+                    print("And check to be sure the timestamps on the " + which_branch +
+                          " branch are reasonable.", file=f)
 
         # exception on git clone
         except subprocess.CalledProcessError as error:
@@ -1037,12 +1054,11 @@ def checkout_vcs_repo(config, my_file):
             with open(error_path, 'w') as f:
                 print(str(error), file=f)
                 print("\n", file=f)
-                print("Check to be sure the repository exists.\n", file=f)
+                print("Check to be sure the repository exists.", file=f)
+                print("If you have made changes, make sure you commit and push them. ", file=f)
                 print(
                     "And check to be sure the submitty_daemon user has appropriate access "
-                    "credentials.\n",
-                    file=f
-                )
+                    "credentials.", file=f)
 
     # exception in constructing full git repository url/path
     except Exception as error:
@@ -1055,10 +1071,10 @@ def checkout_vcs_repo(config, my_file):
         with open(error_path, 'w') as f:
             print(str(error), file=f)
             print("\n", file=f)
-            print("Check to be sure the repository exists.\n", file=f)
+            print("Check to be sure the repository exists.", file=f)
             print(
                 "And check to be sure the submitty_daemon user has appropriate access "
-                "credentials.\n",
+                "credentials.",
                 file=f)
 
     # remove the .git directory (storing full history and metafiles)

@@ -275,25 +275,19 @@ function updateCheckpointCells(elems, scores, no_cookie) {
 }
 
 function getCheckpointHistory(g_id) {
-    const name = `${g_id}_history=`;
-    const cookies = decodeURIComponent(document.cookie).split(';');
-    for (let i = 0; i < cookies.length; i++) {
-        let c = cookies[i];
-        while (c.charAt(0) === ' ') {
-            c = c.substring(1);
-        }
-        if (c.indexOf(name) === 0) {
-            return JSON.parse(c.substring(name.length, c.length));
-        }
+    const history = Cookies.get(`${g_id}_history`);
+    try {
+        return JSON.parse(history) || [0];
     }
-    // if history is empty set pointer to 0
-    return [0];
+    catch (e) {
+        return [0];
+    }
 }
 
 function setCheckpointHistory(g_id, history) {
-    const expiration_date = new Date(Date.now());
+    const expiration_date = new Date();
     expiration_date.setDate(expiration_date.getDate() + 1);
-    document.cookie = `${g_id}_history=${JSON.stringify(history)}; expires=${expiration_date.toUTCString()}`;
+    Cookies.set(`${g_id}_history`, JSON.stringify(history), { expires: expiration_date });
 }
 
 function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
@@ -311,12 +305,6 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
     history.push([user_id, old_scores]);
     history.push([user_id, new_scores]);
 
-    // update undo/redo buttons
-    if (history.length > 1) {
-        $('#checkpoint-undo').prop('disabled', false);
-    }
-    $('#checkpoint-redo').prop('disabled', true);
-
     // keep max history of 5 entries (1 buffer for pointer, 5x2 for old/new)
     if (history.length > 11) {
         history.splice(1, 2);
@@ -326,65 +314,6 @@ function generateCheckpointCookie(user_id, g_id, old_scores, new_scores) {
     }
 
     setCheckpointHistory(g_id, history);
-}
-
-// helper function for undo/redo which rolls the history to a specific point
-function checkpointRollTo(g_id, diff) {
-    // grab history from cookie
-    const history = getCheckpointHistory(g_id);
-
-    const update_queue = [];
-    const direction = Math.sign(diff);
-    let pointer = history[0];
-
-    // clamp to bounds
-    if (pointer + diff < 1) {
-        diff = 1 - pointer;
-    }
-    if (pointer + diff >= history.length) {
-        diff = history.length - 1 - pointer;
-    }
-
-    // if redoing and pointer is on an old_score, move pointer to next new_score
-    if (direction>0 && pointer%2) {
-        pointer += 1;
-        diff -= direction;
-        update_queue.push(history[pointer]);
-    }
-    // if undoing and pointer is on an new_score, move pointer to next old_score
-    else if (direction<0 && !(pointer%2)) {
-        pointer -= 1;
-        diff -= direction;
-        update_queue.push(history[pointer]);
-    }
-
-    // incrementally move snapshot and set states to update, incrementing by old_scores if direction < 0, new_scores if dir > 0
-    while (diff !== 0) {
-        pointer += (2*direction);
-        update_queue.push(history[pointer]);
-        diff -= direction;
-    }
-
-    // update buttons
-    $('#checkpoint-undo').prop('disabled', false);
-    $('#checkpoint-redo').prop('disabled', false);
-    if (pointer <= 1) {
-        $('#checkpoint-undo').prop('disabled', true);
-    }
-    if (pointer >= history.length-1) {
-        $('#checkpoint-redo').prop('disabled', true);
-    }
-
-    //write new cookie
-    history[0] = pointer;
-    setCheckpointHistory(g_id, history);
-
-    // update cells for each snapshot
-    update_queue.forEach((snapshot) => {
-        // get elems from studentID
-        const elems = $(`tr[data-user='${snapshot[0]}'] .cell-grade`);
-        updateCheckpointCells(elems, snapshot[1], true);
-    });
 }
 
 function setupCheckboxCells() {
@@ -412,17 +341,6 @@ function setupCheckboxCells() {
             $('.simple-grade-date').css('display', 'none');
         }
     });
-
-    // initialize undo/redo
-    const g_id = $('tr#row-0').data('gradeable');
-    const history = getCheckpointHistory(g_id);
-
-    if (history.length > 1) {
-        $('#checkpoint-undo').prop('disabled', false);
-        if (history[0] < history.length - 1) {
-            $('#checkpoint-redo').prop('disabled', false);
-        }
-    }
 }
 
 function setupNumericTextCells() {
@@ -871,6 +789,20 @@ function setupSimpleGrading(action) {
         registerKeyHandler({ name: 'Set Row to 1', code: 'KeyD', options: {score: 1} }, keySetCurrentRow);
         registerKeyHandler({ name: 'Cycle Row Value', code: 'KeyF', options: {score: null} }, keySetCurrentRow);
     }
+
+    // make sure to show focused cell when covered by student info
+    $('.scrollable-table td[class^="option-"] > .cell-grade').on('focus', function() {
+        const lastInfoBox = $(this).parent().parent().children('td:not([class^="option-"])').last();
+        const boxRect = lastInfoBox[0].getBoundingClientRect();
+        const inputRect = $(this).parent()[0].getBoundingClientRect();
+
+        const diff = boxRect.right - inputRect.left;
+        if (diff < 0) {
+            return;
+        }
+
+        $('.scrollable-table')[0].scrollLeft -= diff;
+    });
 
     // when pressing enter in the search bar, go to the corresponding element
     $('#student-search-input').on('keyup', function(event) {

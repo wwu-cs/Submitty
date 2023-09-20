@@ -10,6 +10,7 @@ use app\libraries\response\MultiResponse;
 use app\libraries\response\JsonResponse;
 use app\libraries\response\WebResponse;
 use Symfony\Component\Routing\Annotation\Route;
+use app\models\gradeable\LateDays;
 
 /**
  * Class LateController
@@ -44,39 +45,36 @@ class LateController extends AbstractController {
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/late_days_forensics")
+     * @Route("/courses/{_semester}/{_course}/bulk_late_days")
      * @return WebResponse
      */
-    public function viewLateDaysForensics() {
+    public function viewLateDayCache() {
         return new WebResponse(
             ['admin', 'LateDay'],
-            'displayLateDayForesnics',
+            'displayLateDayCache',
             $this->core->getQueries()->getAllUsers(),
             $this->core->getConfig()->getDefaultStudentLateDays()
         );
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/late_days_forensics/flush")
+     * @Route("/courses/{_semester}/{_course}/bulk_late_days/flush")
      * @return RedirectResponse
      */
     public function flushLateDayCache() {
         $this->core->getQueries()->flushAllLateDayCache();
         $this->core->addSuccessMessage("Late day cache flushed!");
-
-        return new RedirectResponse($this->core->buildCourseUrl(['late_days_forensics']));
+        return new RedirectResponse($this->core->buildCourseUrl(['bulk_late_days']));
     }
 
     /**
-     * @Route("/courses/{_semester}/{_course}/late_days_forensics/calculate")
+     * @Route("/courses/{_semester}/{_course}/bulk_late_days/calculate")
      * @return RedirectResponse
      */
     public function calculateLateDayCache() {
         $this->core->getQueries()->generateLateDayCacheForUsers();
-
         $this->core->addSuccessMessage("Late day cache calculated!");
-
-        return new RedirectResponse($this->core->buildCourseUrl(['late_days_forensics']));
+        return new RedirectResponse($this->core->buildCourseUrl(['bulk_late_days']));
     }
 
     /**
@@ -123,6 +121,13 @@ class LateController extends AbstractController {
             }
             if (((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || (!ctype_digit($_POST['late_days'])))) {
                 $error = "Late Days must be a nonnegative integer";
+                $this->core->addErrorMessage($error);
+                return MultiResponse::JsonOnlyResponse(
+                    JsonResponse::getFailResponse($error)
+                );
+            }
+            if (((!isset($_POST['late_days'])) || $_POST['late_days'] == "" || $_POST['late_days'] > 2147483647)) {
+                $error = "Late Days must be within the range of integer values";
                 $this->core->addErrorMessage($error);
                 return MultiResponse::JsonOnlyResponse(
                     JsonResponse::getFailResponse($error)
@@ -278,6 +283,29 @@ class LateController extends AbstractController {
                 return MultiResponse::JsonOnlyResponse(JsonResponse::getSuccessResponse());
             }
         }
+    }
+
+    /**
+     * @AccessControl(role="INSTRUCTOR")
+     * @Route("/courses/{_semester}/{_course}/users/view_latedays", methods={"GET"})
+     * @return RedirectResponse|WebResponse
+     **/
+    public function viewStudentLatedays() {
+        if (!isset($_GET['student_id'])) {
+            $this->core->addErrorMessage("No student ID provided");
+            return new RedirectResponse($this->core->buildCourseUrl(['users']));
+        }
+        $student_id = $_GET['student_id'];
+        $user = $this->core->getQueries()->getUserById($student_id);
+        if ($user === null) {
+            $this->core->addErrorMessage("Invalid Student ID \"" . $_GET['student_id'] . "\"");
+            return new RedirectResponse($this->core->buildCourseUrl(['users']));
+        }
+        return new WebResponse(
+            'LateDaysTable',
+            'showLateTabletoInstructor',
+            LateDays::fromUser($this->core, $user)
+        );
     }
 
     /**

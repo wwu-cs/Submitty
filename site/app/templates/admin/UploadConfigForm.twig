@@ -9,8 +9,8 @@
     <br><br>
     <p>
         Following the assignment configuration specifications:<br>
-        <a href="http://submitty.org/instructor/assignment_configuration">
-            http://submitty.org/instructor/assignment_configuration</a><br>
+        <a href="https://submitty.org/instructor/assignment_configuration/configuration_path">
+            https://submitty.org/instructor/assignment_configuration/configuration_path</a><br>
         and examples:<br>
         <a target=_blank href="https://github.com/Submitty/Tutorial/tree/master/examples">Submitty Tutorial example autograding configurations</a><br>
         <a target=_blank href="https://github.com/Submitty/Submitty/tree/master/more_autograding_examples">Additional example autograding configurations</a><br>
@@ -35,7 +35,7 @@
 
     <br>
     {% if gradeable_id|length %}
-        <a class="btn btn-primary" style="margin-top: 6px" href={{ back_url }}>Go Back To Autograding Page</a>
+        <a data-testid="back-to-autograding" class="btn btn-primary" style="margin-top: 6px" href={{ back_url }}>Go Back To Autograding Page</a>
     {% endif %}
 </div>
 
