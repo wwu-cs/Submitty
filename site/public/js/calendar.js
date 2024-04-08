@@ -1,10 +1,28 @@
-/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend */
+/* exported prevMonth, nextMonth, loadCalendar, loadFullCalendar, editCalendarItemForm, deleteCalendarItem, openNewItemModal, openOptionsModal, updateCalendarOptions, colorLegend, setDateToToday */
 /* global curr_day, curr_month, curr_year, gradeables_by_date, instructor_courses, buildUrl */
 /* global csrfToken */
 
 // List of names of months in English
 const monthNames = ['December', 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 const monthNamesShort = ['Dec', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sept', 'Oct', 'Nov', 'Dec'];
+
+/**
+ * Sets the current date to today and then changes the calendar
+ * @returns {void} : only changes cookies and calendar date
+ */
+function setDateToToday() {
+    const type = $('#calendar-item-type-edit').val();
+    const currentDay = new Date();
+    Cookies.set('calendar_year', currentDay.getFullYear());
+    Cookies.set('calendar_month', currentDay.getMonth()+1);
+    Cookies.set('calendar_day', currentDay.getDate());
+
+    const cookie_year = currentDay.getFullYear();
+    const cookie_month = currentDay.getMonth()+1;
+    const cookie_day = currentDay.getDate();
+
+    loadCalendar(cookie_month, cookie_year, cookie_day, type);
+}
 
 /**
  * Gets the previous month of a given month
@@ -98,6 +116,34 @@ function dateToStr(year, month, day) {
 }
 
 /**
+ * This function returns a slightly darker color than the color variable name passed.
+ *
+ * @param colorstr : string the color to darken in the form "var(--color-name)"
+ * @returns {string} a hex code for a slightly darker shade
+ */
+function darken(colorstr) {
+    if (typeof colorstr !== 'string') {
+        return colorstr;
+    }
+    else {
+        const hexcodestr = window.getComputedStyle(document.documentElement).getPropertyValue(colorstr.slice(4, -1)).toLowerCase();
+        const darkerstr = hexcodestr.split('');
+        for (let i = 1; i < hexcodestr.length; i++) {
+            if ((hexcodestr[i] > 'b' && hexcodestr[i] <= 'f') || (hexcodestr[i] > '1' && hexcodestr[i] <= '9')) {
+                darkerstr[i] = String.fromCharCode(hexcodestr.charCodeAt(i) - 2);
+            }
+            else if (hexcodestr[i] === 'b') {
+                darkerstr[i] = '9';
+            }
+            else if (hexcodestr[i] === 'a') {
+                darkerstr[i] = '8';
+            }
+        }
+        return darkerstr.join('');
+    }
+}
+
+/**
  * Create a HTML element that contains the calendar item (button/link/text).
  *
  * @param item : array the calendar item
@@ -141,14 +187,21 @@ function generateCalendarItem(item) {
         element.style.setProperty('background-color', item['color']);
     }
     if (exists) {
-        element.style.setProperty('cursor','pointer');
+        element.style.setProperty('cursor', 'pointer');
     }
     element.title = tooltip;
     if (link !== '') {
         element.href = link;
+        element.addEventListener('mouseover', () => {
+            element.style.setProperty('background-color', darken(item['color']));
+        });
+        element.addEventListener('mouseout', () => {
+            element.style.setProperty('background-color', item['color']);
+        });
     }
-    if (onclick !== '' && exists) {
+    if (onclick !== '' && instructor_courses.length > 0) {
         if (!item['show_due']) {
+            element.style.cursor = 'pointer';
             element.onclick = () => editCalendarItemForm(item['status'], item['title'], item['id'], item['date'], item['semester'], item['course']);
         }
         else {
@@ -201,7 +254,7 @@ function deleteCalendarItem() {
         data.append('semester', semester);
         data.append('csrf_token', csrfToken);
         $.ajax({
-            url: buildUrl(['calendar', 'items','delete']),
+            url: buildUrl(['calendar', 'items', 'delete']),
             type: 'POST',
             processData: false,
             contentType: false,
@@ -230,7 +283,7 @@ function deleteCalendarItem() {
  * @returns {HTMLElement} the HTML Element containing the cell
  */
 function generateDayCell(year, month, day, curr_view_month, view_semester=false) {
-    const cell_date_str = dateToStr(year, month ,day);
+    const cell_date_str = dateToStr(year, month, day);
 
     const content = document.createElement('td');
     content.classList.add('cal-day-cell');

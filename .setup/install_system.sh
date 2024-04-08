@@ -36,6 +36,7 @@ fi
 # PATHS
 CURRENT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 SUBMITTY_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Submitty
+RAINBOWGRADES_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/RainbowGrades
 LICHEN_REPOSITORY=/usr/local/submitty/GIT_CHECKOUT/Lichen
 SUBMITTY_INSTALL_DIR=/usr/local/submitty
 SUBMITTY_DATA_DIR=/var/local/submitty
@@ -133,7 +134,7 @@ The vagrant box comes with some handy aliases:
     ntp_sync                     - Re-syncs NTP in case of time drift
 
 Saved variables:
-    SUBMITTY_REPOSITORY, LICHEN_REPOSITORY,
+    SUBMITTY_REPOSITORY, LICHEN_REPOSITORY, RAINBOWGRADES_REPOSITORY,
     SUBMITTY_INSTALL_DIR, SUBMITTY_DATA_DIR,
     DAEMON_USER, DAEMON_GROUP, PHP_USER, PHP_GROUP,
     CGI_USER, CGI_GROUP, DAEMONPHP_GROUP, DAEMONCGI_GROUP
@@ -144,6 +145,7 @@ echo -e "
 
 # Convinence stuff for Submitty
 export SUBMITTY_REPOSITORY=${SUBMITTY_REPOSITORY}
+export RAINBOWGRADES_REPOSITORY=${RAINBOWGRADES_REPOSITORY}
 export LICHEN_REPOSITORY=${LICHEN_REPOSITORY}
 export SUBMITTY_INSTALL_DIR=${SUBMITTY_INSTALL_DIR}
 export SUBMITTY_DATA_DIR=${SUBMITTY_DATA_DIR}
@@ -168,6 +170,7 @@ alias submitty_code_watcher='python3 /usr/local/submitty/GIT_CHECKOUT/Submitty/.
 alias submitty_restart_autograding='systemctl restart submitty_autograding_shipper && systemctl restart submitty_autograding_worker'
 alias submitty_restart_websocket='systemctl restart submitty_websocket_server'
 alias submitty_restart_services='submitty_restart_autograding && submitty_restart_websocket && systemctl restart submitty_daemon_jobs_handler && systemctl restart nullsmtpd'
+alias submitty_test='bash /usr/local/submitty/GIT_CHECKOUT/Submitty/.setup/SUBMITTY_TEST.sh'
 alias migrator='python3 ${SUBMITTY_REPOSITORY}/migration/run_migrator.py -c ${SUBMITTY_INSTALL_DIR}/config'
 alias vagrant_info='cat /etc/motd'
 alias ntp_sync='service ntp stop && ntpd -gq && service ntp start'
@@ -330,6 +333,13 @@ usermod -a -G "${DAEMONCGI_GROUP}" "${DAEMON_USER}"
 
 echo -e "\n# set by the .setup/install_system.sh script\numask 027" >> /home/${DAEMON_USER}/.profile
 
+# Add RainbowGrades repo as safe directory for GIT
+gitconfig_path="/home/${DAEMON_USER}/.gitconfig"
+gitconfig_content="[safe]
+    directory = ${RAINBOWGRADES_REPOSITORY}"
+echo "$gitconfig_content" > "$gitconfig_path"
+sudo chown "${DAEMON_USER}:${DAEMON_USER}" "$gitconfig_path"
+
 usermod -a -G docker "${DAEMON_USER}"
 
 #################################################################
@@ -388,10 +398,17 @@ fi
 
 # Dr Memory is a tool for detecting memory errors in C++ programs (similar to Valgrind)
 
+# FIXME: Use of this tool should eventually be moved to containerized
+# autograding and not installed on the native primary and worker
+# machines by default
+
+# FIXME: DrMemory is also re-installed in INSTALL_SUBMITTY_HELPER.sh
+
 pushd /tmp > /dev/null
 
 echo "Getting DrMemory..."
 
+rm -rf /tmp/DrMemory*
 wget https://github.com/DynamoRIO/drmemory/releases/download/${DRMEMORY_TAG}/DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz -o /dev/null > /dev/null 2>&1
 tar -xpzf DrMemory-Linux-${DRMEMORY_VERSION}.tar.gz
 rsync --delete -a /tmp/DrMemory-Linux-${DRMEMORY_VERSION}/ ${SUBMITTY_INSTALL_DIR}/drmemory

@@ -257,9 +257,7 @@ class ElectronicGraderController extends AbstractController {
                 foreach ($students as $student) {
                     array_push($student_list, ['user_id' => $student->getId()]);
                     if ($submit_before_grading) {
-                        if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()) {
-                        }
-                        else {
+                        if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId())) {
                             array_push($student_array, $student->getId());
                         }
                     }
@@ -300,9 +298,7 @@ class ElectronicGraderController extends AbstractController {
              $sorted_students[$reg_sec][] = $student;
              array_push($student_list, ['user_id' => $student->getId()]);
             if ($submit_before_grading) {
-                if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId()) == $student->getId()) {
-                }
-                else {
+                if ($this->core->getQueries()->getUserHasSubmission($gradeable, $student->getId())) {
                     array_push($student_array, $student->getId());
                 }
             }
@@ -682,7 +678,7 @@ class ElectronicGraderController extends AbstractController {
             $graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $late_components = $this->core->getQueries()->getBadGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
             $ta_graded_components = $this->core->getQueries()->getGradedComponentsCountByGradingSections($gradeable_id, $sections, $section_key, $gradeable->isTeamAssignment());
-            $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie);
+            $component_averages = $this->core->getQueries()->getAverageComponentScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
             $autograded_average = $this->core->getQueries()->getAverageAutogradedScores($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $bad_submissions_cookie, $null_section_cookie);
             $overall_average = $this->core->getQueries()->getAverageForGradeable($gradeable_id, $section_key, $gradeable->isTeamAssignment(), $override_cookie, $bad_submissions_cookie, $null_section_cookie);
             $order = new GradingOrder($this->core, $gradeable, $this->core->getUser(), true);
@@ -1676,6 +1672,10 @@ class ElectronicGraderController extends AbstractController {
             // Get the graded gradeable for the $from user
             $id_from_anon = $this->core->getQueries()->getSubmitterIdFromAnonId($from, $gradeable_id);
             if ($blind_grading !== "unblind" || $anon_mode) {
+                if ($id_from_anon === null) {
+                    $gradeableUrl = $this->core->buildCourseUrl(['gradeable', $gradeable->getId(), 'grading', 'details']);
+                    return new RedirectResponse($gradeableUrl);
+                }
                 $from_graded_gradeable = $this->tryGetGradedGradeable($gradeable, $id_from_anon, false);
             }
             else {
